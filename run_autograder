@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+
+BASE_DIR=$(pwd)
+
+rm -rf /autograder/testbox
+mkdir -p /autograder/testbox
+TESTBOX=/autograder/testbox
+REPO=/autograder/autograder-code
+AUTOGRADER_CORE_REPO=/autograder/autograder-core
+TESTS=$REPO/tests
+SUBMISSION=/autograder/submission
+
+# sanity check before doing any real effort
+# TODO: move this check into run_tests.py?
+#
+# TODO(you): list required submission files in src_list array
+#              e.g. src_list=( main.cpp thing.cpp thing.h test_thing.cpp )
+#
+src_list=()
+for file in "${src_list[@]}"; do
+  if [ ! -f $SUBMISSION/"$file" ]; then
+	  {
+		  echo "{\"score\": 0, \"output\": \"$file does not exist.\"}"
+	  } > /autograder/results/results.json
+	  exit 1
+  fi
+done
+
+# Update autograder files
+cd $AUTOGRADER_CORE_REPO
+git pull
+cd $REPO
+git pull
+
+# backdoor update run_autograder?
+cp run_autograder /autograder/
+
+# copy test runner to testbox
+cp $AUTOGRADER_CORE_REPO/run_tests.py $TESTBOX/
+
+# copy tests to testbox
+cp tests/cs12x_test.h $TESTBOX/
+cp -r tests/io_tests/ $TESTBOX/
+cp -r tests/script_tests/ $TESTBOX/
+cp tests/approved_includes* $TESTBOX/
+
+#
+# TODO(you): specify assignment-specific testing files
+#
+cp tests/tests.cpp $TESTBOX/
+
+# copy student code to testbox
+cd $SUBMISSION
+for file in "${src_list[@]}"; do
+  cp $file $TESTBOX/
+done
+
+# run tests <tests file> [results file]
+cd $TESTBOX
+chmod +x ./approved_includes.sh
+python3 run_tests.py tests.cpp /autograder/results/results.json
+

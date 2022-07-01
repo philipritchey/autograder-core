@@ -1,0 +1,10 @@
+Host assignment
+  Hostname github.com
+  IdentityFile ~/.ssh/deploy_key
+  IdentitiesOnly yes
+  
+
+Host core
+  Hostname github.com
+  IdentityFile ~/.ssh/autograder_core_deploy_key
+  IdentitiesOnly yes
