@@ -4,13 +4,13 @@ BASE_DIR=$(pwd)
 
 if [ -d /autograder ]; then
     # gradescope environment detected
-    is_gradescope=True
+    is_gradescope=true
 else
     echo "gradescope environment not detected."
-    is_gradescope=False
+    is_gradescope=false
 fi
 
-if [ $is_gradescope ]; then
+if [ $is_gradescope == "true" ]; then
     rm -rf /autograder/testbox
     mkdir -p /autograder/testbox
     TESTBOX=/autograder/testbox
@@ -39,7 +39,7 @@ fi
 src_list=()
 for file in "${src_list[@]}"; do
   if [ ! -f $SUBMISSION/"$file" ]; then
-    if [ $is_gradescope ]; then
+    if [ $is_gradescope == "true" ]; then
     {
         echo "{\"score\": 0, \"output\": \"$file does not exist.\"}"
     } > /autograder/results/results.json
@@ -55,7 +55,7 @@ for file in "${src_list[@]}"; do
   cp $SUBMISSION/$file $TESTBOX/
 done
 
-if [ $is_gradescope ]; then
+if [ $is_gradescope == "true" ]; then
     # Update autograder files
     cd $AUTOGRADER_CORE_REPO
     git pull
