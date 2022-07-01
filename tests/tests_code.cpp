@@ -13,7 +13,7 @@
 
 /*
 @number: 2
-@name: selection: memory errors
+@name: memory errors
 @points: 10
 @show_output: True
 @type: script
@@ -26,7 +26,7 @@
 
 /*
 @number: 3
-@name: selection: test coverage
+@name: test coverage
 @points: 10
 @show_output: True
 @type: script
@@ -43,7 +43,7 @@
 @points: 5
 @show_output: True
 @type: unit
-@target: selection.cpp
+@target: code.cpp
 */
 {
     EXPECT_EQ(foo(867), 5309);
