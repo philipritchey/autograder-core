@@ -21,10 +21,10 @@ an `autograder_core_deploy_key` can be obtained by emailing pcr@tamu.edu
 1. copy `ssh_config`, `seup.sh`, and `run_autograder` to your assignment-specific repo
 1. in `ssh_config`:
    * you should not need to change anything, but you can if you need to (i.e. you know what you are doing)
-   * make sure you have created a deploy key for you assignment-specific repo and you have an autogrdaer-core deploy key
+   * make sure you have created a deploy key for your assignment-specific repo and you have an autogrdaer-core deploy key
 1. in `setup.sh`:
    * at line 8, install any dependencies your tests require (e.g. valgrind for finding memory errors)
-   * double-check: make sure you have created a deploy key for you assignment-specific repo and you have an autogrdaer-core deploy key
+   * double-check: make sure you have created a deploy key for your assignment-specific repo and you have an autogrdaer-core deploy key
    * at line 34, change `$username` and `$repository` to your github username and assignment-specific repository, respectively
 1. in `run_autograder`:
    * at line 19, list the files the students are required to submit
