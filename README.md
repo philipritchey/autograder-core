@@ -22,6 +22,62 @@ the core autograder functionality common to all assignments.
      * if you change the file name from `tests.cpp`, be sure to also change it at line 61 (in the `python3 run_tests.py ...` command)
 1. you should be good to go.  happy testing!
 
+## writing tests
+### unit tests
+TODO
+
+```
+/*
+@number: 2
+@name: example
+@points: 5
+@show_output: True
+@type: unit
+@target: code.cpp
+*/
+{
+    // unit test code, e.g.
+    EXPECT_EQ(foo(input), expected_value);
+}
+```
+
+### i/o tests
+TODO
+
+```
+/*
+@number: 3
+@name: example
+@points: 5 
+@show_output: True
+@type: i/o
+@target: code.cpp
+*/
+{
+	input
+	io_tests/example/input.txt
+	output
+	io_tests/example/output.txt
+}
+```
+
+### script tests
+TODO
+
+```
+/*
+@number: 1
+@name: compiles without errors or warnings
+@points: 10
+@show_output: True
+@type: script
+@target: code.cpp
+*/
+{
+  script
+  script_tests/code_compiles.sh
+}
+```
 
 ## basic packaging for gradescope
 this is how you should package the autograder files for gradescope.  do this from your assignment-specific repository.
