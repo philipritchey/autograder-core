@@ -4,10 +4,10 @@ BASE_DIR=$(pwd)
 
 if [ -d /autograder ]; then
     # gradescope environment detected
-    is_gradesope=True
+    is_gradescope=True
 else
     echo "gradescope environment not detected."
-    is_gradesope=False
+    is_gradescope=False
 fi
 
 if [ $is_gradescope ]; then
@@ -37,14 +37,14 @@ fi
 src_list=()
 for file in "${src_list[@]}"; do
   if [ ! -f $SUBMISSION/"$file" ]; then
-	if [ $is_gradescope ]; then
-	  {
-		  echo "{\"score\": 0, \"output\": \"$file does not exist.\"}"
-	  } > /autograder/results/results.json
+    if [ $is_gradescope ]; then
+    {
+        echo "{\"score\": 0, \"output\": \"$file does not exist.\"}"
+    } > /autograder/results/results.json
     else
-      echo "[FATAL] $file does not exist. exiting."
+        echo "[FATAL] $file does not exist. exiting."
     fi
-	exit 1
+    exit 1
   fi
 done
 
@@ -60,7 +60,7 @@ if [ $is_gradescope ]; then
     git pull
     cd $REPO
     git pull
-    
+
     # backdoor update run_autograder?
     cp run_autograder /autograder/
 fi
@@ -78,7 +78,7 @@ cp tests/approved_includes_* $TESTBOX/
 # collect and enable tests
 cd $TESTBOX
 touch tests.cpp
-for file in $REPO/tests/tests_*; do
+for file in $TESTS/tests_*; do
   if [ -f "$file" ]; then
 	cat $file >> tests.cpp
     printf "\n" >> tests.cpp
