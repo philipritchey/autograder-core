@@ -6,7 +6,7 @@ the core autograder functionality common to all assignments.
 1. `setup.sh` - boilerplate for gradescope container setup; keep your version with your assignment-specific repository
 1. `ssh_config` - ssh configuration file for pulling from 2 repos with 2 identities; keep a copy in your assignment-specific repository
 
-## get started using for your assignment-specific repo
+## get started integrating with your assignment-specific repo
 1. copy `ssh_config`, `seup.sh`, and `run_autograder` to your assignment-specific repo
 1. in `ssh_config`:
    * you should not need to change anything, but you can if you need to (i.e. you know what you are doing)
