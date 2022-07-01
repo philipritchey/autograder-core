@@ -23,8 +23,10 @@ else
     rm -rf testbox
     mkdir testbox
     TESTBOX=testbox
-    AUTOGRADER_CORE_REPO=../autograder-core
-    SUBMISSION=./solution
+    REPO=$BASE_DIR
+    AUTOGRADER_CORE_REPO=$BASE_DIR/../autograder-core
+    TESTS=$REPO/tests
+    SUBMISSION=$BASE_DIR/solution
     RESULTS_DIR=$BASE_DIR
 fi
 
@@ -49,9 +51,8 @@ for file in "${src_list[@]}"; do
 done
 
 # copy submitted code to testbox
-cd $SUBMISSION
 for file in "${src_list[@]}"; do
-  cp $file $TESTBOX/
+  cp $SUBMISSION/$file $TESTBOX/
 done
 
 if [ $is_gradescope ]; then
@@ -89,4 +90,3 @@ chmod +x ./approved_includes.sh
 
 # run tests <tests file> [results file]
 python3 run_tests.py tests.cpp $RESULTS_DIR/results.json
-
