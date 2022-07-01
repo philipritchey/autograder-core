@@ -133,7 +133,7 @@ def read_tests(filename: str) -> List[Dict[str,str]]:
             break
 
         type = attributes['type']
-        if type == 'unit':
+        if type == 'unit' or type == 'performance':
             # go to next line
             index,line = goto_next_line(index, lines, filename)
             
@@ -236,14 +236,23 @@ def write_unit_test(test: Dict[str,str]) -> None:
     with open('unit_test.cpp', 'wt') as f:
         f.write('#include "cs12x_test.h"\n')
         f.write('#include "{}"\n\n'.format(test['target']))
-        f.write('#include<string>\n')
-        f.write('#include<sstream>\n')
 
         f.write('int main() {\n')
         f.write('    INIT_TEST;\n')
         f.write('    {}\n'.format('\n    '.join(test['code'].splitlines())))
         f.write('    RESULT(pass);\n')
         f.write('    return pass ? 0 : 1;\n')
+        f.write('}\n')
+
+def write_performance_test(test: Dict[str,str]) -> None:
+    with open('performance_test.cpp', 'wt') as f:
+        f.write('#include "{}"\n\n'.format(test['target']))
+        f.write('#include<iostream>\n')
+        f.write('#include<chrono>\n')
+
+        f.write('int main() {\n')
+        f.write('    {}\n'.format('\n    '.join(test['code'].splitlines())))
+        f.write('    return 0;\n')
         f.write('}\n')
 
 # Writes out the input and output strings
@@ -262,6 +271,20 @@ def compile_unit_test() -> bool:
     CXX = 'g++'
     FLAGS = '-std=c++17 -g -o unit_test'
     SRC = 'unit_test.cpp'
+    compile_cmd = '{} {} {} 2>&1'.format(CXX, FLAGS, SRC)
+    p = popen(compile_cmd)
+    try:
+        output = p.read()
+    except Exception as e:
+        output = str(e)
+    ret = p.close()
+    # print('ret = {}'.format(ret))
+    return ret == None, output
+
+def compile_performance_test() -> bool:
+    CXX = 'g++'
+    FLAGS = '-std=c++17 -g -o performance_test'
+    SRC = 'performance_test.cpp'
     compile_cmd = '{} {} {} 2>&1'.format(CXX, FLAGS, SRC)
     p = popen(compile_cmd)
     try:
@@ -291,6 +314,19 @@ def compile_script_test() -> bool:
     
 def run_unit_test() -> bool:
     run_cmd = ["./unit_test", "2>&1"]
+    p = subprocess.Popen(run_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    try:
+        output_en, err_en = p.communicate(timeout=10) #p.stdout.decode('utf-8')
+        output = output_en.decode('utf-8')
+    except subprocess.TimeoutExpired as e:
+        output = "Timeout during test execution, check for an infinite loop\n"
+    except Exception as e:
+        output = str(e)
+    ret = p.returncode
+    return ret == 0, output
+
+def run_performance_test() -> bool:
+    run_cmd = ["./performance_test", "2>&1"]
     p = subprocess.Popen(run_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     try:
         output_en, err_en = p.communicate(timeout=10) #p.stdout.decode('utf-8')
@@ -415,6 +451,8 @@ def main(filename) -> None:
             # these tests just make sure all files show up in targets
             print('[PENDING]\n')
             continue
+        elif test['type'] == 'performance':
+            write_performance_test(test)
         else:
             print("Unsupported test")
             continue
@@ -425,6 +463,8 @@ def main(filename) -> None:
             compiles, compile_output = compile_io_test(test['target'])
         elif test['type'] == 'script':
             compiles, compile_output = compile_script_test()
+        elif test['type'] == 'performance':
+            compiles, compile_output = compile_performance_test()
         else:
             print("Unsupported test")
             continue
@@ -437,6 +477,8 @@ def main(filename) -> None:
                 runs, run_output = run_io_test()
             elif test['type'] == 'script':
                 runs, run_output, point_multiplier = run_script_test()
+            elif test['type'] == 'performance':
+                runs, run_output = run_performance_test()
             else:
                 print("Unsupported test")
                 continue
