@@ -9,6 +9,10 @@ from sys import argv
 from time import time
 import json
 
+BEGIN_TEST_DELIMITER = '<test>'
+END_TEST_DELIMITER = '</test>'
+EMPTY_TEST_BLOCK = '<test/>'
+
 def unexpected_end_of_input(filename: str, index: int, line: str) -> Exception:
     # filename lineno offset text
     return SyntaxError('unexpected end of input', (filename, index, len(line), line))
@@ -30,26 +34,38 @@ def skip_blank_lines(index: int, lines: List[str]) -> Tuple[int,str]:
         index += 1
     return index
 
-def eat_block_of_code(index, lines, filename) -> Tuple[int,str]:
+def eat_block_of_test(index, lines, filename) -> Tuple[int,str]:
     # go to next line
     index,line = goto_next_line(index, lines, filename)
     
-    # expect start of code block
-    if line != '{':
-        # filename lineno offset text
-        raise SyntaxError('missing expected start of code block: "{"', (filename, index+1, 1, line))
+    # expect start of test block
+    if line == EMPTY_TEST_BLOCK:
+        return index,line
     
-    # expect next lines to be unit test code
-    open_curly_braces = 1
-    while open_curly_braces > 0:
+    if line != BEGIN_TEST_DELIMITER:
+        # filename lineno offset text
+        raise SyntaxError(f'missing expected start of test block: "{BEGIN_TEST_DELIMITER}"', (filename, index+1, 1, line))
+    
+    # eat until end of test block
+    while line != END_TEST_DELIMITER:
         # go to next line
         index, line = goto_next_line(index, lines, filename)
-        
-        if line.startswith('{'):
-            open_curly_braces += 1
-        elif line.startswith('}'):
-            open_curly_braces -= 1
             
+    return index,line
+    
+def eat_empty_test_block(index, lines, filename) -> Tuple[int,str]:
+    # go to next line
+    index,line = goto_next_line(index, lines, filename)
+    
+    # expect empty test block
+    if line == BEGIN_TEST_DELIMITER:
+        index,line = goto_next_line(index, lines, filename)
+        if line != END_TEST_DELIMITER:
+            raise SyntaxError(f'expected end of test: "{END_TEST_DELIMITER}"', (filename, index+1, 1, line))
+        return index,line
+    elif line != EMPTY_TEST_BLOCK:
+        # filename lineno offset text
+        raise SyntaxError(f'expected empty test block: "{EMPTY_TEST_BLOCK}"', (filename, index+1, 1, line))
     return index,line
 
 def read_attributes(index: int, lines: List[str], filename: str) -> Tuple[int, Dict]:
@@ -91,19 +107,16 @@ def read_attributes(index: int, lines: List[str], filename: str) -> Tuple[int, D
     
     return index, attributes
 
-def read_block_of_code(index: int, lines: List[str], filename: str) -> Tuple[int, str]:
-    open_curly_braces = 1
+def read_block_of_test(index: int, lines: List[str], filename: str) -> Tuple[int, str]:
     code = str()
-    while open_curly_braces > 0:
+    got_code = True
+    while got_code:
         index,line = goto_next_line(index, lines, filename)
         
-        if line.startswith('{'):
-            open_curly_braces += 1
-        elif line.startswith('}'):
-            open_curly_braces -= 1
-        
-        if open_curly_braces > 0:
+        if line != END_TEST_DELIMITER:
             code += line + '\n'
+        else:
+            got_code = False
     
     return index, code
 
@@ -124,13 +137,13 @@ def read_tests(filename: str) -> List[Dict[str,str]]:
             # go to next line
             index,line = goto_next_line(index, lines, filename)
             
-            # expect start of code block
-            if line != '{':
+            # expect start of test block
+            if line != BEGIN_TEST_DELIMITER:
                 # filename lineno offset text
-                raise SyntaxError('missing expected start of code block: "{"', (filename, index+1, 1, line))
+                raise SyntaxError(f'missing expected start of test block: "{BEGIN_TEST_DELIMITER}"', (filename, index+1, 1, line))
             
             # expect next lines to be unit test code
-            index, code = read_block_of_code(index, lines, filename)      
+            index, code = read_block_of_test(index, lines, filename)      
             attributes['code'] = code
             
             tests.append(attributes)
@@ -138,15 +151,15 @@ def read_tests(filename: str) -> List[Dict[str,str]]:
         elif type == 'i/o':
             # go to next line
             index,line = goto_next_line(index, lines, filename)
-            if line != '{':
+            if line != BEGIN_TEST_DELIMITER:
                 # filename lineno offset text
-                raise SyntaxError('missing expected start of i/o block: "{"', (filename, index+1, 1, line))
+                raise SyntaxError(f'missing expected start of i/o block: "{BEGIN_TEST_DELIMITER}"', (filename, index+1, 1, line))
 
             # expect start of code block
             index,line = goto_next_line(index, lines, filename)
             if line != 'input':
                 # filename lineno offset text
-                raise SyntaxError('missing expected start of i/o block: "input"', (filename, index+1, 1, line))
+                raise SyntaxError('missing expected start of i/o input section: "input"', (filename, index+1, 1, line))
             
             # go to next line
             index,line = goto_next_line(index, lines, filename)
@@ -156,16 +169,16 @@ def read_tests(filename: str) -> List[Dict[str,str]]:
             index,line = goto_next_line(index, lines, filename)
             if line != 'output':
                 # filename lineno offset text
-                raise SyntaxError('missing expected start of i/o block: "output"', (filename, index+1, 1, line))
+                raise SyntaxError('missing expected start of i/o output section: "output"', (filename, index+1, 1, line))
             
             index,line = goto_next_line(index, lines, filename)
             output_filename_string = line
             # print("Output filename: " + output_filename_string)
 
             index,line = goto_next_line(index, lines, filename)
-            if line != '}':
+            if line != END_TEST_DELIMITER:
                 # filename lineno offset text
-                raise SyntaxError('missing expected start of i/o block: "}"', (filename, index+1, 1, line))
+                raise SyntaxError(f'missing expected end of i/o block: "{END_TEST_DELIMITER}"', (filename, index+1, 1, line))
 
 
             with open(input_filename_string, 'r') as f:
@@ -178,15 +191,15 @@ def read_tests(filename: str) -> List[Dict[str,str]]:
         elif type == 'script':
             # go to next line
             index,line = goto_next_line(index, lines, filename)
-            if line != '{':
+            if line != BEGIN_TEST_DELIMITER:
                 # filename lineno offset text
-                raise SyntaxError('missing expected start of script block: "{"', (filename, index+1, 1, line))
+                raise SyntaxError(f'missing expected start of script block: "{BEGIN_TEST_DELIMITER}"', (filename, index+1, 1, line))
 
             # expect start of code block
             index,line = goto_next_line(index, lines, filename)
             if line != 'script':
                 # filename lineno offset text
-                raise SyntaxError('missing expected start of scriptblock: "input"', (filename, index+1, 1, line))
+                raise SyntaxError('missing expected start of script input section: "script"', (filename, index+1, 1, line))
             
             # go to next line
             index,line = goto_next_line(index, lines, filename)
@@ -194,9 +207,9 @@ def read_tests(filename: str) -> List[Dict[str,str]]:
             # print("Script filename: " + script_filename_string)
 
             index,line = goto_next_line(index, lines, filename)
-            if line != '}':
+            if line != END_TEST_DELIMITER:
                 # filename lineno offset text
-                raise SyntaxError('missing expected start of script block: "}"', (filename, index+1, 1, line))
+                raise SyntaxError(f'missing expected end of script block: "{END_TEST_DELIMITER}"', (filename, index+1, 1, line))
 
             try:
                 with open(script_filename_string, 'r') as f:
@@ -207,13 +220,13 @@ def read_tests(filename: str) -> List[Dict[str,str]]:
                 print(f'No such file or directory: \'{script_filename_string}\'')
 
         elif type == 'approved_includes':
-            index,line = eat_block_of_code(index, lines, filename)
+            index,line = eat_empty_test_block(index, lines, filename)
             tests.append(attributes)
             
         else:
             #raise ValueError('undefined test type: {}'.format(type))
             print('WARNING: undefined test type: {}.  this one will be ignored: {}'.format(type, attributes['name']))
-            index,line = eat_block_of_code(index, lines, filename)
+            index,line = eat_block_of_test(index, lines, filename)
                 
         index += 1
     

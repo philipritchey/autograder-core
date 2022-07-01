@@ -6,10 +6,10 @@
 @type: script
 @target: code.cpp
 */
-{
+<test>
   script
   script_tests/code_compiles.sh
-}
+</test>
 
 /*
 @number: 2
@@ -19,10 +19,10 @@
 @type: script
 @target: code.cpp
 */
-{
+<test>
   script
   script_tests/code_memory_errors.sh
-}
+</test>
 
 /*
 @number: 3
@@ -32,10 +32,10 @@
 @type: script
 @target: code_tests.cpp
 */
-{
+<test>
   script
   script_tests/code_coverage.sh
-}
+</test>
 
 /*
 @number: 4
@@ -45,9 +45,9 @@
 @type: unit
 @target: code.cpp
 */
-{
+<test>
     EXPECT_EQ(foo(867), 5309);
-}
+</test>
 
 /*
 @number: 0
@@ -56,8 +56,8 @@
 @type: approved_includes
 @target: code.cpp
 */
-{
-}
+<test>
+</test>
 
 /*
 @number: 0
@@ -66,8 +66,8 @@
 @type: approved_includes
 @target: code.h
 */
-{
-}
+<test>
+</test>
 
 /*
 @number: 0
@@ -76,5 +76,5 @@
 @type: approved_includes
 @target: code_tests.cpp
 */
-{
-}
+<test>
+</test>

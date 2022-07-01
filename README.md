@@ -35,10 +35,10 @@ TODO
 @type: unit
 @target: code.cpp
 */
-{
+<test>
     // unit test code, e.g.
     EXPECT_EQ(foo(input), expected_value);
-}
+</test>
 ```
 
 ### i/o tests
@@ -53,12 +53,12 @@ TODO
 @type: i/o
 @target: code.cpp
 */
-{
+<test>
 	input
 	io_tests/example/input.txt
 	output
 	io_tests/example/output.txt
-}
+</test>
 ```
 
 ### script tests
@@ -73,10 +73,10 @@ TODO
 @type: script
 @target: code.cpp
 */
-{
+<test>
   script
   script_tests/code_compiles.sh
-}
+</test>
 ```
 
 ## basic packaging for gradescope
