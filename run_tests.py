@@ -55,6 +55,9 @@ def eat_block_of_code(index, lines, filename) -> Tuple[int,str]:
 def read_attributes(index: int, lines: List[str], filename: str) -> Tuple[int, Dict]:
     # skip blank lines
     index = skip_blank_lines(index, lines)
+    if index >= len(lines):
+        # at end of file
+        return -1, None
     line = lines[index].strip()
     
     # expect start of multiline comment
@@ -112,6 +115,9 @@ def read_tests(filename: str) -> List[Dict[str,str]]:
     while index < len(lines):
         # expect next lines to be only attributes and values
         index, attributes = read_attributes(index, lines, filename)
+        if not attributes:
+            # at end of file
+            break
 
         type = attributes['type']
         if type == 'unit':
@@ -192,11 +198,13 @@ def read_tests(filename: str) -> List[Dict[str,str]]:
                 # filename lineno offset text
                 raise SyntaxError('missing expected start of script block: "}"', (filename, index+1, 1, line))
 
-
-            with open(script_filename_string, 'r') as f:
-                attributes['script_content'] = f.read()
-
-            tests.append(attributes)
+            try:
+                with open(script_filename_string, 'r') as f:
+                    attributes['script_content'] = f.read()
+                
+                tests.append(attributes)
+            except FileNotFoundError:
+                print(f'No such file or directory: \'{script_filename_string}\'')
 
         elif type == 'approved_includes':
             index,line = eat_block_of_code(index, lines, filename)
