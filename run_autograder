@@ -2,13 +2,31 @@
 
 BASE_DIR=$(pwd)
 
-rm -rf /autograder/testbox
-mkdir -p /autograder/testbox
-TESTBOX=/autograder/testbox
-REPO=/autograder/autograder-code
-AUTOGRADER_CORE_REPO=/autograder/autograder-core
-TESTS=$REPO/tests
-SUBMISSION=/autograder/submission
+if [ -d /autograder ]; then
+    # gradescope environment detected
+    is_gradesope=True
+else
+    echo "gradescope environment not detected."
+    is_gradesope=False
+fi
+
+if [ $is_gradescope ]; then
+    rm -rf /autograder/testbox
+    mkdir -p /autograder/testbox
+    TESTBOX=/autograder/testbox
+    REPO=/autograder/autograder-code
+    AUTOGRADER_CORE_REPO=/autograder/autograder-core
+    TESTS=$REPO/tests
+    SUBMISSION=/autograder/submission
+    RESULTS_DIR=/autograder/results
+else
+    rm -rf testbox
+    mkdir testbox
+    TESTBOX=testbox
+    AUTOGRADER_CORE_REPO=../autograder-core
+    SUBMISSION=./solution
+    RESULTS_DIR=$BASE_DIR
+fi
 
 # sanity check before doing any real effort
 # TODO: move this check into run_tests.py?
@@ -19,45 +37,56 @@ SUBMISSION=/autograder/submission
 src_list=()
 for file in "${src_list[@]}"; do
   if [ ! -f $SUBMISSION/"$file" ]; then
+	if [ $is_gradescope ]; then
 	  {
 		  echo "{\"score\": 0, \"output\": \"$file does not exist.\"}"
 	  } > /autograder/results/results.json
-	  exit 1
+    else
+      echo "[FATAL] $file does not exist. exiting."
+    fi
+	exit 1
   fi
 done
 
-# Update autograder files
-cd $AUTOGRADER_CORE_REPO
-git pull
-cd $REPO
-git pull
-
-# backdoor update run_autograder?
-cp run_autograder /autograder/
-
-# copy core test runners to testbox
-cp $AUTOGRADER_CORE_REPO/run_tests.py $TESTBOX/
-cp $AUTOGRADER_CORE_REPO/tests/approved_includes.sh $TESTBOX/
-
-# copy tests to testbox
-cp tests/cs12x_test.h $TESTBOX/
-cp -r tests/io_tests/ $TESTBOX/
-cp -r tests/script_tests/ $TESTBOX/
-cp tests/approved_includes* $TESTBOX/
-
-#
-# TODO(you): specify assignment-specific testing files
-#
-cp tests/tests.cpp $TESTBOX/
-
-# copy student code to testbox
+# copy submitted code to testbox
 cd $SUBMISSION
 for file in "${src_list[@]}"; do
   cp $file $TESTBOX/
 done
 
-# run tests <tests file> [results file]
+if [ $is_gradescope ]; then
+    # Update autograder files
+    cd $AUTOGRADER_CORE_REPO
+    git pull
+    cd $REPO
+    git pull
+    
+    # backdoor update run_autograder?
+    cp run_autograder /autograder/
+fi
+
+# copy core test runners to testbox
+cp $AUTOGRADER_CORE_REPO/run_tests.py $TESTBOX/
+cp $AUTOGRADER_CORE_REPO/tests/approved_includes.sh $TESTBOX/
+cp $AUTOGRADER_CORE_REPO/tests/cs12x_test.h $TESTBOX/
+
+# copy tests to testbox
+cp -r tests/io_tests/ $TESTBOX/
+cp -r tests/script_tests/ $TESTBOX/
+cp tests/approved_includes_* $TESTBOX/
+
+# collect and enable tests
 cd $TESTBOX
+touch tests.cpp
+for file in $REPO/tests/tests_*; do
+  if [ -f "$file" ]; then
+	cat $file >> tests.cpp
+    printf "\n" >> tests.cpp
+  fi
+done
+
 chmod +x ./approved_includes.sh
-python3 run_tests.py tests.cpp /autograder/results/results.json
+
+# run tests <tests file> [results file]
+python3 run_tests.py tests.cpp $RESULTS_DIR/results.json
 
