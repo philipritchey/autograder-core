@@ -479,26 +479,26 @@ def main(filename) -> None:
     unapproved_includes = False  
     for target in targets: 
         print(f'test: approved includes for {target}')
-        try:
-            f = open('approved_includes_{}'.format(target))
-        except FileNotFoundError:
-            print('approved_includes_{} not found: assuming default deny all'.format(target))
-            continue
         list_of_approved_includes = list()
-        for line in f:
-            list_of_approved_includes.append(line.strip())
+        try:
+            with open(f'approved_includes_{target}') as f:
+                for line in f:
+                    list_of_approved_includes.append(line.strip())
+        except FileNotFoundError:
+            print('[WARNING] approved_includes_{} not found: assuming default deny all'.format(target))
+        
         forbidden_found, output = check_approved_includes(target, list_of_approved_includes)
         test_result = {'score': 0, 'number':'00', 'max_score': 0, 'name': 'Approved includes for {}'.format(target), 'output': output.strip()}
         if (forbidden_found):
             print('[FAIL] found a forbidden include\n')
-            test_result['score'] = 0
-            print(test_result['score'])
+            print(output)
+            #test_result['score'] = 0
+            #print(test_result['score'])
             unapproved_includes = True
         else:
             print('[PASS] all includes are approved\n')
         test_results.append(test_result)
         results['score'] += test_result['score']
-        f.close()
     
     if unapproved_includes:
         results['score'] = 0
@@ -509,6 +509,7 @@ def main(filename) -> None:
     results['execution_time'] = total_time
     if unapproved_includes:
         results['output'] = 'Forbidden includes are used, so we set your current submission score to 0.0'
+        earned = 0
     results['visibility'] = 'visible'
     results['stdout_visibility'] = 'visible'
     # if results['visibility'] == 'visible' or results['stdout_visibility'] == 'visible':

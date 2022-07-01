@@ -35,8 +35,9 @@ git pull
 # backdoor update run_autograder?
 cp run_autograder /autograder/
 
-# copy test runner to testbox
+# copy core test runners to testbox
 cp $AUTOGRADER_CORE_REPO/run_tests.py $TESTBOX/
+cp $AUTOGRADER_CORE_REPO/tests/approved_includes.sh $TESTBOX/
 
 # copy tests to testbox
 cp tests/cs12x_test.h $TESTBOX/
