@@ -19,7 +19,7 @@ cp ssh_config /root/.ssh/config
 mv deploy_key /root/.ssh/deploy_key
 chmod 600 /root/.ssh/deploy_key
 
-# you can get `autograder_core_deploy_key` from pcr@tamu.edu
+# you can get an `autograder_core_deploy_key` from pcr@tamu.edu
 mv autograder_core_deploy_key /root/.ssh/autograder_core_deploy_key
 chmod 600 /root/.ssh/autograder_core_deploy_key
 
