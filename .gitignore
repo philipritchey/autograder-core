@@ -1,5 +1,5 @@
 *.zip
-*deploy_key
+*deploy_key*
 solution/
 results.json
 testbox/
