@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 
 from collections import namedtuple
-from typing import List, Tuple, Dict, Any, TypedDict
+from typing import List, Tuple, Dict, Any, TypedDict, Optional
 from os import popen
 import os
 import subprocess
