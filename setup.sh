@@ -10,7 +10,7 @@ apt-get -y upgrade
 # python3.8
 #apt install software-properties-common
 #add-apt-repository -y ppa:deadsnakes/ppa
-#apt-get install python3.8
+#apt-get -y install python3.8
 
 cd /autograder/source
 mkdir -p /root/.ssh

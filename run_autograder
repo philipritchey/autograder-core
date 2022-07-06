@@ -61,9 +61,6 @@ if [ $is_gradescope == "true" ]; then
     git pull
     cd $REPO
     git pull
-
-    # backdoor update run_autograder?
-    cp run_autograder /autograder/
 fi
 
 # copy core test runners to testbox
