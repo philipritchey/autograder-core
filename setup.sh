@@ -7,6 +7,11 @@ apt-get -y upgrade
 # install dependencies
 #apt-get -y install apt-utils valgrind
 
+# python3.8
+#apt install software-properties-common
+#add-apt-repository -y ppa:deadsnakes/ppa
+#apt install python3.8
+
 cd /autograder/source
 mkdir -p /root/.ssh
 cp ssh_config /root/.ssh/config

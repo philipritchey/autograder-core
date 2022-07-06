@@ -475,9 +475,9 @@ class TestResult(TypedDict):
     score: float
     max_score: float
     output: str
-    tags: List[str]
-    visibility: str
-    extra_data: Dict[Any,Any]
+    tags: Optional[List[str]]
+    visibility: Optional[str]
+    extra_data: Optional[Dict[Any,Any]]
 
 class Result(TypedDict):
     score: float
@@ -569,9 +569,6 @@ def main(filename) -> Result:
             'score': points,
             'max_score': max_points,
             'output': '',
-            'tags': [],
-            'visibility': 'visible',
-            'extra_data': {}
             }
         has_compile_output = len(compile_output) > 0
         if test['show_output'].lower() == 'true':
@@ -609,9 +606,6 @@ def main(filename) -> Result:
             'score': 0,
             'max_score': 0,
             'output': output.strip(),
-            'tags': [],
-            'visibility': 'visible',
-            'extra_data': {}
             }
         if (forbidden_found):
             print('[FAIL] found a forbidden include\n')
