@@ -209,10 +209,17 @@ def read_tests(filename: str) -> List[Dict[str,Any]]:
                 raise SyntaxError(f'missing expected end of i/o block: "{END_TEST_DELIMITER}"', (filename, index+1, 1, line))
 
 
-            with open(input_filename_string, 'r') as f:
-                attributes['expected_input'] = f.read()
-            with open(output_filename_string, 'r') as f:
-                attributes['expected_output'] = f.read()
+            try:
+                with open(input_filename_string, 'r') as f:
+                    attributes['expected_input'] = f.read()
+            except FileNotFoundError:
+                raise SyntaxError(f'input file not found: {input_filename_string}', (filename, index+1, 1, line))
+                
+            try:
+                with open(output_filename_string, 'r') as f:
+                    attributes['expected_output'] = f.read()
+            except FileNotFoundError:
+                raise SyntaxError(f'output file not found: {output_filename_string}', (filename, index+1, 1, line))
 
             tests.append(attributes)
 
@@ -280,13 +287,16 @@ def write_performance_test(test: Dict[str,Any]) -> None:
         if 'include' in test:
             for include in test['include'].split():
                 f.write(f'#include {include}\n')
+        f.write('#include "cs12x_test.h"\n')
         f.write(f"#include \"{test['target']}\"\n\n")
         f.write('#include<iostream>\n')
         f.write('#include<chrono>\n')
 
         f.write('int main() {\n')
+        f.write('    INIT_TEST;\n')
         f.write('    {}\n'.format('\n    '.join(test['code'].splitlines())))
-        f.write('    return 0;\n')
+        f.write('    RESULT(pass);\n')
+        f.write('    return pass ? 0 : 1;\n')
         f.write('}\n')
 
 # Writes out the input and output strings
