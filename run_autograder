@@ -88,6 +88,3 @@ chmod +x ./approved_includes.sh
 # run tests <tests file> [results file]
 python3 run_tests.py tests.cpp $RESULTS_DIR/results.json
 
-# clean up
-cd $BASE_DIR
-rm -r $TESTBOX
