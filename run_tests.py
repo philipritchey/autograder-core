@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 
 from collections import namedtuple
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Any, TypedDict
 from os import popen
 import os
 import subprocess
@@ -9,9 +9,14 @@ from sys import argv
 from time import time
 import json
 
+# TODO: move configuration stuff to configuration file (and let it be assignment-specific)
 BEGIN_TEST_DELIMITER = '<test>'
 END_TEST_DELIMITER = '</test>'
 EMPTY_TEST_BLOCK = '<test/>'
+
+DEFAULT_POINTS = '0'
+DEFAULT_TIMEOUT = '10'
+DEFAULT_SHOW_OUTPUT = 'false'
 
 def unexpected_end_of_input(filename: str, index: int, line: str) -> Exception:
     # filename lineno offset text
@@ -29,7 +34,7 @@ def goto_next_line(index: int, lines: List[str], filename: str) -> Tuple[int, st
     
     return index, line
     
-def skip_blank_lines(index: int, lines: List[str]) -> Tuple[int,str]:
+def skip_blank_lines(index: int, lines: List[str]) -> int:
     while index < len(lines) and not lines[index].strip():
         index += 1
     return index
@@ -68,12 +73,12 @@ def eat_empty_test_block(index, lines, filename) -> Tuple[int,str]:
         raise SyntaxError(f'expected empty test block: "{EMPTY_TEST_BLOCK}"', (filename, index+1, 1, line))
     return index,line
 
-def read_attributes(index: int, lines: List[str], filename: str) -> Tuple[int, Dict]:
+def read_attributes(index: int, lines: List[str], filename: str) -> Tuple[int, Dict[str,Any]]:
     # skip blank lines
     index = skip_blank_lines(index, lines)
     if index >= len(lines):
         # at end of file
-        return -1, None
+        return -1, {}
     line = lines[index].strip()
     
     # expect start of multiline comment
@@ -86,9 +91,24 @@ def read_attributes(index: int, lines: List[str], filename: str) -> Tuple[int, D
     
     attributes = dict()
     while line.startswith('@'):
-        tag,value = line.split(sep=':', maxsplit=1)
+        try:
+            tag,value = line.split(sep=':', maxsplit=1)
+        except ValueError:
+            raise SyntaxError('missing attribute value? (attributes look like "@name: value")', (filename, index+1, 1, line))
         tag = tag.strip()[1:]
         value = value.strip()
+        if tag == "points":
+            try:
+                points = float(value)
+            except ValueError:
+                print(f'[WARNING] ({filename}:{index+1}) points attribute has empty value, using default value ({DEFAULT_POINTS})')
+                value = DEFAULT_POINTS
+        elif tag =='timeout':
+            try:
+                timeout = float(value)
+            except ValueError:
+                print(f'[WARNING] ({filename}:{index+1}) timeout attribute has empty value, using default value ({DEFAULT_TIMEOUT})')
+                value = DEFAULT_TIMEOUT
         attributes[tag] = value
         
         # go to next line
@@ -104,6 +124,14 @@ def read_attributes(index: int, lines: List[str], filename: str) -> Tuple[int, D
     for attribute in required_attributes:
         if attribute not in attributes:
             raise KeyError(f'({filename}:{index+1}) missing required attribute: {attribute}')
+            
+    # set timeouts to default if not specified
+    if 'timeout' not in attributes:
+        attributes['timeout'] = DEFAULT_TIMEOUT
+        
+    # set show_output to default if not specified
+    if 'show_output' not in attributes:
+        attributes['show_output'] = DEFAULT_SHOW_OUTPUT
     
     return index, attributes
 
@@ -120,7 +148,7 @@ def read_block_of_test(index: int, lines: List[str], filename: str) -> Tuple[int
     
     return index, code
 
-def read_tests(filename: str) -> List[Dict[str,str]]:
+def read_tests(filename: str) -> List[Dict[str,Any]]:
     tests = list()
     with open(filename) as f:
         lines = f.readlines()
@@ -232,10 +260,13 @@ def read_tests(filename: str) -> List[Dict[str,str]]:
     
     return tests
 
-def write_unit_test(test: Dict[str,str]) -> None:
+def write_unit_test(test: Dict[str,Any]) -> None:
     with open('unit_test.cpp', 'wt') as f:
+        if 'include' in test:
+            for include in test['include'].split():
+                f.write(f'#include {include}\n')
         f.write('#include "cs12x_test.h"\n')
-        f.write('#include "{}"\n\n'.format(test['target']))
+        f.write(f"#include \"{test['target']}\"\n\n")
 
         f.write('int main() {\n')
         f.write('    INIT_TEST;\n')
@@ -244,9 +275,12 @@ def write_unit_test(test: Dict[str,str]) -> None:
         f.write('    return pass ? 0 : 1;\n')
         f.write('}\n')
 
-def write_performance_test(test: Dict[str,str]) -> None:
+def write_performance_test(test: Dict[str,Any]) -> None:
     with open('performance_test.cpp', 'wt') as f:
-        f.write('#include "{}"\n\n'.format(test['target']))
+        if 'include' in test:
+            for include in test['include'].split():
+                f.write(f'#include {include}\n')
+        f.write(f"#include \"{test['target']}\"\n\n")
         f.write('#include<iostream>\n')
         f.write('#include<chrono>\n')
 
@@ -256,18 +290,18 @@ def write_performance_test(test: Dict[str,str]) -> None:
         f.write('}\n')
 
 # Writes out the input and output strings
-def write_io_test(test: Dict[str,str]) -> None:
+def write_io_test(test: Dict[str,Any]) -> None:
     with open('input.txt', 'wt') as f:
         f.write(test['expected_input'])
         f.write("\n")
     with open('output.txt', 'wt') as f:
         f.write(test['expected_output'])
 
-def write_script_test(test: Dict[str,str]) -> None:
+def write_script_test(test: Dict[str,Any]) -> None:
     with open('script.sh', 'wt') as f:
         f.write(test['script_content'])
 
-def compile_unit_test() -> bool:
+def compile_unit_test() -> Tuple[bool,str]:
     CXX = 'g++'
     FLAGS = '-std=c++17 -g -o unit_test'
     SRC = 'unit_test.cpp'
@@ -281,7 +315,7 @@ def compile_unit_test() -> bool:
     # print('ret = {}'.format(ret))
     return ret == None, output
 
-def compile_performance_test() -> bool:
+def compile_performance_test() -> Tuple[bool,str]:
     CXX = 'g++'
     FLAGS = '-std=c++17 -g -o performance_test'
     SRC = 'performance_test.cpp'
@@ -295,7 +329,7 @@ def compile_performance_test() -> bool:
     # print('ret = {}'.format(ret))
     return ret == None, output
 
-def compile_io_test(src_target) -> bool:
+def compile_io_test(src_target) -> Tuple[bool,str]:
     CXX = 'g++'
     FLAGS = '-std=c++17 -g -o io_test'
     SRC = src_target
@@ -309,14 +343,14 @@ def compile_io_test(src_target) -> bool:
     # print('ret = {}'.format(ret))
     return ret == None, output
 
-def compile_script_test() -> bool:
+def compile_script_test() -> Tuple[bool,str]:
     return True, ""
     
-def run_unit_test() -> bool:
+def run_unit_test(timeout: float) -> Tuple[bool,str]:
     run_cmd = ["./unit_test", "2>&1"]
     p = subprocess.Popen(run_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     try:
-        output_en, err_en = p.communicate(timeout=10) #p.stdout.decode('utf-8')
+        output_en, err_en = p.communicate(timeout=timeout) #p.stdout.decode('utf-8')
         output = output_en.decode('utf-8')
     except subprocess.TimeoutExpired as e:
         output = "Timeout during test execution, check for an infinite loop\n"
@@ -325,11 +359,11 @@ def run_unit_test() -> bool:
     ret = p.returncode
     return ret == 0, output
 
-def run_performance_test() -> bool:
+def run_performance_test(timeout: float) -> Tuple[bool,str]:
     run_cmd = ["./performance_test", "2>&1"]
     p = subprocess.Popen(run_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     try:
-        output_en, err_en = p.communicate(timeout=10) #p.stdout.decode('utf-8')
+        output_en, err_en = p.communicate(timeout=timeout) #p.stdout.decode('utf-8')
         output = output_en.decode('utf-8')
     except subprocess.TimeoutExpired as e:
         output = "Timeout during test execution, check for an infinite loop\n"
@@ -338,7 +372,7 @@ def run_performance_test() -> bool:
     ret = p.returncode
     return ret == 0, output
 
-def run_io_test() -> bool:
+def run_io_test(timeout: float) -> Tuple[bool,str]:
     run_cmd = ["./io_test", "2>&1"]
     with open('input.txt', 'r') as file:
         input_data = file.read()
@@ -350,7 +384,7 @@ def run_io_test() -> bool:
     message_to_student = ""
 
     try:
-        output, err = p.communicate(input_data.encode('utf-8'), timeout=10)
+        output, err = p.communicate(input_data.encode('utf-8'), timeout=timeout)
         output_str = output.decode('utf-8').rstrip()
         err_str = err.decode('utf-8')
 
@@ -369,7 +403,7 @@ def run_io_test() -> bool:
 
     return (output_str == gt_string), message_to_student
 
-def run_script_test() -> bool:
+def run_script_test(timeout: float) -> Tuple[bool,str,float]:
 
     #print("Can write: ")
     #print(os.access('./', os.W_OK))
@@ -387,7 +421,7 @@ def run_script_test() -> bool:
     debug_string = ""
     output_string = "0"
     try:
-        output, err = p.communicate(timeout=10)
+        output, err = p.communicate(timeout=timeout)
 
         if os.path.exists('./OUTPUT'):
             with open('./OUTPUT', 'r') as file:
@@ -407,7 +441,7 @@ def run_script_test() -> bool:
 
     return (score > 0.0), debug_string, score
 
-def check_approved_includes(target: str, approved_includes: List[str]) -> bool:
+def check_approved_includes(target: str, approved_includes: List[str]) -> Tuple[bool,str]:
     
     cmd = ["bash"]
     #print('cmd = {}'.format(cmd))
@@ -425,16 +459,30 @@ def check_approved_includes(target: str, approved_includes: List[str]) -> bool:
         forbidden_found = True
     return forbidden_found, output_str
 
-def main(filename) -> None:
-    results = dict()
-    test_results = list()
+class TestResult(TypedDict):
+    number: str
+    name: str
+    score: float
+    max_score: float
+    output: str
+    tags: List[str]
+    visibility: str
+    extra_data: Dict[Any,Any]
+
+class Result(TypedDict):
+    score: float
+    output: str
+    execution_time: float
+    visibility: str
+    stdout_visibility: str
+    tests: List[TestResult]
+
+def main(filename) -> Result:
+    result_score = 0.0
+    test_results: List[TestResult] = list()
     tests = read_tests(filename)
-    earned = 0
-    possible = 0
-    total_time = 0
-    test_num = 1
-    results['score'] = 0
-    results['output'] = ''
+    possible = 0.0
+    total_time = 0.0
     for test in tests:
         point_multiplier = 100.0
         max_points = float(test['points'])
@@ -470,15 +518,15 @@ def main(filename) -> None:
             continue
         if compiles:
             time_start = time()
-            
+            timeout = float(test['timeout'])
             if test['type'] == 'unit':
-                runs, run_output = run_unit_test()
+                runs, run_output = run_unit_test(timeout)
             elif test['type'] == 'i/o':
-                runs, run_output = run_io_test()
+                runs, run_output = run_io_test(timeout)
             elif test['type'] == 'script':
-                runs, run_output, point_multiplier = run_script_test()
+                runs, run_output, point_multiplier = run_script_test(timeout)
             elif test['type'] == 'performance':
-                runs, run_output = run_performance_test()
+                runs, run_output = run_performance_test(timeout)
             else:
                 print("Unsupported test")
                 continue
@@ -492,7 +540,6 @@ def main(filename) -> None:
                 else:
                     print('[PASS] ran correctly\n')
                 points = max_points * (point_multiplier / 100.0)
-                earned += points
             else:
                 print('[FAIL] incorrect behavior\n')
                 print(run_output.strip())
@@ -504,26 +551,28 @@ def main(filename) -> None:
             print(compile_output)
             points = 0
         
-        test_result = dict()
-        test_result['score'] = points
-        results['score'] += points
-        test_result['number'] = str(test['number'])
-        test_result['max_score'] = max_points
-        test_result['name'] = test['name']
-        #test_result['number'] = ''
-        test_result['output'] = ''
-        if len(compile_output) > 0:
-            test_result['output'] += compile_output.strip()
-        if len(run_output) > 0:
-            if len(compile_output) > 0:
-                test_result['output'] += '\n\n'
-            test_result['output'] += run_output.strip()
-        if test['show_output'] == 'False':
+        result_score += points
+        
+        test_result: TestResult = {
+            'number': test['number'],
+            'name': test['name'],
+            'score': points,
+            'max_score': max_points,
+            'output': '',
+            'tags': [],
+            'visibility': 'visible',
+            'extra_data': {}
+            }
+        has_compile_output = len(compile_output) > 0
+        if test['show_output'].lower() == 'true':
+            if has_compile_output:
+                test_result['output'] += compile_output.strip()
+            if len(run_output) > 0:
+                if has_compile_output > 0:
+                    test_result['output'] += '\n\n'
+                test_result['output'] += run_output.strip()
+        else:
             test_result['output'] = 'Output is intentionally hidden'
-        #tags = list()
-        #test_result['tags'] = tags
-        #test_result['visibility'] = 'hidden'
-        #test_result['extra_data'] = dict()
         
         test_results.append(test_result)
     
@@ -531,6 +580,7 @@ def main(filename) -> None:
     for test in tests:
         targets.add(test['target'])
     
+    # TODO: integrate approved includes test into standard test processing (above)
     unapproved_includes = False  
     for target in targets: 
         print(f'test: approved includes for {target}')
@@ -543,7 +593,16 @@ def main(filename) -> None:
             print('[WARNING] approved_includes_{} not found: assuming default deny all'.format(target))
         
         forbidden_found, output = check_approved_includes(target, list_of_approved_includes)
-        test_result = {'score': 0, 'number':'00', 'max_score': 0, 'name': 'Approved includes for {}'.format(target), 'output': output.strip()}
+        ai_test_result: TestResult = {
+            'number':'00',
+            'name': f'Approved includes for {target}',
+            'score': 0,
+            'max_score': 0,
+            'output': output.strip(),
+            'tags': [],
+            'visibility': 'visible',
+            'extra_data': {}
+            }
         if (forbidden_found):
             print('[FAIL] found a forbidden include\n')
             print(output)
@@ -552,21 +611,22 @@ def main(filename) -> None:
             unapproved_includes = True
         else:
             print('[PASS] all includes are approved\n')
-        test_results.append(test_result)
-        results['score'] += test_result['score']
+        test_results.append(ai_test_result)
+        result_score += ai_test_result['score']
     
+    result_output = ''
     if unapproved_includes:
-        results['score'] = 0
-    
-    # DISABLE SCORING FROM AUTOGRADER
-    # results['score'] = 0
-    
-    results['execution_time'] = total_time
-    if unapproved_includes:
+        result_score = 0
         results['output'] = 'Forbidden includes are used, so we set your current submission score to 0.0'
         earned = 0
-    results['visibility'] = 'visible'
-    results['stdout_visibility'] = 'visible'
+    
+    # DISABLE SCORING FROM AUTOGRADER
+    # results_score = 0
+    
+    #results['execution_time'] = total_time
+    
+    #results['visibility'] = 'visible'
+    #results['stdout_visibility'] = 'visible'
     # if results['visibility'] == 'visible' or results['stdout_visibility'] == 'visible':
     #     print('###########################')
     #     print('#                         #')
@@ -579,14 +639,24 @@ def main(filename) -> None:
     #     print('#                         #')
     #     print('###########################')
     #results['extra_data'] = dict()
-    results['tests'] = test_results
+    #results['tests'] = test_results
     #results['leaderboard'] = leaderboard
     
     print('#####################')
     print('#                   #')
-    print('# points: {:3.0f} / {:3.0f} #'.format(earned,possible))
+    print('# points: {:3.0f} / {:3.0f} #'.format(result_score,possible))
     print('#                   #')
     print('#####################')
+    
+    results: Result = {
+        'score': result_score,
+        'output': output,
+        'execution_time': total_time,
+        'visibility': 'visible',
+        'stdout_visibility': 'visible',
+        'tests': test_results
+        }
+    
     return results
     
 
