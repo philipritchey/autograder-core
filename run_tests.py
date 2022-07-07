@@ -230,12 +230,6 @@ def read_tests(filename: str) -> List[Dict[str,Any]]:
                 # filename lineno offset text
                 raise SyntaxError(f'missing expected start of script block: "{BEGIN_TEST_DELIMITER}"', (filename, index+1, 1, line))
 
-            # expect start of code block
-            index,line = goto_next_line(index, lines, filename)
-            if line != 'script':
-                # filename lineno offset text
-                raise SyntaxError('missing expected start of script input section: "script"', (filename, index+1, 1, line))
-            
             # go to next line
             index,line = goto_next_line(index, lines, filename)
             script_filename_string = line
