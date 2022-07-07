@@ -704,11 +704,14 @@ def main(filename) -> Result:
     #results['tests'] = test_results
     #results['leaderboard'] = leaderboard
     
-    print('#####################')
-    print('#                   #')
-    print('# points: {:3.0f} / {:3.0f} #'.format(result_score,possible))
-    print('#                   #')
-    print('#####################')
+    t = int(result_score * 10000 + 0.5)
+    result_score = t / 10000
+    
+    print('###############################')
+    print('#                             #')
+    print('# points: {:8.4f} / {:8.4f} #'.format(result_score,possible))
+    print('#                             #')
+    print('###############################')
     
     results: Result = {
         'score': result_score,
