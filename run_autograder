@@ -71,7 +71,6 @@ cp $AUTOGRADER_CORE_REPO/tests/cs12x_test.h $TESTBOX/
 # copy tests to testbox
 cp -r tests/io_tests/ $TESTBOX/
 cp -r tests/script_tests/ $TESTBOX/
-cp tests/approved_includes_* $TESTBOX/
 
 # collect and enable tests
 cd $TESTBOX
