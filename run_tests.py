@@ -320,11 +320,11 @@ def read_tests(filename: str) -> List[Attributes]:
 
 def write_unit_test(test: Attributes) -> None:
     with open('unit_test.cpp', 'wt') as f:
+        f.write(f"#include \"{test['target']}\"\n\n")    
         if len(test['include']) > 0:
             for include in test['include'].split():
                 f.write(f'#include {include}\n')
-        f.write('#include "cs12x_test.h"\n')
-        f.write(f"#include \"{test['target']}\"\n\n")
+        f.write('#include "cs12x_test.h"\n')    
 
         f.write('int main() {\n')
         f.write('    INIT_TEST;\n')
@@ -335,13 +335,13 @@ def write_unit_test(test: Attributes) -> None:
 
 def write_performance_test(test: Attributes) -> None:
     with open('performance_test.cpp', 'wt') as f:
+        f.write(f"#include \"{test['target']}\"\n\n")
+        f.write('#include<iostream>\n')
+        f.write('#include<chrono>\n')
         if len(test['include']) > 0:
             for include in test['include'].split():
                 f.write(f'#include {include}\n')
         f.write('#include "cs12x_test.h"\n')
-        f.write(f"#include \"{test['target']}\"\n\n")
-        f.write('#include<iostream>\n')
-        f.write('#include<chrono>\n')
 
         f.write('int main() {\n')
         f.write('    INIT_TEST;\n')

@@ -1,5 +1,19 @@
 #!/usr/bin/env bash
 
+# python version check (requires 3.8+)
+python=python3
+typeset -i python3_version=$($python --version | cut -d. -f2)
+if [ $python3_version -lt 8 ]; then
+  if [ "$(which python3.8)" == ""  ]; then
+    echo "[FATAL] requires Python 3.8+ (because pcr _insists_ on using type hints)"
+    echo "        for gradescope: make sure setup.sh includes the python3.8 install steps"
+    echo "        for local: follow the python3.8 install steps in setup.sh"
+    exit 1
+  else
+    python=python3.8
+  fi
+fi
+
 BASE_DIR=$(pwd)
 
 if [ -d /autograder ]; then
@@ -39,13 +53,8 @@ fi
 src_list=()
 for file in "${src_list[@]}"; do
   if [ ! -f $SUBMISSION/"$file" ]; then
-    if [ $is_gradescope == "true" ]; then
-    {
-        echo "{\"score\": 0, \"output\": \"$file does not exist.\"}"
-    } > /autograder/results/results.json
-    else
-        echo "[FATAL] $file does not exist. exiting."
-    fi
+    echo "[FATAL] $file does not exist. exiting."
+    echo "{\"score\": 0, \"output\": \"$file does not exist.\"}" > $RESULTS_DIR/results.json
     exit 1
   fi
 done
@@ -85,5 +94,5 @@ done
 chmod +x ./approved_includes.sh
 
 # run tests <tests file> [results file]
-python3 run_tests.py tests.cpp $RESULTS_DIR/results.json
+$python run_tests.py tests.cpp $RESULTS_DIR/results.json
 
