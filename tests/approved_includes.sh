@@ -16,21 +16,16 @@ array_contains () {
     return 1
 }
 
-if [ ! -e "$filename" ]; then 
-    break
-fi
-if [ -d "$filename" ]; then
-    continue
-fi
+echo 0 > OUTPUT
+
 grep -iPo '^\s*#include\s*(<|")\K(\.*/)*\w+(/\w+)*(\.\w+)?' -- "$filename" | cut -d : -f 2 | while read -r lib; do
     if array_contains "$lib" "${approved[@]}"; then
-        echo "OK: $lib found in $filename"
+        echo "OK: $lib found in $filename" >> DEBUG
     else
-        echo "FORBIDDEN: $lib found in $filename"
+        echo "FORBIDDEN: $lib found in $filename" >> DEBUG
         # fail the test
         exit 1
     fi
 done
 
-exit 0
-
+echo 100 > OUTPUT

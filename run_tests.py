@@ -14,8 +14,8 @@ BEGIN_TEST_DELIMITER = '<test>'
 END_TEST_DELIMITER = '</test>'
 EMPTY_TEST_BLOCK = '<test/>'
 
-DEFAULT_POINTS = '0'
-DEFAULT_TIMEOUT = '10'
+DEFAULT_POINTS = 0.0
+DEFAULT_TIMEOUT = 10.0
 DEFAULT_SHOW_OUTPUT = 'false'
 
 def unexpected_end_of_input(filename: str, index: int, line: str) -> Exception:
@@ -73,12 +73,28 @@ def eat_empty_test_block(index, lines, filename) -> Tuple[int,str]:
         raise SyntaxError(f'expected empty test block: "{EMPTY_TEST_BLOCK}"', (filename, index+1, 1, line))
     return index,line
 
-def read_attributes(index: int, lines: List[str], filename: str) -> Tuple[int, Dict[str,Any]]:
+class Attributes(TypedDict):
+    number: str
+    name: str
+    points: float
+    type: str
+    target: str
+    show_output: str
+    timeout: float
+    include: str
+    code: str
+    expected_input: str
+    expected_output: str
+    script_content: str
+    approved_includes: List[str]
+    
+
+def read_attributes(index: int, lines: List[str], filename: str) -> Tuple[int, Optional[Attributes]]:
     # skip blank lines
     index = skip_blank_lines(index, lines)
     if index >= len(lines):
         # at end of file
-        return -1, {}
+        return -1, None
     line = lines[index].strip()
     
     # expect start of multiline comment
@@ -88,8 +104,8 @@ def read_attributes(index: int, lines: List[str], filename: str) -> Tuple[int, D
 
     # go to next line
     index, line = goto_next_line(index, lines, filename)
-    
-    attributes = dict()
+
+    attr_dict: Dict[str, Any] = dict()
     while line.startswith('@'):
         try:
             tag,value = line.split(sep=':', maxsplit=1)
@@ -97,19 +113,27 @@ def read_attributes(index: int, lines: List[str], filename: str) -> Tuple[int, D
             raise SyntaxError('missing attribute value? (attributes look like "@name: value")', (filename, index+1, 1, line))
         tag = tag.strip()[1:]
         value = value.strip()
+        if tag in attr_dict:
+            old_value = attr_dict[tag]
+            print(f'[WARNING] ({filename}:{index+1}) tag "{tag}" already exists, old value will be overwritten: {old_value} --> {value}')
         if tag == "points":
+            points = DEFAULT_POINTS
             try:
                 points = float(value)
             except ValueError:
-                print(f'[WARNING] ({filename}:{index+1}) points attribute has empty value, using default value ({DEFAULT_POINTS})')
-                value = DEFAULT_POINTS
+                print(f'[WARNING] ({filename}:{index+1}) points attribute has invalid value, using default value ({DEFAULT_POINTS})')
+            attr_dict['points'] = points
         elif tag =='timeout':
+            timeout = DEFAULT_TIMEOUT
             try:
                 timeout = float(value)
+                if timeout <= 0:
+                    raise ValueError('timeout must be positive')
             except ValueError:
-                print(f'[WARNING] ({filename}:{index+1}) timeout attribute has empty value, using default value ({DEFAULT_TIMEOUT})')
-                value = DEFAULT_TIMEOUT
-        attributes[tag] = value
+                print(f'[WARNING] ({filename}:{index+1}) timeout attribute has invalid value, using default value ({DEFAULT_TIMEOUT})')
+            attr_dict['timeout'] = timeout
+        else:
+            attr_dict[tag] = value
         
         # go to next line
         index, line = goto_next_line(index, lines, filename)
@@ -122,16 +146,35 @@ def read_attributes(index: int, lines: List[str], filename: str) -> Tuple[int, D
     # verify all required attributes are present
     required_attributes = ('name', 'points', 'type', 'target', 'number')
     for attribute in required_attributes:
-        if attribute not in attributes:
+        if attribute not in attr_dict:
             raise KeyError(f'({filename}:{index+1}) missing required attribute: {attribute}')
             
     # set timeouts to default if not specified
-    if 'timeout' not in attributes:
-        attributes['timeout'] = DEFAULT_TIMEOUT
+    if 'timeout' not in attr_dict:
+        attr_dict['timeout'] = DEFAULT_TIMEOUT
         
     # set show_output to default if not specified
-    if 'show_output' not in attributes:
-        attributes['show_output'] = DEFAULT_SHOW_OUTPUT
+    if 'show_output' not in attr_dict:
+        attr_dict['show_output'] = DEFAULT_SHOW_OUTPUT
+        
+    if 'include' not in attr_dict:
+        attr_dict['include'] = ''
+    
+    attributes: Attributes = {
+        'number': attr_dict['number'],
+        'name': attr_dict['name'],
+        'points': attr_dict['points'],
+        'type': attr_dict['type'],
+        'target': attr_dict['target'],
+        'show_output': attr_dict['show_output'],
+        'timeout': attr_dict['timeout'],
+        'include': attr_dict['include'],
+        'code': '',
+        'expected_input':'',
+        'expected_output': '',
+        'script_content': '',
+        'approved_includes': []
+        }
     
     return index, attributes
 
@@ -148,7 +191,7 @@ def read_block_of_test(index: int, lines: List[str], filename: str) -> Tuple[int
     
     return index, code
 
-def read_tests(filename: str) -> List[Dict[str,Any]]:
+def read_tests(filename: str) -> List[Attributes]:
     tests = list()
     with open(filename) as f:
         lines = f.readlines()
@@ -156,7 +199,7 @@ def read_tests(filename: str) -> List[Dict[str,Any]]:
     while index < len(lines):
         # expect next lines to be only attributes and values
         index, attributes = read_attributes(index, lines, filename)
-        if not attributes:
+        if index < 0:
             # at end of file
             break
 
@@ -249,7 +292,21 @@ def read_tests(filename: str) -> List[Dict[str,Any]]:
                 print(f'No such file or directory: \'{script_filename_string}\'')
 
         elif type == 'approved_includes':
-            index,line = eat_empty_test_block(index, lines, filename)
+            # go to next line
+            index,line = goto_next_line(index, lines, filename)
+            
+            # expect start of test block
+            if line != BEGIN_TEST_DELIMITER:
+                # filename lineno offset text
+                raise SyntaxError(f'missing expected start of test block: "{BEGIN_TEST_DELIMITER}"', (filename, index+1, 1, line))
+            
+            # go to next line
+            index,line = goto_next_line(index, lines, filename)
+            
+            while line != END_TEST_DELIMITER:
+                attributes['approved_includes'].append(line)
+                index,line = goto_next_line(index, lines, filename)
+            
             tests.append(attributes)
             
         else:
@@ -261,9 +318,9 @@ def read_tests(filename: str) -> List[Dict[str,Any]]:
     
     return tests
 
-def write_unit_test(test: Dict[str,Any]) -> None:
+def write_unit_test(test: Attributes) -> None:
     with open('unit_test.cpp', 'wt') as f:
-        if 'include' in test:
+        if len(test['include']) > 0:
             for include in test['include'].split():
                 f.write(f'#include {include}\n')
         f.write('#include "cs12x_test.h"\n')
@@ -276,9 +333,9 @@ def write_unit_test(test: Dict[str,Any]) -> None:
         f.write('    return pass ? 0 : 1;\n')
         f.write('}\n')
 
-def write_performance_test(test: Dict[str,Any]) -> None:
+def write_performance_test(test: Attributes) -> None:
     with open('performance_test.cpp', 'wt') as f:
-        if 'include' in test:
+        if len(test['include']) > 0:
             for include in test['include'].split():
                 f.write(f'#include {include}\n')
         f.write('#include "cs12x_test.h"\n')
@@ -294,21 +351,28 @@ def write_performance_test(test: Dict[str,Any]) -> None:
         f.write('}\n')
 
 # Writes out the input and output strings
-def write_io_test(test: Dict[str,Any]) -> None:
+def write_io_test(test: Attributes) -> None:
     with open('input.txt', 'wt') as f:
         f.write(test['expected_input'])
         f.write("\n")
     with open('output.txt', 'wt') as f:
         f.write(test['expected_output'])
 
-def write_script_test(test: Dict[str,Any]) -> None:
+def write_script_test(test: Attributes) -> None:
     with open('script.sh', 'wt') as f:
         f.write(test['script_content'])
 
-def compile_unit_test() -> Tuple[bool,str]:
+def write_approved_includes_test(test: Attributes) -> None:
+    test['script_content'] = f"./approved_includes.sh {test['target']} {' '.join(test['approved_includes'])}"
+    write_script_test(test)
+
+def compile_X_test(name: str, src: str = '') -> Tuple[bool,str]:
     CXX = 'g++'
-    FLAGS = '-std=c++17 -g -o unit_test'
-    SRC = 'unit_test.cpp'
+    FLAGS = f'-std=c++17 -g -o {name}'
+    if src:
+        SRC = src
+    else:
+        SRC = f'{name}.cpp'
     compile_cmd = '{} {} {} 2>&1'.format(CXX, FLAGS, SRC)
     p = popen(compile_cmd)
     try:
@@ -316,38 +380,21 @@ def compile_unit_test() -> Tuple[bool,str]:
     except Exception as e:
         output = str(e)
     ret = p.close()
-    # print('ret = {}'.format(ret))
     return ret == None, output
+
+def compile_unit_test() -> Tuple[bool,str]:
+    return compile_X_test('unit_test')
 
 def compile_performance_test() -> Tuple[bool,str]:
-    CXX = 'g++'
-    FLAGS = '-std=c++17 -g -o performance_test'
-    SRC = 'performance_test.cpp'
-    compile_cmd = '{} {} {} 2>&1'.format(CXX, FLAGS, SRC)
-    p = popen(compile_cmd)
-    try:
-        output = p.read()
-    except Exception as e:
-        output = str(e)
-    ret = p.close()
-    # print('ret = {}'.format(ret))
-    return ret == None, output
+    return compile_X_test('performance_test')
 
 def compile_io_test(src_target) -> Tuple[bool,str]:
-    CXX = 'g++'
-    FLAGS = '-std=c++17 -g -o io_test'
-    SRC = src_target
-    compile_cmd = '{} {} {} 2>&1'.format(CXX, FLAGS, SRC)
-    p = popen(compile_cmd)
-    try:
-        output = p.read()
-    except Exception as e:
-        output = str(e)
-    ret = p.close()
-    # print('ret = {}'.format(ret))
-    return ret == None, output
+    return compile_X_test('io_test', src_target)
 
 def compile_script_test() -> Tuple[bool,str]:
+    return True, ""
+    
+def compile_approved_includes_test() -> Tuple[bool,str]:
     return True, ""
     
 def run_unit_test(timeout: float) -> Tuple[bool,str]:
@@ -431,7 +478,8 @@ def run_script_test(timeout: float) -> Tuple[bool,str,float]:
             with open('./OUTPUT', 'r') as file:
                 output_string = file.read()
         else:
-            print('[WARNING]: OUTPUT does not exist.')
+            print('[FATAL]: OUTPUT does not exist.')
+            raise FileNotFoundError('./OUTPUT')
 
         if os.path.exists('./DEBUG'):
             with open('./DEBUG', 'r') as file:
@@ -445,13 +493,16 @@ def run_script_test(timeout: float) -> Tuple[bool,str,float]:
 
     return (score > 0.0), debug_string, score
 
+def run_approved_includes_test(timeout: float) -> Tuple[bool,str,float]:
+    return run_script_test(timeout)
+
 def check_approved_includes(target: str, approved_includes: List[str]) -> Tuple[bool,str]:
     
     cmd = ["bash"]
     #print('cmd = {}'.format(cmd))
     p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     # p = popen(cmd)
-    output, err = p.communicate("./approved_includes.sh {} {} 2>&1".format(target, ' '.join(approved_includes)).encode('utf-8'))
+    output, err = p.communicate("./approved_includes.sh {} {}".format(target, ' '.join(approved_includes)).encode('utf-8'))
     output_str = output.decode('utf-8')
     err_str = err.decode('utf-8')
     # try:
@@ -487,8 +538,8 @@ def main(filename) -> Result:
     tests = read_tests(filename)
     possible = 0.0
     total_time = 0.0
+    unapproved_includes = False
     for test in tests:
-        point_multiplier = 100.0
         max_points = float(test['points'])
         possible += max_points
         print(f"test: {test['name']}")
@@ -499,14 +550,11 @@ def main(filename) -> Result:
         elif test['type'] == 'script':
             write_script_test(test)
         elif test['type'] == 'approved_includes':
-            # do nothing
-            # these tests just make sure all files show up in targets
-            print('[PENDING]\n')
-            continue
+            write_approved_includes_test(test)
         elif test['type'] == 'performance':
             write_performance_test(test)
         else:
-            print("Unsupported test")
+            print("[INFO] Unsupported test")
             continue
         compile_output, run_output = '',''
         if test['type'] == 'unit':
@@ -517,12 +565,16 @@ def main(filename) -> Result:
             compiles, compile_output = compile_script_test()
         elif test['type'] == 'performance':
             compiles, compile_output = compile_performance_test()
+        elif test['type'] == 'approved_includes':
+            compiles, compile_output = compile_approved_includes_test()
         else:
-            print("Unsupported test")
+            print("[INFO] Unsupported test")
             continue
         if compiles:
-            time_start = time()
+            runs, run_output, point_multiplier = True, '', 100.0
+            point_multiplier = 100.0
             timeout = float(test['timeout'])
+            time_start = time()
             if test['type'] == 'unit':
                 runs, run_output = run_unit_test(timeout)
             elif test['type'] == 'i/o':
@@ -531,28 +583,31 @@ def main(filename) -> Result:
                 runs, run_output, point_multiplier = run_script_test(timeout)
             elif test['type'] == 'performance':
                 runs, run_output = run_performance_test(timeout)
+            elif test['type'] == 'approved_includes':
+                runs, run_output, point_multiplier = run_approved_includes_test(timeout)
+                if not runs:
+                    unapproved_includes = True
             else:
-                print("Unsupported test")
+                print("[INFO] Unsupported test")
                 continue
             time_end = time()
             total_time += time_end - time_start
             
             if runs:
-                
                 if point_multiplier < 100.0:
-                    print("[PASS - PARTIAL] ran correctly, but only recieved {0:2}% partial credit\n".format((point_multiplier)))    
+                    print(f"[PASS - PARTIAL] ran correctly, but only recieved {point_multiplier:0.2f}% partial credit\n")    
                 else:
                     print('[PASS] ran correctly\n')
                 points = max_points * (point_multiplier / 100.0)
             else:
                 print('[FAIL] incorrect behavior\n')
-                print(run_output.strip())
-                print()
+                #print(run_output.strip())
+                #print()
                 points = 0
             
         else:
             print('[FAIL] failed to compile\n')
-            print(compile_output)
+            #print(compile_output)
             points = 0
         
         result_score += points
@@ -563,9 +618,13 @@ def main(filename) -> Result:
             'score': points,
             'max_score': max_points,
             'output': '',
+            'tags': None,
+            'visibility': None,
+            'extra_data': None
             }
-        has_compile_output = len(compile_output) > 0
+        
         if test['show_output'].lower() == 'true':
+            has_compile_output = len(compile_output) > 0
             if has_compile_output:
                 test_result['output'] += compile_output.strip()
             if len(run_output) > 0:
@@ -577,6 +636,7 @@ def main(filename) -> Result:
         
         test_results.append(test_result)
     
+    '''
     targets = set()
     for test in tests:
         targets.add(test['target'])
@@ -600,6 +660,9 @@ def main(filename) -> Result:
             'score': 0,
             'max_score': 0,
             'output': output.strip(),
+            'tags': None,
+            'visibility': None,
+            'extra_data': None
             }
         if (forbidden_found):
             print('[FAIL] found a forbidden include\n')
@@ -611,11 +674,12 @@ def main(filename) -> Result:
             print('[PASS] all includes are approved\n')
         test_results.append(ai_test_result)
         result_score += ai_test_result['score']
+    '''
     
     result_output = ''
     if unapproved_includes:
         result_score = 0
-        results['output'] = 'Forbidden includes are used, so we set your current submission score to 0.0'
+        result_output = 'Forbidden includes are used, so we set your current submission score to 0.0'
         earned = 0
     
     # DISABLE SCORING FROM AUTOGRADER
@@ -648,7 +712,7 @@ def main(filename) -> Result:
     
     results: Result = {
         'score': result_score,
-        'output': output,
+        'output': result_output,
         'execution_time': total_time,
         'visibility': 'visible',
         'stdout_visibility': 'visible',
