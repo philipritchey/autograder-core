@@ -1,11 +1,16 @@
 /*
-@number: 0
+@number: 00
 @name: approved includes for code.cpp
 @points: 0
 @type: approved_includes
 @target: code.cpp
 */
-<test/>
+<test>
+cstddef
+iostream
+stdexcept
+code.h
+</test>
 
 /*
 @number: 0
@@ -14,7 +19,11 @@
 @type: approved_includes
 @target: code.h
 */
-<test/>
+<test>
+cstddef
+iostream
+stdexcept
+</test>
 
 /*
 @number: 0
@@ -23,7 +32,12 @@
 @type: approved_includes
 @target: code_tests.cpp
 */
-<test/>
+<test>
+cstddef
+iostream
+stdexcept
+code.h
+<test>
 
 /*
 @number: 1
@@ -34,7 +48,6 @@
 @target: code.cpp
 */
 <test>
-  script
   script_tests/code_compiles.sh
 </test>
 
@@ -47,7 +60,6 @@
 @target: code.cpp
 */
 <test>
-  script
   script_tests/code_memory_errors.sh
 </test>
 
@@ -60,7 +72,6 @@
 @target: code_tests.cpp
 */
 <test>
-  script
   script_tests/code_coverage.sh
 </test>
 

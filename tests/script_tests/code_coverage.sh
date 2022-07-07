@@ -14,9 +14,9 @@ target_h="code.h"
 
 echo 0 > OUTPUT
 
-SOURCE=("$target_cpp" "$tests")
-HEADERS=("$target_h")
-FILES=("${SOURCE[@]}" "${HEADERS[@]}")
+SOURCE=( $target_cpp $tests)
+HEADERS=( $target_h )
+FILES=( ${SOURCE[@]} ${HEADERS[@]} )
 
 {
   for file in "${FILES[@]}"; do
