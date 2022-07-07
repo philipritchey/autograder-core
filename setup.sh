@@ -8,7 +8,7 @@ apt-get -y upgrade
 #apt-get -y install apt-utils valgrind
 
 # python3.8
-#apt install software-properties-common
+#apt-get install software-properties-common
 #add-apt-repository -y ppa:deadsnakes/ppa
 #apt-get -y install python3.8
 
