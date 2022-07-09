@@ -607,7 +607,7 @@ def main(filename) -> Result:
             
         else:
             print('[FAIL] failed to compile\n')
-            print(compile_output)
+            #print(compile_output)
             points = 0
         
         result_score += points
