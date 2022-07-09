@@ -1,5 +1,6 @@
 fail () {
-  printf "FAIL\n"
+  printf "FAIL\n" >> DEBUG
+  echo 0 > OUTPUT
   exit 1
 }
 
@@ -12,30 +13,26 @@ tests="code_tests.cpp"
 target_cpp="code.cpp"
 target_h="code.h"
 
-echo 0 > OUTPUT
-
 SOURCE=( $target_cpp $tests)
 HEADERS=( $target_h )
 FILES=( ${SOURCE[@]} ${HEADERS[@]} )
 
-{
-  for file in "${FILES[@]}"; do
-    printf "%s exists? " "$file"
-    if [ -f "$file" ]; then
-      printf "OK\n"
-    else
-      printf "NO\n"
-      fail
-    fi
-  done
-} >> DEBUG
+for file in "${FILES[@]}"; do
+printf "%s exists? " "$file"  >> DEBUG
+if [ -f "$file" ]; then
+  printf "OK\n"  >> DEBUG
+else
+  printf "NO\n" >> DEBUG
+  fail
+fi
+done
 
 # compile and execute code with coverage
 if g++ -std=c++17 --coverage "${SOURCE[@]}" >>DEBUG 2>&1; then
   echo -e "\nCompiles without error\n" >> DEBUG
 else
   echo -e "\nCompile-time errors" >> DEBUG
-	fail
+  fail
 fi
 
 # clean up before running student code
@@ -72,8 +69,8 @@ typeset -i coverage=$(cat OUTPUT)
 
 # TODO(you): update this (currently threshhold for credit is 90% coverage)
 if [ $coverage -lt 90 ]; then
-  echo "FAIL: < 90% coverage" >> DEBUG
-  echo "0" > OUTPUT
+  echo "< 90% coverage" >> DEBUG
+  fail
 else
-  echo "100" > OUTPUT
+  echo 100 > OUTPUT
 fi
