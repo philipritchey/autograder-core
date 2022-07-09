@@ -714,6 +714,8 @@ def main(filename) -> Result:
     print('# points: {:6.2f} / {:6.2f} #'.format(result_score,possible))
     print('#                         #')
     print('###########################')
+    if unapproved_includes:
+        print('!!! ZERO DUE TO UNAPPROVED INCLUDES')
     
     results: Result = {
         'score': result_score,
