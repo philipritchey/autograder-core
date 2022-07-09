@@ -607,7 +607,7 @@ def main(filename) -> Result:
             
         else:
             print('[FAIL] failed to compile\n')
-            #print(compile_output)
+            print(compile_output)
             points = 0
         
         result_score += points
@@ -707,11 +707,11 @@ def main(filename) -> Result:
     t = int(result_score * 10000 + 0.5)
     result_score = t / 10000
     
-    print('###############################')
-    print('#                             #')
-    print('# points: {:8.4f} / {:8.4f} #'.format(result_score,possible))
-    print('#                             #')
-    print('###############################')
+    print('###########################')
+    print('#                         #')
+    print('# points: {:6.2f} / {:6.2f} #'.format(result_score,possible))
+    print('#                         #')
+    print('###########################')
     
     results: Result = {
         'score': result_score,
