@@ -3,6 +3,7 @@
 solution/
 results.json
 testbox/
+.vscode
 
 # Prerequisites
 *.d
