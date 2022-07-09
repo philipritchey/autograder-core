@@ -683,7 +683,6 @@ def main(filename) -> Result:
     if unapproved_includes:
         result_score = 0
         result_output = 'Forbidden includes are used, so we set your current submission score to 0.0'
-        earned = 0
     
     # DISABLE SCORING FROM AUTOGRADER
     # results_score = 0
