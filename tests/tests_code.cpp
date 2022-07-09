@@ -3,6 +3,7 @@
 @name: approved includes for code.cpp
 @points: 0
 @type: approved_includes
+@show_output: True
 @target: code.cpp
 */
 <test>
@@ -17,6 +18,7 @@ code.h
 @name: approved includes for code.h
 @points: 0
 @type: approved_includes
+@show_output: True
 @target: code.h
 */
 <test>
@@ -30,6 +32,7 @@ stdexcept
 @name: approved includes for code_tests.cpp
 @points: 0
 @type: approved_includes
+@show_output: True
 @target: code_tests.cpp
 */
 <test>
