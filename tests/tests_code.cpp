@@ -40,7 +40,7 @@ cstddef
 iostream
 stdexcept
 code.h
-<test>
+</test>
 
 /*
 @number: 1
