@@ -5,6 +5,11 @@ results.json
 testbox/
 .vscode
 
+# coverage
+*.gcno
+*.gcda
+*.gcov
+
 # Prerequisites
 *.d
 
