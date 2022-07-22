@@ -1,6 +1,7 @@
 *.zip
 *deploy_key*
 solution/
+starter/
 results.json
 testbox/
 .vscode
