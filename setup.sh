@@ -48,6 +48,8 @@ ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
 # TODO(you)
 #
 # set your username and repository for the assignment-specific content (i.e. tests)
+username=your_username
+repository=repository_for_assignment
 git clone git@assignment:$username/$repository.git /autograder/autograder-code
 git clone git@core:CSCE-12x/autograder-core.git /autograder/autograder-core
 
