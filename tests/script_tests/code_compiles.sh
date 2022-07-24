@@ -6,9 +6,9 @@ fail () {
 echo 0 > OUTPUT
 
 # TODO(you): update with necessary source and header files
-SOURCE=( code.cpp code_tests.cpp)
-HEADERS=( code.h)
-FILES=("${SOURCE[@]}" "${HEADERS[@]}")
+SOURCE=( code.cpp code_tests.cpp )
+HEADERS=( code.h )
+FILES=( "${SOURCE[@]}" "${HEADERS[@]}" )
 
 for file in "${FILES[@]}"; do
 printf "%s exists? " "$file" >> DEBUG
