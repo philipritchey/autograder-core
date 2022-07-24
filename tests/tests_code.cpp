@@ -1,7 +1,7 @@
 /*
 @number: 00
 @name: approved includes for code.cpp
-@points: 0
+@points: 1
 @type: approved_includes
 @show_output: True
 @target: code.cpp
@@ -16,7 +16,7 @@ code.h
 /*
 @number: 0
 @name: approved includes for code.h
-@points: 0
+@points: 1
 @type: approved_includes
 @show_output: True
 @target: code.h
@@ -30,7 +30,7 @@ stdexcept
 /*
 @number: 0
 @name: approved includes for code_tests.cpp
-@points: 0
+@points: 1
 @type: approved_includes
 @show_output: True
 @target: code_tests.cpp
@@ -45,7 +45,7 @@ code.h
 /*
 @number: 1
 @name: code compiles without errors or warnings
-@points: 10
+@points: 1
 @show_output: True
 @type: script
 @target: code.cpp
@@ -57,7 +57,7 @@ code.h
 /*
 @number: 2
 @name: memory errors
-@points: 10
+@points: 1
 @show_output: True
 @type: script
 @target: code.cpp
@@ -69,7 +69,7 @@ code.h
 /*
 @number: 3
 @name: test coverage
-@points: 10
+@points: 1
 @show_output: True
 @type: script
 @target: code_tests.cpp
@@ -81,7 +81,7 @@ code.h
 /*
 @number: 4
 @name: example
-@points: 5
+@points: 1
 @show_output: True
 @type: unit
 @target: code.cpp
