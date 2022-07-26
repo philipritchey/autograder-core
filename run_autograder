@@ -50,7 +50,7 @@ fi
 # TODO(you): list required submission files in src_list array
 #              e.g. src_list=( main.cpp thing.cpp thing.h test_thing.cpp )
 #
-src_list=()
+src_list=( code.cpp code.h code_tests.cpp )
 for file in "${src_list[@]}"; do
   if [ ! -f $SUBMISSION/"$file" ]; then
     echo "[FATAL] $file does not exist. exiting."
@@ -75,6 +75,7 @@ fi
 # copy core test runners to testbox
 cp $AUTOGRADER_CORE_REPO/run_tests.py $TESTBOX/
 cp $AUTOGRADER_CORE_REPO/tests/approved_includes.sh $TESTBOX/
+cp $AUTOGRADER_CORE_REPO/tests/coverage.sh $TESTBOX/
 cp $AUTOGRADER_CORE_REPO/tests/cs12x_test.h $TESTBOX/
 
 # copy tests to testbox

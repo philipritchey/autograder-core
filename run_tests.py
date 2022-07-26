@@ -9,6 +9,8 @@ from sys import argv
 from time import time
 import json
 
+from attr import attrib
+
 # TODO: move configuration stuff to configuration file (and let it be assignment-specific)
 BEGIN_TEST_DELIMITER = '<test>'
 END_TEST_DELIMITER = '</test>'
@@ -27,13 +29,13 @@ def goto_next_line(index: int, lines: List[str], filename: str) -> Tuple[int, st
     if index >= len(lines):
         raise unexpected_end_of_input(filename, index, lines[-1])
     line = lines[index].strip()
-    
+
     # skip blank lines
     index =  skip_blank_lines(index, lines)
     line = lines[index].strip()
-    
+
     return index, line
-    
+
 def skip_blank_lines(index: int, lines: List[str]) -> int:
     while index < len(lines) and not lines[index].strip():
         index += 1
@@ -42,26 +44,26 @@ def skip_blank_lines(index: int, lines: List[str]) -> int:
 def eat_block_of_test(index, lines, filename) -> Tuple[int,str]:
     # go to next line
     index,line = goto_next_line(index, lines, filename)
-    
+
     # expect start of test block
     if line == EMPTY_TEST_BLOCK:
         return index,line
-    
+
     if line != BEGIN_TEST_DELIMITER:
         # filename lineno offset text
         raise SyntaxError(f'missing expected start of test block: "{BEGIN_TEST_DELIMITER}"', (filename, index+1, 1, line))
-    
+
     # eat until end of test block
     while line != END_TEST_DELIMITER:
         # go to next line
         index, line = goto_next_line(index, lines, filename)
-            
+
     return index,line
-    
+
 def eat_empty_test_block(index, lines, filename) -> Tuple[int,str]:
     # go to next line
     index,line = goto_next_line(index, lines, filename)
-    
+
     # expect empty test block
     if line == BEGIN_TEST_DELIMITER:
         index,line = goto_next_line(index, lines, filename)
@@ -87,7 +89,7 @@ class Attributes(TypedDict):
     expected_output: str
     script_content: str
     approved_includes: List[str]
-    
+
 
 def read_attributes(index: int, lines: List[str], filename: str) -> Tuple[int, Optional[Attributes]]:
     # skip blank lines
@@ -96,7 +98,7 @@ def read_attributes(index: int, lines: List[str], filename: str) -> Tuple[int, O
         # at end of file
         return -1, None
     line = lines[index].strip()
-    
+
     # expect start of multiline comment
     if line != '/*':
         # filename lineno offset text
@@ -134,35 +136,35 @@ def read_attributes(index: int, lines: List[str], filename: str) -> Tuple[int, O
             attr_dict['timeout'] = timeout
         else:
             attr_dict[tag] = value
-        
+
         # go to next line
         index, line = goto_next_line(index, lines, filename)
-        
+
     # expect end of multiline comment
     if line != '*/':
         # filename lineno offset text
         raise SyntaxError('missing expected end of multiline comment: "*/"', (filename, index+1, 1, line))
-    
+
     # verify all required attributes are present
     required_attributes = ('name', 'points', 'type', 'target', 'number')
     for attribute in required_attributes:
         if attribute not in attr_dict:
             raise KeyError(f'({filename}:{index+1}) missing required attribute: {attribute}')
-            
+
     # set timeouts to default if not specified
     if 'timeout' not in attr_dict:
         attr_dict['timeout'] = DEFAULT_TIMEOUT
-        
+
     # set show_output to default if not specified
     if 'show_output' not in attr_dict:
         if attr_dict['type'] == 'approved_includes':
             attr_dict['show_output'] = 'True'
         else:
             attr_dict['show_output'] = DEFAULT_SHOW_OUTPUT
-        
+
     if 'include' not in attr_dict:
         attr_dict['include'] = ''
-    
+
     attributes: Attributes = {
         'number': attr_dict['number'],
         'name': attr_dict['name'],
@@ -178,7 +180,7 @@ def read_attributes(index: int, lines: List[str], filename: str) -> Tuple[int, O
         'script_content': '',
         'approved_includes': []
         }
-    
+
     return index, attributes
 
 def read_block_of_test(index: int, lines: List[str], filename: str) -> Tuple[int, str]:
@@ -186,12 +188,12 @@ def read_block_of_test(index: int, lines: List[str], filename: str) -> Tuple[int
     got_code = True
     while got_code:
         index,line = goto_next_line(index, lines, filename)
-        
+
         if line != END_TEST_DELIMITER:
             code += line + '\n'
         else:
             got_code = False
-    
+
     return index, code
 
 def read_tests(filename: str) -> List[Attributes]:
@@ -210,16 +212,16 @@ def read_tests(filename: str) -> List[Attributes]:
         if type == 'unit' or type == 'performance':
             # go to next line
             index,line = goto_next_line(index, lines, filename)
-            
+
             # expect start of test block
             if line != BEGIN_TEST_DELIMITER:
                 # filename lineno offset text
                 raise SyntaxError(f'missing expected start of test block: "{BEGIN_TEST_DELIMITER}"', (filename, index+1, 1, line))
-            
+
             # expect next lines to be unit test code
-            index, code = read_block_of_test(index, lines, filename)      
+            index, code = read_block_of_test(index, lines, filename)
             attributes['code'] = code
-            
+
             tests.append(attributes)
 
         elif type == 'i/o':
@@ -227,14 +229,14 @@ def read_tests(filename: str) -> List[Attributes]:
             index,line = goto_next_line(index, lines, filename)
             if line != BEGIN_TEST_DELIMITER:
                 # filename lineno offset text
-                raise SyntaxError(f'missing expected start of i/o block: "{BEGIN_TEST_DELIMITER}"', (filename, index+1, 1, line))
+                raise SyntaxError(f'missing expected start of test block: "{BEGIN_TEST_DELIMITER}"', (filename, index+1, 1, line))
 
             # expect start of code block
             index,line = goto_next_line(index, lines, filename)
             if line != 'input':
                 # filename lineno offset text
                 raise SyntaxError('missing expected start of i/o input section: "input"', (filename, index+1, 1, line))
-            
+
             # go to next line
             index,line = goto_next_line(index, lines, filename)
             input_filename_string = line
@@ -244,7 +246,7 @@ def read_tests(filename: str) -> List[Attributes]:
             if line != 'output':
                 # filename lineno offset text
                 raise SyntaxError('missing expected start of i/o output section: "output"', (filename, index+1, 1, line))
-            
+
             index,line = goto_next_line(index, lines, filename)
             output_filename_string = line
             # print("Output filename: " + output_filename_string)
@@ -252,7 +254,7 @@ def read_tests(filename: str) -> List[Attributes]:
             index,line = goto_next_line(index, lines, filename)
             if line != END_TEST_DELIMITER:
                 # filename lineno offset text
-                raise SyntaxError(f'missing expected end of i/o block: "{END_TEST_DELIMITER}"', (filename, index+1, 1, line))
+                raise SyntaxError(f'missing expected end of test block: "{END_TEST_DELIMITER}"', (filename, index+1, 1, line))
 
 
             try:
@@ -260,7 +262,7 @@ def read_tests(filename: str) -> List[Attributes]:
                     attributes['expected_input'] = f.read()
             except FileNotFoundError:
                 raise SyntaxError(f'input file not found: {input_filename_string}', (filename, index+1, 1, line))
-                
+
             try:
                 with open(output_filename_string, 'r') as f:
                     attributes['expected_output'] = f.read()
@@ -274,7 +276,7 @@ def read_tests(filename: str) -> List[Attributes]:
             index,line = goto_next_line(index, lines, filename)
             if line != BEGIN_TEST_DELIMITER:
                 # filename lineno offset text
-                raise SyntaxError(f'missing expected start of script block: "{BEGIN_TEST_DELIMITER}"', (filename, index+1, 1, line))
+                raise SyntaxError(f'missing expected start of test block: "{BEGIN_TEST_DELIMITER}"', (filename, index+1, 1, line))
 
             # go to next line
             index,line = goto_next_line(index, lines, filename)
@@ -284,12 +286,12 @@ def read_tests(filename: str) -> List[Attributes]:
             index,line = goto_next_line(index, lines, filename)
             if line != END_TEST_DELIMITER:
                 # filename lineno offset text
-                raise SyntaxError(f'missing expected end of script block: "{END_TEST_DELIMITER}"', (filename, index+1, 1, line))
+                raise SyntaxError(f'missing expected end of test block: "{END_TEST_DELIMITER}"', (filename, index+1, 1, line))
 
             try:
                 with open(script_filename_string, 'r') as f:
                     attributes['script_content'] = f.read()
-                
+
                 tests.append(attributes)
             except FileNotFoundError:
                 print(f'No such file or directory: \'{script_filename_string}\'')
@@ -297,37 +299,81 @@ def read_tests(filename: str) -> List[Attributes]:
         elif type == 'approved_includes':
             # go to next line
             index,line = goto_next_line(index, lines, filename)
-            
+
             # expect start of test block
             if line != BEGIN_TEST_DELIMITER:
                 # filename lineno offset text
                 raise SyntaxError(f'missing expected start of test block: "{BEGIN_TEST_DELIMITER}"', (filename, index+1, 1, line))
-            
+
             # go to next line
             index,line = goto_next_line(index, lines, filename)
-            
+
             while line != END_TEST_DELIMITER:
                 attributes['approved_includes'].append(line)
                 index,line = goto_next_line(index, lines, filename)
-            
+
             tests.append(attributes)
-            
+
+        elif type == 'coverage':
+            # go to next line
+            index,line = goto_next_line(index, lines, filename)
+
+            # expect start of test block
+            if line != BEGIN_TEST_DELIMITER:
+                # filename lineno offset text
+                raise SyntaxError(f'missing expected start of test block: "{BEGIN_TEST_DELIMITER}"', (filename, index+1, 1, line))
+
+
+            source = []
+            target = ''
+            main = ''
+            for i in range(3):
+                # go to next line
+                index,line = goto_next_line(index, lines, filename)
+
+                tag, values = line.split(':')
+                tag = tag.strip()
+
+                if tag == 'source':
+                    source = values.split()
+                elif tag == 'target':
+                    target = values.strip()
+                elif tag == 'main':
+                    main = values.strip()
+                else:
+                    # filename lineno offset text
+                    raise SyntaxError(f'unexpected tag ({tag}) in coverage test', (filename, index+1, 1, line))
+            if not (target and main):
+                # filename lineno offset text
+                raise SyntaxError(f'missing expected main and/or target in coverage test', (filename, index+1, 1, line))
+
+            index,line = goto_next_line(index, lines, filename)
+            if line != END_TEST_DELIMITER:
+                # filename lineno offset text
+                raise SyntaxError(f'missing expected end of test block: "{END_TEST_DELIMITER}"', (filename, index+1, 1, line))
+
+            attributes['target'] = target
+            attributes['include'] = main
+            attributes['approved_includes'] = source
+
+            tests.append(attributes)
+
         else:
             #raise ValueError('undefined test type: {}'.format(type))
             print('WARNING: undefined test type: {}.  this one will be ignored: {}'.format(type, attributes['name']))
             index,line = eat_block_of_test(index, lines, filename)
-                
+
         index += 1
-    
+
     return tests
 
 def write_unit_test(test: Attributes) -> None:
     with open('unit_test.cpp', 'wt') as f:
-        f.write(f"#include \"{test['target']}\"\n\n")    
+        f.write(f"#include \"{test['target']}\"\n\n")
         if len(test['include']) > 0:
             for include in test['include'].split():
                 f.write(f'#include {include}\n')
-        f.write('#include "cs12x_test.h"\n')    
+        f.write('#include "cs12x_test.h"\n')
 
         f.write('int main() {\n')
         f.write('    INIT_TEST;\n')
@@ -369,6 +415,10 @@ def write_approved_includes_test(test: Attributes) -> None:
     test['script_content'] = f"./approved_includes.sh {test['target']} {' '.join(test['approved_includes'])}"
     write_script_test(test)
 
+def write_coverage_test(test: Attributes) -> None:
+    test['script_content'] = f"./coverage.sh {test['target']} {test['include']} {' '.join(test['approved_includes'])}"
+    write_script_test(test)
+
 def compile_X_test(name: str, src: str = '') -> Tuple[bool,str]:
     CXX = 'g++'
     FLAGS = f'-std=c++17 -g -o {name}'
@@ -396,10 +446,13 @@ def compile_io_test(src_target) -> Tuple[bool,str]:
 
 def compile_script_test() -> Tuple[bool,str]:
     return True, ""
-    
+
 def compile_approved_includes_test() -> Tuple[bool,str]:
     return True, ""
-    
+
+def compile_coverage_test() -> Tuple[bool,str]:
+    return True, ""
+
 def run_unit_test(timeout: float) -> Tuple[bool,str]:
     run_cmd = ["./unit_test", "2>&1"]
     p = subprocess.Popen(run_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -499,8 +552,11 @@ def run_script_test(timeout: float) -> Tuple[bool,str,float]:
 def run_approved_includes_test(timeout: float) -> Tuple[bool,str,float]:
     return run_script_test(timeout)
 
+def run_coverage_test(timeout: float) -> Tuple[bool,str,float]:
+    return run_script_test(timeout)
+
+# TODO(pcr): this is no longer used
 def check_approved_includes(target: str, approved_includes: List[str]) -> Tuple[bool,str]:
-    
     cmd = ["bash"]
     #print('cmd = {}'.format(cmd))
     p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -541,7 +597,8 @@ def main(filename) -> Result:
     tests = read_tests(filename)
     possible = 0.0
     total_time = 0.0
-    unapproved_includes = False
+    unapproved_includes = True
+    sufficient_coverage = False
     for test in tests:
         max_points = float(test['points'])
         possible += max_points
@@ -556,6 +613,8 @@ def main(filename) -> Result:
             write_approved_includes_test(test)
         elif test['type'] == 'performance':
             write_performance_test(test)
+        elif test['type'] == 'coverage':
+            write_coverage_test(test)
         else:
             print("[INFO] Unsupported test")
             continue
@@ -570,6 +629,8 @@ def main(filename) -> Result:
             compiles, compile_output = compile_performance_test()
         elif test['type'] == 'approved_includes':
             compiles, compile_output = compile_approved_includes_test()
+        elif test['type'] == 'coverage':
+            compiles, compile_output = compile_coverage_test()
         else:
             print("[INFO] Unsupported test")
             continue
@@ -589,17 +650,21 @@ def main(filename) -> Result:
                 runs, run_output = run_performance_test(timeout)
             elif test['type'] == 'approved_includes':
                 runs, run_output, point_multiplier = run_approved_includes_test(timeout)
-                if not runs:
-                    unapproved_includes = True
+                if runs:
+                    unapproved_includes = False
+            elif test['type'] == 'coverage':
+                runs, run_output, point_multiplier = run_coverage_test(timeout)
+                if runs:
+                    sufficient_coverage = True
             else:
                 print("[INFO] Unsupported test")
                 continue
             time_end = time()
             total_time += time_end - time_start
-            
+
             if runs:
                 if point_multiplier < 100.0:
-                    print(f"[PASS - PARTIAL] ran correctly, but only recieved {point_multiplier:0.2f}% partial credit\n")    
+                    print(f"[PASS - PARTIAL] ran correctly, but only recieved {point_multiplier:0.2f}% partial credit\n")
                 else:
                     print('[PASS] ran correctly\n')
                 points = max_points * (point_multiplier / 100.0)
@@ -608,14 +673,14 @@ def main(filename) -> Result:
                 #print(run_output.strip())
                 #print()
                 points = 0
-            
+
         else:
             print('[FAIL] failed to compile\n')
             failed_to_compile = True
             points = 0
-        
+
         result_score += points
-        
+
         test_result: TestResult = {
             'number': test['number'],
             'name': test['name'],
@@ -626,7 +691,7 @@ def main(filename) -> Result:
             'visibility': None,
             'extra_data': None
             }
-        
+
         if test['show_output'].lower() == 'true':
             has_compile_output = len(compile_output) > 0
             if has_compile_output:
@@ -639,19 +704,19 @@ def main(filename) -> Result:
             if failed_to_compile:
                 test_result['output']  += 'Failed to compile.\n'
             test_result['output'] = 'Output is intentionally hidden'
-            
-            
-        
+
+
+
         test_results.append(test_result)
-    
+
     '''
     targets = set()
     for test in tests:
         targets.add(test['target'])
-    
+
     # TODO: integrate approved includes test into standard test processing (above)
-    unapproved_includes = False  
-    for target in targets: 
+    unapproved_includes = False
+    for target in targets:
         print(f'test: approved includes for {target}')
         list_of_approved_includes = list()
         try:
@@ -660,7 +725,7 @@ def main(filename) -> Result:
                     list_of_approved_includes.append(line.strip())
         except FileNotFoundError:
             print('[WARNING] approved_includes_{} not found: assuming default deny all'.format(target))
-        
+
         forbidden_found, output = check_approved_includes(target, list_of_approved_includes)
         ai_test_result: TestResult = {
             'number':'00',
@@ -683,17 +748,21 @@ def main(filename) -> Result:
         test_results.append(ai_test_result)
         result_score += ai_test_result['score']
     '''
-    
+
     result_output = ''
     if unapproved_includes:
         result_score = 0
-        result_output = 'Forbidden includes are used, so we set your current submission score to 0.0'
-    
+        result_output += 'Forbidden includes are used, your current submission score is 0.0\n'
+
+    if not sufficient_coverage:
+        result_score = 0
+        result_output += 'Insufficient test coverage, so your current submission score is 0.0\n'
+
     # DISABLE SCORING FROM AUTOGRADER
     # results_score = 0
-    
+
     #results['execution_time'] = total_time
-    
+
     #results['visibility'] = 'visible'
     #results['stdout_visibility'] = 'visible'
     # if results['visibility'] == 'visible' or results['stdout_visibility'] == 'visible':
@@ -710,10 +779,10 @@ def main(filename) -> Result:
     #results['extra_data'] = dict()
     #results['tests'] = test_results
     #results['leaderboard'] = leaderboard
-    
+
     t = int(result_score * 10000 + 0.5)
     result_score = t / 10000
-    
+
     print('###########################')
     print('#                         #')
     print('# points: {:6.2f} / {:6.2f} #'.format(result_score,possible))
@@ -721,7 +790,9 @@ def main(filename) -> Result:
     print('###########################')
     if unapproved_includes:
         print('!!! ZERO DUE TO UNAPPROVED INCLUDES')
-    
+    if not sufficient_coverage:
+        print('!!! ZERO DUE TO INSUFFICIENT COVERAGE')
+
     results: Result = {
         'score': result_score,
         'output': result_output,
@@ -730,9 +801,9 @@ def main(filename) -> Result:
         'stdout_visibility': 'visible',
         'tests': test_results
         }
-    
+
     return results
-    
+
 
 if __name__ == '__main__':
     results_filename = 'results.json'

@@ -61,6 +61,7 @@ code.h
 @show_output: True
 @type: script
 @target: code.cpp
+@timeout: 30
 */
 <test>
   script_tests/code_memory_errors.sh
@@ -73,9 +74,25 @@ code.h
 @show_output: True
 @type: script
 @target: code_tests.cpp
+@timeout: 30
 */
 <test>
   script_tests/code_coverage.sh
+</test>
+
+/*
+@number: 3.new
+@name: test coverage
+@points: 1
+@show_output: True
+@type: coverage
+@target: code_tests.cpp
+@timeout: 30
+*/
+<test>
+  source: code.cpp
+  main: code_tests.cpp
+  target: code.cpp
 </test>
 
 /*
@@ -87,5 +104,28 @@ code.h
 @target: code.cpp
 */
 <test>
-    EXPECT_EQ(foo(867), 5309);
+    EXPECT_FALSE(is_prime(867));
+    EXPECT_TRUE(is_prime(5309));
+    EXPECT_TRUE(is_prime(8675309));
+</test>
+
+/*
+@number: 5
+@name: performance example
+@points: 1
+@show_output: True
+@type: performance
+@target: code.cpp
+@timeout: 30
+*/
+<test>
+    auto start = std::chrono::steady_clock::now();
+    size_t cnt = 1;
+    for (unsigned n = 3; n < 2000000; n++) {
+      if (is_prime(n)) cnt++;
+    }
+    auto end = std::chrono::steady_clock::now();
+    auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    std::cout << "operation took " << microseconds << " µs." << std::endl;
+    std::cout << "  found " << cnt << " primes." << std::endl;
 </test>

@@ -5,7 +5,7 @@ apt-get update
 apt-get -y upgrade
 
 # install dependencies
-#apt-get -y install apt-utils valgrind
+apt-get -y install apt-utils valgrind
 
 # python version check (run_tests.py requires 3.8+)
 typeset -i python3_version=$(python3 --version | cut -d. -f2)

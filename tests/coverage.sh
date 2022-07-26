@@ -1,22 +1,24 @@
+#!/usr/bin/env bash
+
+target=$1
+shift
+main=$1
+shift
+source=( "$@" )
+
+#echo "target: $target"
+#echo "main: $main"
+#echo "source: ${source[@]}"
+
 fail () {
   printf "FAIL\n" >> DEBUG
   echo 0 > OUTPUT
   exit 1
 }
 
-# TODO(you): update this
-# the tests written by the student
-tests="code_tests.cpp"
+FILES=( ${source[@]} $target $main )
 
-# TODO(you): update this
-# the code (single file) being tested
-target_cpp="code.cpp"
-target_h="code.h"
-
-SOURCE=( $target_cpp $tests)
-HEADERS=( $target_h )
-FILES=( ${SOURCE[@]} ${HEADERS[@]} )
-
+# sanity check
 for file in "${FILES[@]}"; do
 printf "%s exists? " "$file"  >> DEBUG
 if [ -f "$file" ]; then
@@ -31,15 +33,12 @@ done
 rm -f *.gcda *.gcno *.gcov
 
 # compile and execute code with coverage
-if g++ -std=c++17 --coverage "${SOURCE[@]}" >>DEBUG 2>&1; then
+if g++ -std=c++17 --coverage "${source[@]}" "$main" >>DEBUG 2>&1; then
   echo -e "\nCompiles without error\n" >> DEBUG
 else
   echo -e "\nCompile-time errors" >> DEBUG
   fail
 fi
-
-# clean up before running student code
-# TODO?
 
 if ./a.out >> DEBUG 2>&1; then
   echo -e "\nRuns without error" >> DEBUG
@@ -48,15 +47,17 @@ else
   fail
 fi
 
-filename="${target_cpp%.*}"
+# TODO(pcr): unfuck this
+# filename actually depends on whether target is .cpp or .h
+filename="${target%.*}"
+#echo "filename: $filename"
 if [ ! -f "$filename.gcda" ]; then
 	echo -e "Unknown FATAL error (a required coverage file was not generated)." >> DEBUG
 	fail
 fi
 
-# TODO(you): update this (use target_cpp or target_h depending on task)
 gcov -mnr "$filename" | \
-	grep -A 2 "$target_cpp" | \
+	grep -A 2 "$target" | \
 	grep "Lines executed:" | \
 	cut -d : -f 2 | \
 	cut -d % -f 1 | \
@@ -70,10 +71,13 @@ gcov -mnr "$filename" | \
 
 typeset -i coverage=$(cat OUTPUT)
 
-# TODO(you): update this (currently threshhold for credit is 90% coverage)
+#echo "coverage: $coverage"
+
 if [ $coverage -lt 90 ]; then
+    echo "100 < 90, huh?"
   echo "< 90% coverage" >> DEBUG
   fail
 else
   echo 100 > OUTPUT
 fi
+
