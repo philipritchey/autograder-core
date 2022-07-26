@@ -545,7 +545,7 @@ def main(filename) -> Result:
     for test in tests:
         max_points = float(test['points'])
         possible += max_points
-        print(f"test: {test['name']}")
+        print(f"test {test['number']}: {test['name']}")
         if test['type'] == 'unit':
             write_unit_test(test)
         elif test['type'] == 'i/o':
@@ -573,6 +573,7 @@ def main(filename) -> Result:
         else:
             print("[INFO] Unsupported test")
             continue
+        failed_to_compile = False
         if compiles:
             runs, run_output, point_multiplier = True, '', 100.0
             point_multiplier = 100.0
@@ -610,7 +611,7 @@ def main(filename) -> Result:
             
         else:
             print('[FAIL] failed to compile\n')
-            #print(compile_output)
+            failed_to_compile = True
             points = 0
         
         result_score += points
@@ -635,7 +636,11 @@ def main(filename) -> Result:
                     test_result['output'] += '\n\n'
                 test_result['output'] += run_output.strip()
         else:
+            if failed_to_compile:
+                test_result['output']  += 'Failed to compile.\n'
             test_result['output'] = 'Output is intentionally hidden'
+            
+            
         
         test_results.append(test_result)
     
