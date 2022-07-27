@@ -323,15 +323,20 @@ def read_tests(filename: str) -> List[Attributes]:
                 # filename lineno offset text
                 raise SyntaxError(f'missing expected start of test block: "{BEGIN_TEST_DELIMITER}"', (filename, index+1, 1, line))
 
-
             source = []
             target = ''
             main = ''
-            for i in range(3):
-                # go to next line
-                index,line = goto_next_line(index, lines, filename)
 
-                tag, values = line.split(':')
+            # go to next line
+            index,line = goto_next_line(index, lines, filename)
+
+            while line != END_TEST_DELIMITER:
+                try:
+                    tag, values = line.split(':')
+                except ValueError:
+                    # filename lineno offset text
+                    raise SyntaxError(f'expected "tag: value" pair', (filename, index+1, 1, line))
+
                 tag = tag.strip()
 
                 if tag == 'source':
@@ -343,14 +348,13 @@ def read_tests(filename: str) -> List[Attributes]:
                 else:
                     # filename lineno offset text
                     raise SyntaxError(f'unexpected tag ({tag}) in coverage test', (filename, index+1, 1, line))
+
+                # go to next line
+                index,line = goto_next_line(index, lines, filename)
+
             if not (target and main):
                 # filename lineno offset text
                 raise SyntaxError(f'missing expected main and/or target in coverage test', (filename, index+1, 1, line))
-
-            index,line = goto_next_line(index, lines, filename)
-            if line != END_TEST_DELIMITER:
-                # filename lineno offset text
-                raise SyntaxError(f'missing expected end of test block: "{END_TEST_DELIMITER}"', (filename, index+1, 1, line))
 
             attributes['target'] = target
             attributes['include'] = main
@@ -597,8 +601,8 @@ def main(filename) -> Result:
     tests = read_tests(filename)
     possible = 0.0
     total_time = 0.0
-    unapproved_includes = True
-    sufficient_coverage = False
+    unapproved_includes = False
+    sufficient_coverage = True
     for test in tests:
         max_points = float(test['points'])
         possible += max_points
@@ -650,12 +654,12 @@ def main(filename) -> Result:
                 runs, run_output = run_performance_test(timeout)
             elif test['type'] == 'approved_includes':
                 runs, run_output, point_multiplier = run_approved_includes_test(timeout)
-                if runs:
-                    unapproved_includes = False
+                if not runs:
+                    unapproved_includes = True
             elif test['type'] == 'coverage':
                 runs, run_output, point_multiplier = run_coverage_test(timeout)
-                if runs:
-                    sufficient_coverage = True
+                if not runs:
+                    sufficient_coverage = False
             else:
                 print("[INFO] Unsupported test")
                 continue
@@ -708,46 +712,6 @@ def main(filename) -> Result:
 
 
         test_results.append(test_result)
-
-    '''
-    targets = set()
-    for test in tests:
-        targets.add(test['target'])
-
-    # TODO: integrate approved includes test into standard test processing (above)
-    unapproved_includes = False
-    for target in targets:
-        print(f'test: approved includes for {target}')
-        list_of_approved_includes = list()
-        try:
-            with open(f'approved_includes_{target}') as f:
-                for line in f:
-                    list_of_approved_includes.append(line.strip())
-        except FileNotFoundError:
-            print('[WARNING] approved_includes_{} not found: assuming default deny all'.format(target))
-
-        forbidden_found, output = check_approved_includes(target, list_of_approved_includes)
-        ai_test_result: TestResult = {
-            'number':'00',
-            'name': f'Approved includes for {target}',
-            'score': 0,
-            'max_score': 0,
-            'output': output.strip(),
-            'tags': None,
-            'visibility': None,
-            'extra_data': None
-            }
-        if (forbidden_found):
-            print('[FAIL] found a forbidden include\n')
-            print(output)
-            #test_result['score'] = 0
-            #print(test_result['score'])
-            unapproved_includes = True
-        else:
-            print('[PASS] all includes are approved\n')
-        test_results.append(ai_test_result)
-        result_score += ai_test_result['score']
-    '''
 
     result_output = ''
     if unapproved_includes:

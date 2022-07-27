@@ -49,7 +49,12 @@ fi
 
 # TODO(pcr): unfuck this
 # filename actually depends on whether target is .cpp or .h
-filename="${target%.*}"
+filename=$(basename -- "$target")
+target_extension="${filename##*.}"
+if [ $target_extension == "h" ]; then
+  filename=$(basename -- "$main")
+fi
+filename="${filename%.*}"
 #echo "filename: $filename"
 if [ ! -f "$filename.gcda" ]; then
 	echo -e "Unknown FATAL error (a required coverage file was not generated)." >> DEBUG
@@ -74,7 +79,6 @@ typeset -i coverage=$(cat OUTPUT)
 #echo "coverage: $coverage"
 
 if [ $coverage -lt 90 ]; then
-    echo "100 < 90, huh?"
   echo "< 90% coverage" >> DEBUG
   fail
 else
