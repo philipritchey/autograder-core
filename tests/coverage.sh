@@ -1,20 +1,16 @@
 #!/usr/bin/env bash
 
-target=$1
-shift
-main=$1
-shift
-source=( "$@" )
-
-#echo "target: $target"
-#echo "main: $main"
-#echo "source: ${source[@]}"
-
 fail () {
   printf "FAIL\n" >> DEBUG
   echo 0 > OUTPUT
   exit 1
 }
+
+target=$1
+shift
+main=$1
+shift
+source=( "$@" )
 
 FILES=( ${source[@]} $target $main )
 
@@ -47,15 +43,12 @@ else
   fail
 fi
 
-# TODO(pcr): unfuck this
-# filename actually depends on whether target is .cpp or .h
 filename=$(basename -- "$target")
 target_extension="${filename##*.}"
 if [ $target_extension == "h" ]; then
   filename=$(basename -- "$main")
 fi
 filename="${filename%.*}"
-#echo "filename: $filename"
 if [ ! -f "$filename.gcda" ]; then
 	echo -e "Unknown FATAL error (a required coverage file was not generated)." >> DEBUG
 	fail
@@ -76,12 +69,9 @@ gcov -mnr "$filename" | \
 
 typeset -i coverage=$(cat OUTPUT)
 
-#echo "coverage: $coverage"
-
 if [ $coverage -lt 90 ]; then
   echo "< 90% coverage" >> DEBUG
   fail
 else
   echo 100 > OUTPUT
 fi
-
