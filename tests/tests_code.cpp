@@ -47,11 +47,12 @@ code.h
 @name: code compiles without errors or warnings
 @points: 1
 @show_output: True
-@type: script
+@type: compile
 @target: code.cpp
 */
 <test>
-  script_tests/code_compiles.sh
+code_tests.cpp
+code.cpp
 </test>
 
 /*
@@ -59,29 +60,17 @@ code.h
 @name: memory errors
 @points: 1
 @show_output: True
-@type: script
+@type: memory_errors
 @target: code.cpp
 @timeout: 30
 */
 <test>
-  script_tests/code_memory_errors.sh
+memory_errors_test.cpp
+code.cpp
 </test>
 
 /*
 @number: 3
-@name: test coverage
-@points: 1
-@show_output: True
-@type: script
-@target: code_tests.cpp
-@timeout: 30
-*/
-<test>
-  script_tests/code_coverage.sh
-</test>
-
-/*
-@number: 3.new
 @name: test coverage
 @points: 1
 @show_output: True
@@ -97,7 +86,7 @@ code.h
 
 /*
 @number: 4
-@name: example
+@name: unit example
 @points: 1
 @show_output: True
 @type: unit
@@ -111,6 +100,20 @@ code.h
 
 /*
 @number: 5
+@name: i/o example
+@points: 1
+@show_output: True
+@type: i/o
+@target: code_interactive.cpp
+@include: code.cpp
+*/
+<test>
+  input: io_tests/example/input.txt
+  output: io_tests/example/output.txt
+</test>
+
+/*
+@number: 6
 @name: performance example
 @points: 1
 @show_output: True
@@ -128,4 +131,17 @@ code.h
     auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
     std::cout << "operation took " << microseconds << " µs." << std::endl;
     std::cout << "  found " << cnt << " primes." << std::endl;
+    EXPECT_EQ(cnt, 148933);
+</test>
+
+/*
+@number: 7
+@name: script example
+@points: 1
+@show_output: True
+@type: script
+@target: code_interactive.cpp
+*/
+<test>
+  script_tests/example.sh
 </test>
