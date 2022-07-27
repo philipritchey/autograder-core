@@ -1,98 +1,48 @@
 #!/usr/bin/env bash
 
-# python version check (requires 3.8+)
-python=python3
-typeset -i python3_version=$($python --version | cut -d. -f2)
-if [ $python3_version -lt 8 ]; then
-  if [ "$(which python3.8)" == ""  ]; then
-    echo "[FATAL] requires Python 3.8+ (because pcr _insists_ on using type hints)"
-    echo "        for gradescope: make sure setup.sh includes the python3.8 install steps"
-    echo "        for local: follow the python3.8 install steps in setup.sh"
-    exit 1
-  else
-    python=python3.8
-  fi
-fi
+# TODO(you): list files that student must submit
+#            and files that are provided on backend (see below)
+#            note: _only_ these files will be used during testing
+files_to_submit=( code.cpp code_tests.cpp code_interactive.cpp code.h )
+
+#
+# TODO?(you): list files provided by instructor
+#
+provided_files=(  )
+
+################################################################################
 
 BASE_DIR=$(pwd)
 
 if [ -d /autograder ]; then
-    # gradescope environment detected
-    is_gradescope=true
+  # we are in a gradescope-like environment
+  AUTOGRADER_CORE_REPO=/autograder/autograder-core
+  REPO=/autograder/autograder-code
+  SUBMISSION=/autograder/submission
+
+  # Update autograder files
+  cd $AUTOGRADER_CORE_REPO
+  git pull
+  cd $REPO
+  git pull
+  cd $BASE_DIR
+
 else
-    echo "gradescope environment not detected."
-    is_gradescope=false
+  # we are NOT in a gradescope-like environment
+  AUTOGRADER_CORE_REPO=$BASE_DIR/../autograder-core
+  REPO=$BASE_DIR
+  SUBMISSION=$BASE_DIR/solution
+
 fi
 
-if [ $is_gradescope == "true" ]; then
-    rm -rf /autograder/testbox
-    mkdir -p /autograder/testbox
-    TESTBOX=/autograder/testbox
-    REPO=/autograder/autograder-code
-    AUTOGRADER_CORE_REPO=/autograder/autograder-core
-    TESTS=$REPO/tests
-    SUBMISSION=/autograder/submission
-    RESULTS_DIR=/autograder/results
-else
-    rm -rf testbox
-    mkdir testbox
-    TESTBOX=testbox
-    REPO=$BASE_DIR
-    AUTOGRADER_CORE_REPO=$BASE_DIR/../autograder-core
-    TESTS=$REPO/tests
-    SUBMISSION=$BASE_DIR/solution
-    RESULTS_DIR=$BASE_DIR
-fi
-
-# sanity check before doing any real effort
-# TODO: move this check into run_tests.py?
-#
-# TODO(you): list required submission files in src_list array
-#              e.g. src_list=( main.cpp thing.cpp thing.h test_thing.cpp )
-#
-src_list=( code.cpp code.h code_tests.cpp )
-for file in "${src_list[@]}"; do
-  if [ ! -f $SUBMISSION/"$file" ]; then
-    echo "[FATAL] $file does not exist. exiting."
-    echo "{\"score\": 0, \"output\": \"$file does not exist.\"}" > $RESULTS_DIR/results.json
-    exit 1
-  fi
+# copy provided files into submission directory
+for file in "${provided_files[@]}"; do
+    cp $REPO/provided/$file $SUBMISSION/
 done
 
-# copy submitted code to testbox
-for file in "${src_list[@]}"; do
-  cp $SUBMISSION/$file $TESTBOX/
-done
+# bootstrapping FTW
+cp $AUTOGRADER_CORE_REPO/run_autograder_script.sh ras
+chmod u+x ./ras
+./ras "${files_to_submit[@]}" "${provided_files[@]}"
 
-if [ $is_gradescope == "true" ]; then
-    # Update autograder files
-    cd $AUTOGRADER_CORE_REPO
-    git pull
-    cd $REPO
-    git pull
-fi
-
-# copy core test runners to testbox
-cp $AUTOGRADER_CORE_REPO/run_tests.py $TESTBOX/
-cp $AUTOGRADER_CORE_REPO/tests/approved_includes.sh $TESTBOX/
-cp $AUTOGRADER_CORE_REPO/tests/coverage.sh $TESTBOX/
-cp $AUTOGRADER_CORE_REPO/tests/cs12x_test.h $TESTBOX/
-
-# copy tests to testbox
-cp -r tests/* $TESTBOX/
-
-# collect and enable tests
-cd $TESTBOX
-touch tests.cpp
-for file in $TESTS/tests_*; do
-  if [ -f "$file" ]; then
-	cat $file >> tests.cpp
-    printf "\n" >> tests.cpp
-  fi
-done
-
-chmod +x ./approved_includes.sh
-
-# run tests <tests file> [results file]
-$python run_tests.py tests.cpp $RESULTS_DIR/results.json
-
+rm ras
