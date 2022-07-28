@@ -94,7 +94,21 @@ def read_attributes(index: int, lines: List[str], filename: str) -> Tuple[int, A
     index = skip_blank_lines(index, lines)
     if index >= len(lines):
         # at end of file
-        empty_attr: Attributes = {}
+        empty_attr: Attributes = {
+            'number': '',
+            'name': '',
+            'points': 0.0,
+            'type': '',
+            'target': '',
+            'show_output': '',
+            'timeout': 0.0,
+            'include': '',
+            'code': '',
+            'expected_input':'',
+            'expected_output': '',
+            'script_content': '',
+            'approved_includes': []
+        }
         return -1, empty_attr
     line = lines[index].strip()
 
