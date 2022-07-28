@@ -170,7 +170,7 @@ def read_attributes(index: int, lines: List[str], filename: str) -> Tuple[int, A
 
     # set show_output to default if not specified
     if 'show_output' not in attr_dict:
-        if attr_dict['type'] == 'approved_includes':
+        if attr_dict['type'] == 'approved_includes' or attr_dict['type'] == 'performance' or attr_dict['type'] == 'coverage' or attr_dict['type'] == 'compile' or attr_dict['type'] == 'memory_errors':
             attr_dict['show_output'] = 'True'
         else:
             attr_dict['show_output'] = DEFAULT_SHOW_OUTPUT
