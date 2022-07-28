@@ -769,7 +769,7 @@ def main(filename) -> Result:
         else:
             if failed_to_compile:
                 test_result['output']  += 'Failed to compile.\n'
-            test_result['output'] = 'Output is intentionally hidden'
+            test_result['output'] += 'Output is intentionally hidden'
 
 
 
