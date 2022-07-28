@@ -82,6 +82,9 @@ for file in $TESTS/tests_*; do
 done
 
 chmod +x ./approved_includes.sh
+chmod +x ./compiles.sh
+chmod +x ./coverage.sh
+chmod +x ./memory_errors.sh
 
 # run tests <tests file> [results file]
 $python run_tests.py tests.cpp $RESULTS_DIR/results.json
