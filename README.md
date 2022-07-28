@@ -38,8 +38,8 @@ the core autograder functionality common to all assignments.
 @points: 5                  // required. a floating-point value for the weight of the test
 @type: unit                 // required. type of test
 @target: code.cpp           // required. target file of test, is #included in unit test code
-@show_output: True          // optional. string value (case insensitive "true" / "false")
-@include: <sstream> "foo.h" // optional. files to include in unit test
+@show_output: True          // optional. string value (case insensitive "true" / "false", default = false)
+@include: <sstream> "foo.h" // optional. files to include in unit test (default = empty)
 @timeout: 20                // optional. floating-point number of seconds before test times out (default = 10)
 ```
 
