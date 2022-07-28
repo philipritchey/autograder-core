@@ -69,7 +69,7 @@ cp $AUTOGRADER_CORE_REPO/tests/memory_errors.sh $TESTBOX/
 
 
 # copy tests to testbox
-cp -r tests/* $TESTBOX/
+cp -r $REPO/tests/* $TESTBOX/
 
 # collect and enable tests
 cd $TESTBOX
