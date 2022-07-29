@@ -563,6 +563,12 @@ def run_performance_test(timeout: float) -> Tuple[bool,str]:
     ret = p.returncode
     return ret == 0, output
 
+def remove_end_of_line_whitespace(s: str) -> str:
+    lines = s.split('\n')
+    lines = [line.rstrip() for line in lines]
+    return '\n'.join(lines)
+    
+
 def run_io_test(timeout: float) -> Tuple[bool,str]:
     run_cmd = ["./io_test", "2>&1"]
     with open('input.txt', 'r') as file:
@@ -581,6 +587,10 @@ def run_io_test(timeout: float) -> Tuple[bool,str]:
 
         with open('output.txt', 'r') as file:
             gt_string = file.read().replace('\r', '').rstrip()
+        
+        gt_string = remove_end_of_line_whitespace(gt_string)
+        output_str = remove_end_of_line_whitespace(output_str)
+        
         message_to_student = "Your output: " + output_str + "\n"
         message_to_student += "\n\n"
         message_to_student += "Expected output: " + gt_string + "\n"
