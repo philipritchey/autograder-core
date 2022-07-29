@@ -159,10 +159,16 @@ def read_attributes(index: int, lines: List[str], filename: str) -> Tuple[int, A
         raise SyntaxError('missing expected end of multiline comment: "*/"', (filename, index+1, 1, line))
 
     # verify all required attributes are present
+    # TODO(pcr): refine attribute requirements
+    #              e.g. target is really only required for unit, i/o, perf, approved_includes
+    #                   compile, memory_errors, coverage could be updated to use it, too, though
+    #                   so... only script doesn't need it, actually.
     required_attributes = ('name', 'points', 'type', 'target', 'number')
     for attribute in required_attributes:
         if attribute not in attr_dict:
             raise KeyError(f'({filename}:{index+1}) missing required attribute: {attribute}')
+        if attr_dict[attribute] == '':
+            raise ValueError(f'({filename}:{index+1}) required attribute missing value: {attribute}')
 
     # set timeouts to default if not specified
     if 'timeout' not in attr_dict:
@@ -660,7 +666,24 @@ class Result(TypedDict):
 def main(filename) -> Result:
     result_score = 0.0
     test_results: List[TestResult] = list()
-    tests = read_tests(filename)
+    
+    fail_result: Result = {
+        'score': 0.0,
+        'output': '',
+        'execution_time': 0.0,
+        'visibility': 'visible',
+        'stdout_visibility': 'visible',
+        'tests': []
+        }
+    try:
+        tests = read_tests(filename)
+    except BaseException as err:
+        fail_result['output'] = repr(err)
+        print('[FATAL] Error occured while reading tests:')
+        print(err)
+        return fail_result
+    
+    
     possible = 0.0
     total_time = 0.0
     unapproved_includes = False
@@ -852,7 +875,9 @@ if __name__ == '__main__':
         if len(argv) > 2:
             # path to results.json (e.g. /autograder/results/results.json) is optional 2nd arg
             results_filename = argv[2]
+    
     results = main(tests_filename)
+        
     #print(json.dumps(results, sort_keys=True, indent=4))
     with open(results_filename,'wt') as f:
         json.dump(results, f, sort_keys=True, indent=4)

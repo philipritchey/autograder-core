@@ -145,3 +145,13 @@ code.cpp
 <test>
   script_tests/example.sh
 </test>
+
+/*
+@number: number
+@name: semantically invalid
+@points: -F
+@type: type
+@target: target
+*/
+<test>
+</test>
