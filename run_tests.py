@@ -1,5 +1,12 @@
 #! /usr/bin/env python3
 
+'''
+TODO(pcr):
+* move configuration stuff to configuration file (and let it be assignment-specific)
+* refine attribute requirements
+* add command line option to run a specific test or set of tests
+'''
+
 from collections import namedtuple
 from typing import List, Tuple, Dict, Any, TypedDict, Optional
 from os import popen
@@ -9,7 +16,7 @@ from sys import argv
 from time import time
 import json
 
-# TODO: move configuration stuff to configuration file (and let it be assignment-specific)
+# TODO(pcr): move configuration stuff to configuration file (and let it be assignment-specific)
 BEGIN_TEST_DELIMITER = '<test>'
 END_TEST_DELIMITER = '</test>'
 EMPTY_TEST_BLOCK = '<test/>'
@@ -163,7 +170,8 @@ def read_attributes(index: int, lines: List[str], filename: str) -> Tuple[int, A
     #              e.g. target is really only required for unit, i/o, perf, approved_includes
     #                   compile, memory_errors, coverage could be updated to use it, too, though
     #                   so... only script doesn't need it, actually.
-    required_attributes = ('name', 'points', 'type', 'target', 'number')
+    #            number should be optional
+    required_attributes = ('name', 'points', 'type', 'target')
     for attribute in required_attributes:
         if attribute not in attr_dict:
             raise KeyError(f'({filename}:{index+1}) missing required attribute: {attribute}')
@@ -875,8 +883,9 @@ def main(filename) -> Result:
 
     return results
 
-
 if __name__ == '__main__':
+    # TODO(pcr): add command line option to run a specific test or set of tests
+    
     results_filename = 'results.json'
     if len(argv) == 1:
         tests_filename = input('path to tests: ')
