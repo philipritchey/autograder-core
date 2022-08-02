@@ -5,6 +5,7 @@ TODO(pcr):
 * move configuration stuff to configuration file (and let it be assignment-specific)
 * refine attribute requirements
 * add command line option to run a specific test or set of tests
+* use @target attribute for coverage tests and some other test(s) that don't use it but could/should
 '''
 
 from collections import namedtuple
@@ -463,8 +464,8 @@ def write_unit_test(test: Attributes) -> None:
 def write_performance_test(test: Attributes) -> None:
     with open('performance_test.cpp', 'wt') as f:
         f.write(f"#include \"{test['target']}\"\n\n")
-        f.write('#include<iostream>\n')
-        f.write('#include<chrono>\n')
+        f.write('#include <iostream>\n')
+        f.write('#include <chrono>\n')
         if len(test['include']) > 0:
             for include in test['include'].split():
                 f.write(f'#include {include}\n')
