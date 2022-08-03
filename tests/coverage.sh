@@ -12,6 +12,8 @@ main=$1
 shift
 source=( "$@" )
 
+# TODO(pcr): if target is a .cpp file, add it to source list
+
 FILES=( ${source[@]} $target $main )
 
 # sanity check

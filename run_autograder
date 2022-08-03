@@ -8,7 +8,7 @@ files_to_submit=( code.cpp code_tests.cpp code_interactive.cpp code.h )
 #
 # TODO?(you): list files provided by instructor
 #
-provided_files=(  )
+provided_files=()
 
 ################################################################################
 

@@ -88,4 +88,3 @@ chmod +x ./memory_errors.sh
 
 # run tests <tests file> [results file]
 $python run_tests.py tests.cpp $RESULTS_DIR/results.json
-

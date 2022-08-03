@@ -174,10 +174,13 @@ def read_attributes(index: int, lines: List[str], filename: str) -> Tuple[int, A
     #            number should be optional
     required_attributes = ('name', 'points', 'type', 'target')
     for attribute in required_attributes:
+        additonal_details = str()
+        for attr in attr_dict:
+            additonal_details += f'  {attr}: {attr_dict[attr]}\n'
         if attribute not in attr_dict:
-            raise KeyError(f'({filename}:{index+1}) missing required attribute: {attribute}')
+            raise KeyError(f'({filename}:{index+1}) missing required attribute: {attribute}\n{additonal_details}')
         if attr_dict[attribute] == '':
-            raise ValueError(f'({filename}:{index+1}) required attribute missing value: {attribute}')
+            raise ValueError(f'({filename}:{index+1}) required attribute missing value: {attribute}\n{additonal_details}')
 
     # set timeouts to default if not specified
     if 'timeout' not in attr_dict:
@@ -638,7 +641,8 @@ def run_script_test(timeout: float) -> Tuple[bool,str,float]:
                 output_string = file.read()
         else:
             print('[FATAL]: OUTPUT does not exist.')
-            raise FileNotFoundError('./OUTPUT')
+            return False, "test failed to run", 0
+            #raise FileNotFoundError('./OUTPUT')
 
         if os.path.exists('./DEBUG'):
             with open('./DEBUG', 'r') as file:
