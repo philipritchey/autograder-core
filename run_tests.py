@@ -833,13 +833,14 @@ def main(filename) -> Result:
 
         test_results.append(test_result)
 
+    recorded_score = result_score;
     result_output = ''
     if unapproved_includes:
-        result_score = 0
+        recorded_score = 0
         result_output += 'Forbidden includes are used, your current submission score is 0.0\n'
 
     if not sufficient_coverage:
-        result_score = 0
+        recorded_score = 0
         result_output += 'Insufficient test coverage, so your current submission score is 0.0\n'
 
     # DISABLE SCORING FROM AUTOGRADER
@@ -866,10 +867,17 @@ def main(filename) -> Result:
 
     t = int(result_score * 10000 + 0.5)
     result_score = t / 10000
-
+    
+    str_score = f'{result_score:6.2f}'
+    str_possible = f'{possible:6.2f}'
     print('###########################')
     print('#                         #')
-    print('# points: {:6.2f} / {:6.2f} #'.format(result_score,possible))
+    if unapproved_includes or not sufficient_coverage:
+        str_score = str_score.replace(' ', '~')
+        print(f'# points:~{str_score}~/ {str_possible} #')
+        print(f'#         {recorded_score:6.2f} / {str_possible} #')
+    else:
+        print(f'# points: {str_score} / {str_possible} #')
     print('#                         #')
     print('###########################')
     if unapproved_includes:
