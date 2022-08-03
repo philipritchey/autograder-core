@@ -455,7 +455,7 @@ def write_unit_test(test: Attributes) -> None:
         if len(test['include']) > 0:
             for include in test['include'].split():
                 f.write(f'#include {include}\n')
-        f.write('#include "cs12x_test.h"\n')
+        f.write('#include "cs12x_test.h"\n\n')
 
         f.write('int main() {\n')
         f.write('    INIT_TEST;\n')
@@ -472,7 +472,7 @@ def write_performance_test(test: Attributes) -> None:
         if len(test['include']) > 0:
             for include in test['include'].split():
                 f.write(f'#include {include}\n')
-        f.write('#include "cs12x_test.h"\n')
+        f.write('#include "cs12x_test.h"\n\n')
 
         f.write('int main() {\n')
         f.write('    INIT_TEST;\n')
