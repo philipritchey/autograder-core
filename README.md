@@ -89,20 +89,35 @@ TODO
 </test>
 ```
 
+```
+/*
+@number: 1
+@name: code compiles without errors or warnings
+@points: 1
+@show_output: True
+@type: compile
+@target: code.cpp
+*/
+<test>
+code_tests.cpp
+code.cpp
+</test>
+```
+
 ### script tests
 TODO
 
 ```
 /*
 @number: 1
-@name: compiles without errors or warnings
+@name: custom checks
 @points: 10
 @show_output: True
 @type: script
 @target: code.cpp
 */
 <test>
-  script_tests/code_compiles.sh
+  script_tests/custom.sh
 </test>
 ```
 
