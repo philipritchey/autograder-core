@@ -11,6 +11,10 @@ files_to_submit=( code.cpp code_tests.cpp code_interactive.cpp code.h )
 provided_files=()
 
 ################################################################################
+##
+## DON'T MESS WITH THIS STUFF DOWN HERE, please.
+##
+################################################################################
 
 BASE_DIR=$(pwd)
 
