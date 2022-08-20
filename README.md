@@ -45,14 +45,14 @@ the core autograder functionality common to all assignments.
 ```
 
 ### test types
-* `unit`
-* `i/o`
 * `approved_includes`
-* `performance`
-* `coverage`
 * `compile`
+* `coverage`
+* `i/o`
 * `memory_errors`
+* `performance`
 * `script`
+* `unit`
 
 ### unit tests
 TODO
