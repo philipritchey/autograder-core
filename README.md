@@ -28,6 +28,7 @@ the core autograder functionality common to all assignments.
 1. in `run_autograder`:
    * at line 6, list the files the students are required to submit
    * at line 11, list the files that are provided
+     * provided files are expected to be a folder named `provided` in the root of the repo
 1. you should be good to go.  happy testing!
 
 ## writing tests
