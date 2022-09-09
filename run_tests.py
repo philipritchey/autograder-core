@@ -962,7 +962,7 @@ if __name__ == '__main__':
             currentResult["output"] += "Your current submission's score was " + str(float(currentResult["score"])) + ", however you get to keep your maximum submission score of " + str(previousMaxScore) + "\n"
             currentResult['score'] = previousMaxScore
 
-        currentResult["output"] += f"this is your {submission_cnt}{ordinal_suffix(submission_cnt)} submission.\n"
+        currentResult["output"] += f"This is your {submission_cnt}{ordinal_suffix(submission_cnt)} submission.\n"
         currentResult["output"] += snarky_comment_about_number_of_submissions(submission_cnt) + "\n"
 
         with open('/autograder/results/results.json', 'w') as f:
