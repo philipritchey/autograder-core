@@ -948,7 +948,7 @@ if __name__ == '__main__':
         submission_cnt = 0
         with open('/autograder/submission_metadata.json', 'r') as f:
             previousResultJson = json.load(f)
-            submission_cnt = len(previousResultJson)
+            submission_cnt = len(previousResultJson['previous_submissions'])
             for prevSubmission in previousResultJson['previous_submissions']:
                 previousScore = float(prevSubmission["score"])
                 if (previousScore > previousMaxScore):
