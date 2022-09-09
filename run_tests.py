@@ -886,7 +886,7 @@ def main(filename) -> Result:
         print('!!! ZERO DUE TO INSUFFICIENT COVERAGE')
 
     results: Result = {
-        'score': result_score,
+        'score': recorded_score,
         'output': result_output,
         'execution_time': total_time,
         'visibility': 'visible',
