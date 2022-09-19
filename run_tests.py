@@ -603,9 +603,9 @@ def run_io_test(timeout: float) -> Tuple[bool,str]:
         gt_string = remove_end_of_line_whitespace(gt_string)
         output_str = remove_end_of_line_whitespace(output_str)
         
-        message_to_student = "Your output: " + output_str + "\n"
-        message_to_student += "\n\n"
-        message_to_student += "Expected output: " + gt_string + "\n"
+        message_to_student += f"The input:\n{input_data.rstrip()}\n\n"
+        message_to_student += f"Your output:\n{output_str}\n\n"
+        message_to_student += f"Expected output:\n{gt_string}\n\n"
 
     except subprocess.TimeoutExpired as e:
         output_str = "Timeout during test execution, check for an infinite loop\n"
