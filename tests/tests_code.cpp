@@ -100,7 +100,7 @@ code.cpp
 
 /*
 @number: 5.1
-@name: i/o example with visible output
+@name: i/o example with output shown
 @points: 1
 @show_output: True
 @type: i/o
@@ -114,7 +114,7 @@ code.cpp
 
 /*
 @number: 5.2
-@name: i/o example without visible output
+@name: i/o example with output NOT shown
 @points: 1
 @show_output: False
 @type: i/o

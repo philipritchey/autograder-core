@@ -16,6 +16,25 @@ provided_files=()
 ##
 ################################################################################
 
+usage() {
+  echo "Usage: $0 [-d] [-h]"
+  echo "  -d run autograder script (-> tests) in debug mode"
+  echo "  -h show this help message and exit"
+}
+
+debugmode=0
+while getopts "dh" flag; do
+  case "${flag}" in
+    d)
+      debugmode=1
+      ;;
+    h | *) # display help
+      usage
+      exit 0
+      ;;
+  esac
+done
+
 BASE_DIR=$(pwd)
 
 if [ -d /autograder ]; then
@@ -47,6 +66,11 @@ done
 # bootstrapping FTW
 cp $AUTOGRADER_CORE_REPO/run_autograder_script.sh ras
 chmod u+x ./ras
-./ras "${files_to_submit[@]}" "${provided_files[@]}"
+
+if [ $debugmode -eq 1 ]; then
+  ./ras -d "${files_to_submit[@]}" "${provided_files[@]}"
+else
+  ./ras "${files_to_submit[@]}" "${provided_files[@]}"
+fi
 
 rm ras

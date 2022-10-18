@@ -16,6 +16,7 @@ import subprocess
 from sys import argv
 from time import time
 import json
+import argparse
 
 # TODO(pcr): move configuration stuff to configuration file (and let it be assignment-specific)
 BEGIN_TEST_DELIMITER = '<test>'
@@ -686,7 +687,7 @@ class Result(TypedDict):
     stdout_visibility: str
     tests: List[TestResult]
 
-def main(filename) -> Result:
+def main(filename: str, debugmode: bool=False) -> Result:
     result_score = 0.0
     test_results: List[TestResult] = list()
     
@@ -811,10 +812,13 @@ def main(filename) -> Result:
             'score': points,
             'max_score': max_points,
             'output': '',
-            'tags': None,
-            'visibility': None,
-            'extra_data': None
+            'tags': [],
+            'visibility': 'visible',
+            'extra_data': {}
             }
+
+        if debugmode:
+            test['show_output'] = 'true'
 
         if test['show_output'].lower() == 'true':
             has_compile_output = len(compile_output) > 0
@@ -828,8 +832,6 @@ def main(filename) -> Result:
             if failed_to_compile:
                 test_result['output']  += 'Failed to compile.\n'
             test_result['output'] += 'Output is intentionally hidden'
-
-
 
         test_results.append(test_result)
 
@@ -925,16 +927,19 @@ def ordinal_suffix(n: int) -> str:
 if __name__ == '__main__':
     # TODO(pcr): add command line option to run a specific test or set of tests
     
-    results_filename = 'results.json'
-    if len(argv) == 1:
-        tests_filename = input('path to tests: ')
-    else:
-        tests_filename = argv[1]
-        if len(argv) > 2:
-            # path to results.json (e.g. /autograder/results/results.json) is optional 2nd arg
-            results_filename = argv[2]
+    parser = argparse.ArgumentParser()
+    parser.add_argument('tests_path', type=str, help='path to tests (input)')
+    parser.add_argument('-r', '--results_path', type=str, default='results.json', help='path to results (output) [default=./results.json]')
+    parser.add_argument('-d', '--debugmode', help='force show test output', action='store_true')
     
-    results = main(tests_filename)
+    args = parser.parse_args()
+    tests_filename = args.tests_path
+    results_filename = args.results_path
+    
+    if args.debugmode:
+        print('===DEBUGMODE===')
+
+    results = main(tests_filename, args.debugmode)
         
     #print(json.dumps(results, sort_keys=True, indent=4))
     with open(results_filename,'wt') as f:

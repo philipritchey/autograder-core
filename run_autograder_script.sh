@@ -1,5 +1,26 @@
 #!/usr/bin/env bash
 
+usage() {
+  echo "Usage: $0 [-d] [-h]"
+  echo "  -d run tests in debug mode"
+  echo "  -h show this help message and exit"
+}
+
+
+debugmode=0
+while getopts "dh" flag; do
+  case "${flag}" in
+    d)
+      debugmode=1
+      ;;
+    h | *) # display help
+      usage
+      exit 0
+      ;;
+  esac
+done
+shift $(( OPTIND - 1 ))
+
 # python version check (requires 3.8+)
 python=python3
 typeset -i python3_version=$($python --version | cut -d. -f2)
@@ -15,7 +36,6 @@ if [ $python3_version -lt 8 ]; then
 fi
 
 BASE_DIR=$(pwd)
-
 
 if [ -d /autograder ]; then
   # gradescope-like environment detected
@@ -86,5 +106,9 @@ chmod +x ./compiles.sh
 chmod +x ./coverage.sh
 chmod +x ./memory_errors.sh
 
-# run tests <tests file> [results file]
-$python run_tests.py tests.cpp $RESULTS_DIR/results.json
+# run tests <tests file> [-r results file]
+if [ $debugmode -eq 1 ]; then
+  $python run_tests.py --debugmode tests.cpp -r $RESULTS_DIR/results.json
+else
+  $python run_tests.py tests.cpp -r $RESULTS_DIR/results.json
+fi
