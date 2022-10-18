@@ -50,6 +50,8 @@ if [ -d /autograder ]; then
   git pull
   cd $BASE_DIR
 
+  cp $REPO/run_autograder .
+
 else
   # we are NOT in a gradescope-like environment
   AUTOGRADER_CORE_REPO=$BASE_DIR/../autograder-core
