@@ -99,6 +99,7 @@ class Attributes(TypedDict):
     script_content: str
     approved_includes: List[str]
     skip: bool
+    script_args: str
 
 
 def read_attributes(index: int, lines: List[str], filename: str) -> Tuple[int, Attributes]:
@@ -120,7 +121,8 @@ def read_attributes(index: int, lines: List[str], filename: str) -> Tuple[int, A
             'expected_output': '',
             'script_content': '',
             'approved_includes': [],
-            'skip': False
+            'skip': False,
+            'script_args': ''
         }
         return -1, empty_attr
     line = lines[index].strip()
@@ -218,7 +220,8 @@ def read_attributes(index: int, lines: List[str], filename: str) -> Tuple[int, A
         'expected_output': '',
         'script_content': '',
         'approved_includes': [],
-        'skip': attr_dict['skip']
+        'skip': attr_dict['skip'],
+        'script_args': ''
         }
 
     return index, attributes
@@ -331,7 +334,17 @@ def read_tests(filename: str) -> List[Attributes]:
 
             # go to next line
             index,line = goto_next_line(index, lines, filename)
-            script_filename_string = line
+            values = line.split(None, 1)
+            if len(values) == 0:
+                 raise SyntaxError(f'missing expected name of script, e.g. scripts/example.sh', (filename, index+1, 1, line))
+            elif len(values) == 1:
+                # does not have args (only script path)
+                script_filename_string = line
+            else:
+                # has args
+                script_filename_string = values[0]
+                attributes['script_args'] = values[1]
+                
             # print("Script filename: " + script_filename_string)
 
             index,line = goto_next_line(index, lines, filename)
@@ -625,7 +638,7 @@ def run_io_test(timeout: float) -> Tuple[bool,str]:
 
     return (output_str == gt_string), message_to_student
 
-def run_script_test(timeout: float) -> Tuple[bool,str,float]:
+def run_script_test(timeout: float, args: str = '') -> Tuple[bool,str,float]:
 
     #print("Can write: ")
     #print(os.access('./', os.W_OK))
@@ -635,7 +648,7 @@ def run_script_test(timeout: float) -> Tuple[bool,str,float]:
     if os.path.exists('./OUTPUT'):
         os.remove('./OUTPUT')
 
-    cmd = ["bash ./script.sh"]
+    cmd = f'bash ./script.sh {args}'
     #print('cmd = {}'.format(cmd))
     p = subprocess.Popen(cmd, stdin=subprocess.PIPE, shell=True)
     # p = popen(cmd)
@@ -794,7 +807,7 @@ def main(args) -> Result:
             elif test['type'] == 'i/o':
                 runs, run_output = run_io_test(timeout)
             elif test['type'] == 'script':
-                runs, run_output, point_multiplier = run_script_test(timeout)
+                runs, run_output, point_multiplier = run_script_test(timeout, test['script_args'])
             elif test['type'] == 'performance':
                 runs, run_output = run_performance_test(timeout)
             elif test['type'] == 'approved_includes':

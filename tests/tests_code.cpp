@@ -182,3 +182,15 @@ code.cpp
 <test>
   script_tests/example.sh
 </test>
+
+/*
+@number: 9
+@name: example with args
+@points: 1
+@show_output: True
+@type: script
+@target: code_interactive.cpp
+*/
+<test>
+  script_tests/example.sh -h
+</test>
