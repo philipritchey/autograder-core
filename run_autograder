@@ -56,6 +56,11 @@ else
   REPO=$BASE_DIR
   SUBMISSION=$BASE_DIR/solution
 
+  if [ ! -d "$AUTOGRADER_CORE_REPO" ]; then
+    echo "[FATAL] autograder-core repo is not where it is expected to be ($(realpath $AUTOGRADER_CORE_REPO))"
+    exit 1
+  fi
+
 fi
 
 # copy provided files into submission directory
