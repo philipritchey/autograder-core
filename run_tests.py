@@ -203,7 +203,9 @@ def read_attributes(index: int, lines: List[str], filename: str) -> Tuple[int, A
     if 'include' not in attr_dict:
         attr_dict['include'] = ''
 
-    if 'skip' not in attr_dict:
+    if 'skip' in attr_dict and attr_dict['skip'].lower() == 'true':
+        attr_dict['skip'] = True
+    else:
         attr_dict['skip'] = False
 
     attributes: Attributes = {
