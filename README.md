@@ -135,3 +135,20 @@ this is how you should package the autograder files for gradescope.  do this fro
 1. `autograder_core_deploy_key` - private key for accessing the autograder-core repository
 
 an `autograder_core_deploy_key` can be obtained by emailing pcr@tamu.edu
+
+## running autograder on gradescope (or locally)
+this is how you can use the `run_autograder` script when debugging on gradescope.
+
+```
+./run_autograder -h  # print the usage message and exit
+```
+
+```
+./run_autograder -d  # run in debugmode (all test output is forced visible)
+```
+
+```
+./run_autograder -t <number>  # run test(s) with specified number; "5" includes "5.1, 5.2, ..."
+```
+
+the `-d` and `-t` options can be combined to run a specific test (or group of tests) in debugmode. 
