@@ -1,17 +1,21 @@
 #!/usr/bin/env bash
 
 usage() {
-  echo "Usage: $0 [-d] [-h]"
-  echo "  -d run tests in debug mode"
-  echo "  -h show this help message and exit"
+  echo "Usage: $0 [-d] [-h] [-t <number>]"
+  echo "  -d          run tests in debug mode"
+  echo "  -h          show this help message and exit"
+  echo "  -t <number> run test(s) with specified number"
 }
 
 
 debugmode=0
-while getopts "dh" flag; do
+while getopts "dht:" flag; do
   case "${flag}" in
     d)
       debugmode=1
+      ;;
+    t)
+      tests=${OPTARG}
       ;;
     h | *) # display help
       usage
@@ -107,8 +111,11 @@ chmod +x ./coverage.sh
 chmod +x ./memory_errors.sh
 
 # run tests <tests file> [-r results file]
+flags=""
 if [ $debugmode -eq 1 ]; then
-  $python run_tests.py --debugmode tests.cpp -r $RESULTS_DIR/results.json
-else
-  $python run_tests.py tests.cpp -r $RESULTS_DIR/results.json
+  flags="$flags --debugmode"
 fi
+if [ ! -z  "${tests}" ]; then
+  flags="$flags -t $tests"
+fi
+$python run_tests.py $flags tests.cpp -r $RESULTS_DIR/results.json

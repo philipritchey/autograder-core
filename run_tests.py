@@ -18,6 +18,8 @@ from time import time
 import json
 import argparse
 
+import attr
+
 # TODO(pcr): move configuration stuff to configuration file (and let it be assignment-specific)
 BEGIN_TEST_DELIMITER = '<test>'
 END_TEST_DELIMITER = '</test>'
@@ -96,6 +98,7 @@ class Attributes(TypedDict):
     expected_output: str
     script_content: str
     approved_includes: List[str]
+    skip: bool
 
 
 def read_attributes(index: int, lines: List[str], filename: str) -> Tuple[int, Attributes]:
@@ -116,7 +119,8 @@ def read_attributes(index: int, lines: List[str], filename: str) -> Tuple[int, A
             'expected_input':'',
             'expected_output': '',
             'script_content': '',
-            'approved_includes': []
+            'approved_includes': [],
+            'skip': False
         }
         return -1, empty_attr
     line = lines[index].strip()
@@ -197,6 +201,9 @@ def read_attributes(index: int, lines: List[str], filename: str) -> Tuple[int, A
     if 'include' not in attr_dict:
         attr_dict['include'] = ''
 
+    if 'skip' not in attr_dict:
+        attr_dict['skip'] = False
+
     attributes: Attributes = {
         'number': attr_dict['number'],
         'name': attr_dict['name'],
@@ -210,7 +217,8 @@ def read_attributes(index: int, lines: List[str], filename: str) -> Tuple[int, A
         'expected_input':'',
         'expected_output': '',
         'script_content': '',
-        'approved_includes': []
+        'approved_includes': [],
+        'skip': attr_dict['skip']
         }
 
     return index, attributes
@@ -687,7 +695,13 @@ class Result(TypedDict):
     stdout_visibility: str
     tests: List[TestResult]
 
-def main(filename: str, debugmode: bool=False) -> Result:
+def main(args) -> Result:
+    filename = args.tests_path
+    test_number = args.tests
+    debugmode = args.debugmode
+    if debugmode:
+        print('===DEBUGMODE===')
+    
     result_score = 0.0
     test_results: List[TestResult] = list()
     
@@ -708,11 +722,25 @@ def main(filename: str, debugmode: bool=False) -> Result:
         return fail_result
     
     
+    if test_number != '*':
+        # run only those tests with number that matches test_number
+        #   '5' means run all tests numbered 5: 5[.1, 5.2, ...]
+        #   '5.2' means run all tests numbered 5.2: 5.2[.1, 5.2.2, ...]
+        for test in tests:
+            if test['number'] == test_number or (test['number'].startswith(test_number) and (len(test['number']) == len(test_number) or test['number'][len(test_number)] == '.')):
+                test['skip'] = False
+            else:
+                test['skip'] = True
+
+
     possible = 0.0
     total_time = 0.0
     unapproved_includes = False
     sufficient_coverage = True
     for test in tests:
+        if test['skip']:
+            #print(f"test {test['number']}: {test['name']}\n[SKIP]")
+            continue
         max_points = float(test['points'])
         possible += max_points
         print(f"test {test['number']}: {test['name']}")
@@ -931,15 +959,12 @@ if __name__ == '__main__':
     parser.add_argument('tests_path', type=str, help='path to tests (input)')
     parser.add_argument('-r', '--results_path', type=str, default='results.json', help='path to results (output) [default=./results.json]')
     parser.add_argument('-d', '--debugmode', help='force show test output', action='store_true')
+    parser.add_argument('-t', '--tests', type=str, default='*')
     
     args = parser.parse_args()
-    tests_filename = args.tests_path
     results_filename = args.results_path
     
-    if args.debugmode:
-        print('===DEBUGMODE===')
-
-    results = main(tests_filename, args.debugmode)
+    results = main(args)
         
     #print(json.dumps(results, sort_keys=True, indent=4))
     with open(results_filename,'wt') as f:

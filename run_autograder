@@ -17,16 +17,20 @@ provided_files=()
 ################################################################################
 
 usage() {
-  echo "Usage: $0 [-d] [-h]"
-  echo "  -d run autograder script (-> tests) in debug mode"
-  echo "  -h show this help message and exit"
+  echo "Usage: $0 [-d] [-h] [-t <number>]"
+  echo "  -d          run autograder script (-> tests) in debug mode"
+  echo "  -h          show this help message and exit"
+  echo "  -t <number> run test(s) with specified number"
 }
 
 debugmode=0
-while getopts "dh" flag; do
+while getopts "dht:" flag; do
   case "${flag}" in
     d)
       debugmode=1
+      ;;
+    t)
+      tests=${OPTARG}
       ;;
     h | *) # display help
       usage
@@ -72,10 +76,18 @@ done
 cp $AUTOGRADER_CORE_REPO/run_autograder_script.sh ras
 chmod u+x ./ras
 
+flags=""
 if [ $debugmode -eq 1 ]; then
-  ./ras -d "${files_to_submit[@]}" "${provided_files[@]}"
+  flags="${flags} -d"
+fi
+if [ ! -z  "${tests}" ]; then
+  flags="${flags} -t $tests"
+fi
+
+if [ ! -z "${flags}" ]; then
+  ./ras ${flags} "${files_to_submit[@]}" "${provided_files[@]}"
 else
   ./ras "${files_to_submit[@]}" "${provided_files[@]}"
-fi
+fi 
 
 rm ras

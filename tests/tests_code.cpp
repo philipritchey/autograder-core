@@ -169,3 +169,16 @@ code.cpp
 */
 <test>
 </test>
+
+/*
+@skip: True
+@number: 8
+@name: skipped example
+@points: 1
+@show_output: True
+@type: script
+@target: code_interactive.cpp
+*/
+<test>
+  script_tests/example.sh
+</test>
