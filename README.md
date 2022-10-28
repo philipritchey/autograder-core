@@ -42,6 +42,7 @@ the core autograder functionality common to all assignments.
 @show_output: True          // optional. string value (case insensitive "true" / "false", default = false)
 @include: <sstream> "foo.h" // optional. files to include in unit test (default = empty)
 @timeout: 20                // optional. floating-point number of seconds before test times out (default = 10)
+@skip: True                 // optional. string value (case insensitive "true" / "false", default = false)
 ```
 
 ### test types
@@ -119,7 +120,7 @@ TODO
 @target: code.cpp
 */
 <test>
-  script_tests/custom.sh
+  script_tests/custom.sh [optional command line arguments]
 </test>
 ```
 
