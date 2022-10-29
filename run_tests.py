@@ -18,8 +18,6 @@ from time import time
 import json
 import argparse
 
-# import attr
-
 # TODO(pcr): move configuration stuff to configuration file (and let it be assignment-specific)
 BEGIN_TEST_DELIMITER = '<test>'
 END_TEST_DELIMITER = '</test>'
