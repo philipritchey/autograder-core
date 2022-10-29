@@ -18,7 +18,7 @@ from time import time
 import json
 import argparse
 
-import attr
+# import attr
 
 # TODO(pcr): move configuration stuff to configuration file (and let it be assignment-specific)
 BEGIN_TEST_DELIMITER = '<test>'
@@ -346,7 +346,7 @@ def read_tests(filename: str) -> List[Attributes]:
                 # has args
                 script_filename_string = values[0]
                 attributes['script_args'] = values[1]
-                
+
             # print("Script filename: " + script_filename_string)
 
             index,line = goto_next_line(index, lines, filename)
@@ -603,7 +603,7 @@ def remove_end_of_line_whitespace(s: str) -> str:
     lines = s.split('\n')
     lines = [line.rstrip() for line in lines]
     return '\n'.join(lines)
-    
+
 
 def run_io_test(timeout: float) -> Tuple[bool,str]:
     run_cmd = ["./io_test", "2>&1"]
@@ -623,10 +623,10 @@ def run_io_test(timeout: float) -> Tuple[bool,str]:
 
         with open('output.txt', 'r') as file:
             gt_string = file.read().replace('\r', '').rstrip()
-        
+
         gt_string = remove_end_of_line_whitespace(gt_string)
         output_str = remove_end_of_line_whitespace(output_str)
-        
+
         message_to_student += f"The input:\n{input_data.rstrip()}\n\n"
         message_to_student += f"Your output:\n{output_str}\n\n"
         message_to_student += f"Expected output:\n{gt_string}\n\n"
@@ -716,10 +716,10 @@ def main(args) -> Result:
     debugmode = args.debugmode
     if debugmode:
         print('===DEBUGMODE===')
-    
+
     result_score = 0.0
     test_results: List[TestResult] = list()
-    
+
     fail_result: Result = {
         'score': 0.0,
         'output': '',
@@ -735,8 +735,8 @@ def main(args) -> Result:
         print('[FATAL] Error occured while reading tests:')
         print(err)
         return fail_result
-    
-    
+
+
     if test_number != '*':
         # run only those tests with number that matches test_number
         #   '5' means run all tests numbered 5: 5[.1, 5.2, ...]
@@ -912,7 +912,7 @@ def main(args) -> Result:
 
     t = int(result_score * 10000 + 0.5)
     result_score = t / 10000
-    
+
     str_score = f'{result_score:6.2f}'
     str_possible = f'{possible:6.2f}'
     print('###########################')
@@ -969,18 +969,18 @@ def ordinal_suffix(n: int) -> str:
 
 if __name__ == '__main__':
     # TODO(pcr): add command line option to run a specific test or set of tests
-    
+
     parser = argparse.ArgumentParser()
     parser.add_argument('tests_path', type=str, help='path to tests (input)')
     parser.add_argument('-r', '--results_path', type=str, default='results.json', help='path to results (output) [default=./results.json]')
     parser.add_argument('-d', '--debugmode', help='force show test output', action='store_true')
     parser.add_argument('-t', '--tests', type=str, default='*')
-    
+
     args = parser.parse_args()
     results_filename = args.results_path
-    
+
     results = main(args)
-        
+
     #print(json.dumps(results, sort_keys=True, indent=4))
     with open(results_filename,'wt') as f:
         json.dump(results, f, sort_keys=True, indent=4)
