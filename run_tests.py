@@ -963,6 +963,8 @@ def snarky_comment_about_number_of_submissions(n: int) -> str:
     return "I'm not even mad, that's amazing."
 
 def ordinal_suffix(n: int) -> str:
+    if n > 10 and n < 20:
+        return "th" 
     return ["th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th"][n%10]
 
 if __name__ == '__main__':
