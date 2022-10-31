@@ -1010,5 +1010,5 @@ if __name__ == '__main__':
         currentResult["output"] += snarky_comment_about_number_of_submissions(submission_cnt) + "\n"
 
         with open('/autograder/results/results.json', 'w') as f:
-            json.dump(currentResult, f)
+            json.dump(currentResult, f, sort_keys=True, indent=4)
     # else running on local so no need to compute max score
