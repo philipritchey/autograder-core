@@ -675,6 +675,8 @@ def run_script_test(timeout: float, args: str = '') -> Tuple[bool,str,float]:
         score = float(output_string)
     except subprocess.TimeoutExpired as e:
         debug_string = "Timeout during test execution, check for an infinite loop\n"
+    except UnicodeDecodeError as e:
+        debug_string = "Malformed output is unreadable, check for non-utf-8 characters\n"
 
     return (score > 0.0), debug_string, score
 
