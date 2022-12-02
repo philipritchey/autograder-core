@@ -65,6 +65,11 @@ else
     exit 1
   fi
 
+  if [ ! -d "$SUBMISSION" ]; then
+    echo "[FATAL] solution is not where it is expected to be ($(realpath $SUBMISSION))"
+    exit 1
+  fi
+
 fi
 
 # copy provided files into submission directory
