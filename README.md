@@ -24,6 +24,7 @@ the core autograder functionality common to all assignments.
 1. in `setup.sh`:
    * at line 8, install any dependencies your tests require (e.g. valgrind for finding memory errors)
    * double-check: make sure you have created a deploy key for your assignment-specific repo and you have an autograder-core deploy key
+     * Note that if your editor uses CRLF the deploy keys will not work. Ensure that your document is LF only.
    * at lines 51 and 52, set `username` and `repository` to your github username and assignment-specific repository, respectively
 1. in `run_autograder`:
    * at line 6, list the files the students are required to submit
