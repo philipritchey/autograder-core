@@ -18,7 +18,7 @@ array_contains () {
 
 echo 100 > OUTPUT
 
-grep -iPo '^\s*#include\s*(<|")\K(\.*/)*\w+(/\w+)*(\.\w+)?' -- "$filename" | cut -d : -f 2 | while read -r lib; do
+grep -iPo '^\s*#\s*include\s*(<|")\K(\.*/)*\w+(/\w+)*(\.\w+)?' -- "$filename" | cut -d : -f 2 | while read -r lib; do
     if array_contains "$lib" "${approved[@]}"; then
         echo "OK: $lib found in $filename" >> DEBUG
     else
