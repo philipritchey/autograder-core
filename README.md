@@ -30,9 +30,14 @@ the core autograder functionality common to all assignments.
    * at line 6, list the files the students are required to submit
    * at line 11, list the files that are provided
      * provided files are expected to be a folder named `provided` in the root of the repo
+1. in `tests/`:
+   * define your tests in file(s) named `tests_X`.
 1. you should be good to go.  happy testing!
 
 ## writing tests
+
+tests must be located in `tests/` and the filename(s) must match `tests_*`.
+
 ### test attributes
 ```
 @number: 2                  // required. actually a string, used for sorting tests
@@ -81,7 +86,7 @@ TODO
 /*
 @number: 3
 @name: example
-@points: 5 
+@points: 5
 @show_output: True
 @type: i/o
 @target: code.cpp
@@ -153,4 +158,4 @@ this is how you can use the `run_autograder` script when debugging on gradescope
 ./run_autograder -t <number>  # run test(s) with specified number; "5" includes "5.1, 5.2, ..."
 ```
 
-the `-d` and `-t` options can be combined to run a specific test (or group of tests) in debugmode. 
+the `-d` and `-t` options can be combined to run a specific test (or group of tests) in debugmode.

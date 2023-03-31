@@ -2,17 +2,21 @@
 
 usage() {
   echo "Usage: $0 [-d] [-h] [-t <number>]"
-  echo "  -d          run tests in debug mode"
-  echo "  -h          show this help message and exit"
-  echo "  -t <number> run test(s) with specified number"
+  echo "  -d            run tests in debug mode"
+  echo "  -h            show this help message and exit"
+  echo "  -l <language> expected programming language"
+  echo "  -t <number>   run test(s) with specified number"
 }
 
 
 debugmode=0
-while getopts "dht:" flag; do
+while getopts "dhl:t:" flag; do
   case "${flag}" in
     d)
       debugmode=1
+      ;;
+    l)
+      language=${OPTARG}
       ;;
     t)
       tests=${OPTARG}
@@ -85,12 +89,19 @@ done
 
 # copy core test runners to testbox
 cp $AUTOGRADER_CORE_REPO/run_tests.py $TESTBOX/
-cp $AUTOGRADER_CORE_REPO/tests/approved_includes.sh $TESTBOX/
-cp $AUTOGRADER_CORE_REPO/tests/compiles.sh $TESTBOX/
-cp $AUTOGRADER_CORE_REPO/tests/coverage.sh $TESTBOX/
-cp $AUTOGRADER_CORE_REPO/tests/cs12x_test.h $TESTBOX/
-cp $AUTOGRADER_CORE_REPO/tests/memory_errors.sh $TESTBOX/
-
+if [ "${language}" == "c++" ]; then
+  cp $AUTOGRADER_CORE_REPO/tests/approved_includes.sh $TESTBOX/
+  cp $AUTOGRADER_CORE_REPO/tests/compiles.sh $TESTBOX/
+  cp $AUTOGRADER_CORE_REPO/tests/coverage.sh $TESTBOX/
+  cp $AUTOGRADER_CORE_REPO/tests/cs12x_test.h $TESTBOX/
+  cp $AUTOGRADER_CORE_REPO/tests/memory_errors.sh $TESTBOX/
+elif [ "${language}" == "java" ]; then
+  echo "[WARN] java in not yet fully supported"
+  exit 1
+else
+  echo "[FATAL] unsupported language: ${language}"
+  exit 1
+fi
 
 # copy tests to testbox
 cp -r $REPO/tests/* $TESTBOX/
@@ -111,7 +122,7 @@ chmod +x ./coverage.sh
 chmod +x ./memory_errors.sh
 
 # run tests <tests file> [-r results file]
-flags=""
+flags="-l ${language}"
 if [ $debugmode -eq 1 ]; then
   flags="$flags --debugmode"
 fi

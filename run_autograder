@@ -1,14 +1,18 @@
 #!/usr/bin/env bash
 
+# TODO(you): define the expected language
+language=c++
+
 # TODO(you): list files that student must submit
 #            and files that are provided on backend (see below)
 #            note: _only_ these files will be used during testing
 files_to_submit=( code.cpp code_tests.cpp code_interactive.cpp code.h )
+#files_to_submit=( Code.java )
 
 #
 # TODO?(you): list files provided by instructor
 #
-provided_files=()
+provided_files=( )
 
 ################################################################################
 ##
@@ -18,16 +22,20 @@ provided_files=()
 
 usage() {
   echo "Usage: $0 [-d] [-h] [-t <number>]"
-  echo "  -d          run autograder script (-> tests) in debug mode"
-  echo "  -h          show this help message and exit"
-  echo "  -t <number> run test(s) with specified number"
+  echo "  -d            run autograder script (-> tests) in debug mode"
+  echo "  -h            show this help message and exit"
+  echo "  -l <language> expected programming language (default=${language})"
+  echo "  -t <number>   run test(s) with specified number"
 }
 
 debugmode=0
-while getopts "dht:" flag; do
+while getopts "dhl:t:" flag; do
   case "${flag}" in
     d)
       debugmode=1
+      ;;
+    l)
+      language=${OPTARG}
       ;;
     t)
       tests=${OPTARG}
@@ -81,7 +89,8 @@ done
 cp $AUTOGRADER_CORE_REPO/run_autograder_script.sh ras
 chmod u+x ./ras
 
-flags=""
+
+flags="-l ${language}"
 if [ $debugmode -eq 1 ]; then
   flags="${flags} -d"
 fi
@@ -93,6 +102,6 @@ if [ ! -z "${flags}" ]; then
   ./ras ${flags} "${files_to_submit[@]}" "${provided_files[@]}"
 else
   ./ras "${files_to_submit[@]}" "${provided_files[@]}"
-fi 
+fi
 
 rm ras
