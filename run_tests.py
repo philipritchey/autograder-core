@@ -110,32 +110,9 @@ def eat_empty_test_block(fp: FilePosition) -> str:
     return line
 
 
-def read_attributes(fp: FilePosition) -> Attributes:
-    # skip blank lines
-    skip_blank_lines(fp)
-    if fp.index >= len(fp.lines):
-        # at end of file
-        empty_attr: Attributes = {
-            'number': '',
-            'name': '',
-            'points': 0.0,
-            'type': '',
-            'target': '',
-            'show_output': '',
-            'timeout': 0.0,
-            'include': '',
-            'code': '',
-            'expected_input':'',
-            'expected_output': '',
-            'script_content': '',
-            'approved_includes': [],
-            'skip': False,
-            'script_args': ''
-        }
-        return empty_attr
-    line = fp.lines[fp.index].strip()
-
+def read_annotations(fp: FilePosition) -> Dict[str, Any]:
     # expect start of multiline comment
+    line = fp.lines[fp.index].strip()
     if line != '/*':
         # filename lineno offset text
         raise SyntaxError('missing expected start of multiline comment: "/*"', (fp.filename, fp.index+1, 1, line))
@@ -181,56 +158,86 @@ def read_attributes(fp: FilePosition) -> Attributes:
         # filename lineno offset text
         raise SyntaxError('missing expected end of multiline comment: "*/"', (fp.filename, fp.index+1, 1, line))
 
+    return attr_dict
+
+
+def verify_required_annotations(annotations: Dict[str, Any], fp: FilePosition) -> None:
     # verify all required attributes are present
-    # TODO(pcr): refine attribute requirements
-    #              e.g. target is really only required for unit, i/o, perf, approved_includes
-    #                   compile, memory_errors, coverage could be updated to use it, too, though
-    #                   so... only script doesn't need it, actually.
-    #            number should be optional
     required_attributes = ('name', 'points', 'type', 'target')
     for attribute in required_attributes:
         additonal_details = str()
-        for attr in attr_dict:
-            additonal_details += f'  {attr}: {attr_dict[attr]}\n'
-        if attribute not in attr_dict:
+        for attr in annotations:
+            additonal_details += f'  {attr}: {annotations[attr]}\n'
+        if attribute not in annotations and type != 'script':
             raise KeyError(f'({fp.filename}:{fp.index+1}) missing required attribute: {attribute}\n{additonal_details}')
-        if attr_dict[attribute] == '':
+        if annotations[attribute] == '':
             raise ValueError(f'({fp.filename}:{fp.index+1}) required attribute missing value: {attribute}\n{additonal_details}')
 
+
+
+def apply_default_annotations(annotations: Dict[str, Any]) -> None:
     # set timeouts to default if not specified
-    if 'timeout' not in attr_dict:
-        attr_dict['timeout'] = DEFAULT_TIMEOUT
+    if 'timeout' not in annotations:
+        annotations['timeout'] = DEFAULT_TIMEOUT
 
     # set show_output to default if not specified
-    if 'show_output' not in attr_dict:
-        if attr_dict['type'] == 'approved_includes' or attr_dict['type'] == 'performance' or attr_dict['type'] == 'coverage' or attr_dict['type'] == 'compile' or attr_dict['type'] == 'memory_errors':
-            attr_dict['show_output'] = 'True'
+    if 'show_output' not in annotations:
+        if annotations['type'] == 'approved_includes' or annotations['type'] == 'performance' or annotations['type'] == 'coverage' or annotations['type'] == 'compile' or annotations['type'] == 'memory_errors':
+            annotations['show_output'] = 'True'
         else:
-            attr_dict['show_output'] = DEFAULT_SHOW_OUTPUT
+            annotations['show_output'] = DEFAULT_SHOW_OUTPUT
 
-    if 'include' not in attr_dict:
-        attr_dict['include'] = ''
+    if 'include' not in annotations:
+        annotations['include'] = ''
 
-    if 'skip' in attr_dict and attr_dict['skip'].lower() == 'true':
-        attr_dict['skip'] = True
+    if 'skip' in annotations and annotations['skip'].lower() == 'true':
+        annotations['skip'] = True
     else:
-        attr_dict['skip'] = False
+        annotations['skip'] = False
+
+def read_attributes(fp: FilePosition) -> Attributes:
+    # skip blank lines
+    skip_blank_lines(fp)
+    if fp.index >= len(fp.lines):
+        # at end of file
+        empty_attr: Attributes = {
+            'number': '',
+            'name': '',
+            'points': 0.0,
+            'type': '',
+            'target': '',
+            'show_output': '',
+            'timeout': 0.0,
+            'include': '',
+            'code': '',
+            'expected_input':'',
+            'expected_output': '',
+            'script_content': '',
+            'approved_includes': [],
+            'skip': False,
+            'script_args': ''
+        }
+        return empty_attr
+
+    annotations = read_annotations(fp)
+    verify_required_annotations(annotations, fp)
+    apply_default_annotations(annotations)
 
     attributes: Attributes = {
-        'number': attr_dict['number'],
-        'name': attr_dict['name'],
-        'points': attr_dict['points'],
-        'type': attr_dict['type'],
-        'target': attr_dict['target'],
-        'show_output': attr_dict['show_output'],
-        'timeout': attr_dict['timeout'],
-        'include': attr_dict['include'],
+        'number': annotations['number'],
+        'name': annotations['name'],
+        'points': annotations['points'],
+        'type': annotations['type'],
+        'target': annotations['target'],
+        'show_output': annotations['show_output'],
+        'timeout': annotations['timeout'],
+        'include': annotations['include'],
         'code': '',
         'expected_input':'',
         'expected_output': '',
         'script_content': '',
         'approved_includes': [],
-        'skip': attr_dict['skip'],
+        'skip': annotations['skip'],
         'script_args': ''
         }
 
@@ -434,8 +441,7 @@ def read_tests(filename: str) -> List[Attributes]:
     while fp.index < len(fp.lines):
         # expect next lines to be only attributes and values
         attributes = read_attributes(fp)
-        #print(f'{fp.filename}:{fp.index}')
-        #print(fp.lines[fp.index])
+
         if fp.index < 0:
             # at end of file
             break
