@@ -92,14 +92,14 @@ chmod u+x ./ras
 
 flags="-l ${language}"
 if [ $debugmode -eq 1 ]; then
-  flags="${flags} -d"
+  flags="$flags -d"
 fi
 if [ ! -z  "${tests}" ]; then
-  flags="${flags} -t $tests"
+  flags="$flags -t $tests"
 fi
 
 if [ ! -z "${flags}" ]; then
-  ./ras ${flags} "${files_to_submit[@]}" "${provided_files[@]}"
+  ./ras $flags "${files_to_submit[@]}" "${provided_files[@]}"
 else
   ./ras "${files_to_submit[@]}" "${provided_files[@]}"
 fi

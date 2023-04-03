@@ -162,7 +162,7 @@ code.cpp
 
 /*
 @number: number
-@name: semantically invalid
+@name: semantically invalid test
 @points: -F
 @type: type
 @target: target
