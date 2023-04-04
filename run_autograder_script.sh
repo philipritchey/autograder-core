@@ -51,7 +51,6 @@ if [ -d /autograder ]; then
   TESTBOX=/autograder/testbox
   REPO=/autograder/autograder-code
   AUTOGRADER_CORE_REPO=/autograder/autograder-core
-  TESTS=$REPO/tests
   SUBMISSION=/autograder/submission
   RESULTS_DIR=/autograder/results
 
@@ -61,11 +60,22 @@ else
   TESTBOX=testbox
   REPO=$BASE_DIR
   AUTOGRADER_CORE_REPO=$BASE_DIR/../autograder-core
-  TESTS=$REPO/tests
-  SUBMISSION=$BASE_DIR/solution
+  SUBMISSION=$BASE_DIR/solution/$language
   RESULTS_DIR=$BASE_DIR
 
 fi
+
+case "$language" in
+  c++)
+    TESTS=$REPO/tests/c++
+    ;;
+  java)
+    TESTS=$REPO/tests/java
+    ;;
+  *)
+    echo "Unsupported Language: $language"
+    exit 1
+esac
 
 rm -rf $TESTBOX
 mkdir $TESTBOX
@@ -90,11 +100,11 @@ done
 # copy core test runners to testbox
 cp $AUTOGRADER_CORE_REPO/run_tests.py $TESTBOX/
 if [ "${language}" == "c++" ]; then
-  cp $AUTOGRADER_CORE_REPO/tests/approved_includes.sh $TESTBOX/
-  cp $AUTOGRADER_CORE_REPO/tests/compiles.sh $TESTBOX/
-  cp $AUTOGRADER_CORE_REPO/tests/coverage.sh $TESTBOX/
-  cp $AUTOGRADER_CORE_REPO/tests/cs12x_test.h $TESTBOX/
-  cp $AUTOGRADER_CORE_REPO/tests/memory_errors.sh $TESTBOX/
+  cp $AUTOGRADER_CORE_REPO/tests/c++/approved_includes.sh $TESTBOX/
+  cp $AUTOGRADER_CORE_REPO/tests/c++/compiles.sh $TESTBOX/
+  cp $AUTOGRADER_CORE_REPO/tests/c++/coverage.sh $TESTBOX/
+  cp $AUTOGRADER_CORE_REPO/tests/c++/cs12x_test.h $TESTBOX/
+  cp $AUTOGRADER_CORE_REPO/tests/c++/memory_errors.sh $TESTBOX/
 elif [ "${language}" == "java" ]; then
   echo "[WARN] java in not yet fully supported"
   exit 1
@@ -104,7 +114,7 @@ else
 fi
 
 # copy tests to testbox
-cp -r $REPO/tests/* $TESTBOX/
+cp -r $TESTS/* $TESTBOX/
 
 # collect and enable tests
 cd $TESTBOX

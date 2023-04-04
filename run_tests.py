@@ -26,6 +26,8 @@ EMPTY_TEST_BLOCK = '<test/>'
 DEFAULT_POINTS = 0.0
 DEFAULT_TIMEOUT = 10.0
 DEFAULT_SHOW_OUTPUT = 'false'
+DEFAULT_NUMBER = ''
+DEFAULT_TARGET = ''
 
 TIMEOUT_MSSG = 'Timeout during test execution, check for an infinite loop\n'
 OCTOTHORPE_LINE = '#'*27
@@ -109,13 +111,27 @@ def eat_empty_test_block(fp: FilePosition) -> str:
         raise SyntaxError(f'expected empty test block: "{EMPTY_TEST_BLOCK}"', (fp.filename, fp.index+1, 1, line))
     return line
 
+def current_line(fp: FilePosition) -> str:
+    return fp.lines[fp.index].strip()
 
-def read_annotations(fp: FilePosition) -> Dict[str, Any]:
+def expect_start_of_multiline_comment(fp: FilePosition) -> None:
     # expect start of multiline comment
-    line = fp.lines[fp.index].strip()
+    line = current_line(fp)
     if line != '/*':
         # filename lineno offset text
         raise SyntaxError('missing expected start of multiline comment: "/*"', (fp.filename, fp.index+1, 1, line))
+
+
+def expect_end_of_multiline_comment(fp: FilePosition) -> None:
+    # expect end of multiline comment
+    line = current_line(fp)
+    if line != '*/':
+        # filename lineno offset text
+        raise SyntaxError('missing expected end of multiline comment: "*/"', (fp.filename, fp.index+1, 1, line))
+
+
+def read_annotations(fp: FilePosition) -> Dict[str, Any]:
+    expect_start_of_multiline_comment(fp)
 
     # go to next line
     line = goto_next_line(fp)
@@ -153,29 +169,37 @@ def read_annotations(fp: FilePosition) -> Dict[str, Any]:
         # go to next line
         line = goto_next_line(fp)
 
-    # expect end of multiline comment
-    if line != '*/':
-        # filename lineno offset text
-        raise SyntaxError('missing expected end of multiline comment: "*/"', (fp.filename, fp.index+1, 1, line))
+    expect_end_of_multiline_comment(fp)
 
     return attr_dict
 
 
 def verify_required_annotations(annotations: Dict[str, Any], fp: FilePosition) -> None:
     # verify all required attributes are present
+    # 'target' not required for script tests
     required_attributes = ('name', 'points', 'type', 'target')
-    for attribute in required_attributes:
-        additonal_details = str()
-        for attr in annotations:
-            additonal_details += f'  {attr}: {annotations[attr]}\n'
-        if attribute not in annotations and type != 'script':
-            raise KeyError(f'({fp.filename}:{fp.index+1}) missing required attribute: {attribute}\n{additonal_details}')
-        if annotations[attribute] == '':
-            raise ValueError(f'({fp.filename}:{fp.index+1}) required attribute missing value: {attribute}\n{additonal_details}')
 
+    additonal_details = str()
+    for attr in annotations:
+        additonal_details += f'  {attr}: {annotations[attr]}\n'
+
+    for attribute in required_attributes:
+        # if test type is not script or attribute is not target
+        #   -> target is not required for script tests
+        if attribute != 'target' or annotations['type'] != 'script':
+            if attribute not in annotations:
+                raise KeyError(f'({fp.filename}:{fp.index+1}) missing required attribute: {attribute}\n{additonal_details}')
+            if annotations[attribute] == '':
+                raise ValueError(f'({fp.filename}:{fp.index+1}) required attribute missing value: {attribute}\n{additonal_details}')
 
 
 def apply_default_annotations(annotations: Dict[str, Any]) -> None:
+    if 'number' not in annotations:
+        annotations['number'] = DEFAULT_NUMBER
+
+    if 'target' not in annotations:
+        annotations['target'] = DEFAULT_TARGET
+
     # set timeouts to default if not specified
     if 'timeout' not in annotations:
         annotations['timeout'] = DEFAULT_TIMEOUT
@@ -198,9 +222,7 @@ def apply_default_annotations(annotations: Dict[str, Any]) -> None:
 def read_attributes(fp: FilePosition) -> Attributes:
     # skip blank lines
     skip_blank_lines(fp)
-    if fp.index >= len(fp.lines):
-        # at end of file
-        empty_attr: Attributes = {
+    attributes: Attributes = {
             'number': '',
             'name': '',
             'points': 0.0,
@@ -217,29 +239,23 @@ def read_attributes(fp: FilePosition) -> Attributes:
             'skip': False,
             'script_args': ''
         }
-        return empty_attr
+    if fp.index >= len(fp.lines):
+        # at end of file
+        return attributes
 
     annotations = read_annotations(fp)
     verify_required_annotations(annotations, fp)
     apply_default_annotations(annotations)
 
-    attributes: Attributes = {
-        'number': annotations['number'],
-        'name': annotations['name'],
-        'points': annotations['points'],
-        'type': annotations['type'],
-        'target': annotations['target'],
-        'show_output': annotations['show_output'],
-        'timeout': annotations['timeout'],
-        'include': annotations['include'],
-        'code': '',
-        'expected_input':'',
-        'expected_output': '',
-        'script_content': '',
-        'approved_includes': [],
-        'skip': annotations['skip'],
-        'script_args': ''
-        }
+    attributes['number'] = annotations['number']
+    attributes['name'] = annotations['name']
+    attributes['points'] = annotations['points']
+    attributes['type'] = annotations['type']
+    attributes['target'] = annotations['target']
+    attributes['show_output'] = annotations['show_output']
+    attributes['timeout'] = annotations['timeout']
+    attributes['include'] = annotations['include']
+    attributes['skip'] = annotations['skip']
 
     return attributes
 
@@ -736,7 +752,9 @@ def write_test(test: Attributes) -> bool:
     return True
 
 def compile_test(test: Attributes) -> Tuple[bool, bool, str]:
+    compiles = False
     compile_output = ''
+    ok = True
     if test['type'] == 'unit':
         compiles, compile_output = compile_unit_test()
     elif test['type'] == 'i/o':
@@ -755,8 +773,8 @@ def compile_test(test: Attributes) -> Tuple[bool, bool, str]:
         compiles, compile_output = compile_memory_errors_test()
     else:
         print(INFO_UNSUPPORTED_TEST)
-        return False, False, None
-    return True, compiles, compile_output
+        ok = False
+    return ok, compiles, compile_output
 
 def run_test(test: Attributes) -> Tuple[bool, str, bool, bool, float, float]:
     max_points = float(test['points'])

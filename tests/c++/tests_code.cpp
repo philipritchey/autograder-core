@@ -85,8 +85,21 @@ code.cpp
 </test>
 
 /*
-@number: 4
+@number: 4.1
 @name: unit example
+@points: 1
+@show_output: True
+@type: unit
+@target: code.cpp
+*/
+<test>
+    EXPECT_FALSE(is_prime(867));
+    EXPECT_TRUE(is_prime(5309));
+    EXPECT_TRUE(is_prime(8675309));
+</test>
+
+/*
+@name: number is optional
 @points: 1
 @show_output: True
 @type: unit
@@ -177,7 +190,6 @@ code.cpp
 @points: 1
 @show_output: True
 @type: script
-@target: code_interactive.cpp
 */
 <test>
   script_tests/example.sh
@@ -189,7 +201,6 @@ code.cpp
 @points: 1
 @show_output: True
 @type: script
-@target: code_interactive.cpp
 */
 <test>
   script_tests/example.sh -h
