@@ -5,7 +5,7 @@ from time import time
 from typing import Tuple
 from attributes import Attributes
 
-from config import TIMEOUT_MSSG
+from config import JAVA_CLASSPATH, TIMEOUT_MSSG
 from test_types import UnsupportedTestException
 
 
@@ -19,7 +19,7 @@ def class_name(filename):
     return filename[:-5]
 
 def run_unit_test(timeout: float) -> Tuple[bool,str]:
-    run_cmd = ["java", "-classpath", ".", 'UnitTest', "2>&1"]
+    run_cmd = ["java", "-classpath", JAVA_CLASSPATH, 'UnitTestRunner', "2>&1"]
     p = subprocess.Popen(run_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     try:
         output_en, _ = p.communicate(timeout=timeout) #p.stdout.decode('utf-8')

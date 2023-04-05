@@ -23,26 +23,55 @@ Code.java
 </test>
 
 /*
-@number: 4.1
-@name: unit example
-@points: 1
+@number: 4.1.1
+@name: basic unit example
+@points: 0.5
 @show_output: True
 @type: unit
 @target: Code.java
 */
 <test>
   String reason = "867 is not prime.";
-  boolean pass;
   if (Code.isPrime(867)) {
-    System.out.println("[FAIL]" + reason);
-    pass = false;
+    System.out.println("[FAIL] " + reason);
+    System.exit(1);  // signal failure to test runner
   } else {
-    System.out.println("[PASS]" + reason);
-    pass = true;
+    System.out.println("[PASS] " + reason);
+    System.exit(0);  // signal success to test runner
   }
-  //assertThat(is_prime(867), not(true));
-  //assertThat(is_prime(5309), is(true));
-  //assertThat(is_prime(8675309), is(true));
+</test>
+
+/*
+@number: 4.1.2
+@name: basic unit example
+@points: 0.5
+@show_output: True
+@type: unit
+@target: Code.java
+*/
+<test>
+  String reason = "5309 is prime.";
+  if (!Code.isPrime(5309)) {
+    System.out.println("[FAIL] " + reason);
+    System.exit(1);  // signal failure to test runner
+  } else {
+    System.out.println("[PASS] " + reason);
+    System.exit(0);  // signal success to test runner
+  }
+</test>
+
+/*
+@number: 4.2
+@name: junit example
+@points: 1
+@show_output: True
+@type: unit
+@target: Code.java
+*/
+<test>
+  assertThat(Code.isPrime(867), not(true));
+  assertThat(Code.isPrime(5309), is(true));
+  assertThat(Code.isPrime(8675309), is(true));
 </test>
 
 /*

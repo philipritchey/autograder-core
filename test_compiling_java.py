@@ -2,15 +2,14 @@ from typing import List, Tuple
 from os import popen
 
 from attributes import Attributes
+from config import JAVA_CLASSPATH, JAVA_FLAGS, JAVAC
 from test_types import UnsupportedTestException
 
 
 def compile_x_test(src: List[str] = None) -> Tuple[bool,str]:
-    JAVAC = 'javac'
-    FLAGS = '-Xlint -source 11 -g'
     SRC = ' '.join(src)
 
-    compile_cmd = '{} {} {} 2>&1'.format(JAVAC, FLAGS, SRC)
+    compile_cmd = '{} {} {} 2>&1'.format(JAVAC, JAVA_FLAGS, SRC)
     p = popen(compile_cmd)
     try:
         output = p.read()
@@ -20,7 +19,7 @@ def compile_x_test(src: List[str] = None) -> Tuple[bool,str]:
     return ret == None, output
 
 def compile_unit_test(src: List[str]) -> Tuple[bool,str]:
-    return compile_x_test(['UnitTest.java'] + src)
+    return compile_x_test(src + ['UnitTest.java', 'UnitTestRunner.java', 'TestRunner.java'])
 
 def compile_performance_test(src: List[str]) -> Tuple[bool,str]:
     return compile_x_test(src)

@@ -14,3 +14,8 @@ TIMEOUT_MSSG = 'Timeout during test execution, check for an infinite loop\n'
 OCTOTHORPE_LINE = '#'*27
 OCTOTHORPE_WALL = '#'+' '*25+'#'
 INFO_UNSUPPORTED_TEST = '[INFO] Unsupported Test'
+
+# java compilation config
+JAVA_CLASSPATH = ".:./lib/hamcrest-2.2.jar:./lib/junit-4.13.2.jar"
+JAVAC = 'javac'
+JAVA_FLAGS = '-Xlint -source 11 -g -cp ' + JAVA_CLASSPATH

@@ -123,6 +123,13 @@ elif [ "${language}" == "java" ]; then
   cp $AUTOGRADER_CORE_REPO/tests/java/compiles.sh $TESTBOX/
   echo "[TODO] coverage report"
   echo "[TODO] unit testing"
+  mkdir $TESTBOX/lib
+  cp $AUTOGRADER_CORE_REPO/tests/java/lib/hamcrest-2.2.jar $TESTBOX/lib
+  cp $AUTOGRADER_CORE_REPO/tests/java/lib/jacocoagent.jar $TESTBOX/lib
+  cp $AUTOGRADER_CORE_REPO/tests/java/lib/jacococli.jar $TESTBOX/lib
+  cp $AUTOGRADER_CORE_REPO/tests/java/lib/junit-4.13.2.jar $TESTBOX/lib
+  cp $AUTOGRADER_CORE_REPO/tests/java/TestRunner.java $TESTBOX/
+  cp $AUTOGRADER_CORE_REPO/tests/java/UnitTestRunner.java $TESTBOX/
   echo "[TODO] performance testing"
   cp $AUTOGRADER_CORE_REPO/test_writing_java.py $TESTBOX/
   cp $AUTOGRADER_CORE_REPO/test_compiling_java.py $TESTBOX/

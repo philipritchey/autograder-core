@@ -1,18 +1,19 @@
 from attributes import Attributes
 from test_types import UnsupportedTestException
 
-
 def write_unit_test(test: Attributes) -> None:
     with open('UnitTest.java', 'wt') as f:
-        f.write('public class UnitTest {\n')
-        f.write('  public static void main(String... args) {\n')
+        f.write('import static org.hamcrest.MatcherAssert.assertThat;\n')
+        f.write('import static org.hamcrest.Matchers.*;\n')
+        f.write('import static org.junit.Assert.assertThrows;\n\n')
+        
+        f.write('import junit.framework.TestCase;\n')
+        f.write('import org.junit.Test;\n\n')
+
+        f.write('public class UnitTest extends TestCase {\n')
+        f.write('  @Test\n')
+        f.write('  public void testUnit() {\n')
         f.write('    {}\n'.format('\n    '.join(test['code'].splitlines())))
-        f.write('    if (pass) {\n')
-        f.write('      System.out.println("[PASS] test passed");\n')
-        f.write('    } else {\n')
-        f.write('      System.out.println("[FAIL] test failed");\n')
-        f.write('    }\n')
-        f.write('    System.exit(pass ? 0 : 1);\n')
         f.write('  }\n')
         f.write('}\n')
 
