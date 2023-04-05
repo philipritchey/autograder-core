@@ -20,7 +20,7 @@ def compile_x_test(src: List[str] = None) -> Tuple[bool,str]:
     return ret == None, output
 
 def compile_unit_test(src: List[str]) -> Tuple[bool,str]:
-    return compile_x_test(src)
+    return compile_x_test(['UnitTest.java'] + src)
 
 def compile_performance_test(src: List[str]) -> Tuple[bool,str]:
     return compile_x_test(src)

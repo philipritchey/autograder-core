@@ -53,6 +53,8 @@ struct cout_redirect {
     }
 };
 
+#define INIT_TEST bool pass = true;
+
 #define RESULT(X) if (X) {\
 	std::cout << "[PASS] all tests passing";\
 } else {\
@@ -211,8 +213,6 @@ catch (...) {\
   RESULT(false);\
   return 1;\
 }
-
-#define INIT_TEST bool pass = true;
 
 #define STARTING(X) std::cout << "Starting test_" << #X << "..." << std::endl;
 #define TEST(X) STARTING(X); test_##X() ? pass_cnt++ : fail_cnt++;

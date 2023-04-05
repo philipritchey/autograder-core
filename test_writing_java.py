@@ -3,18 +3,17 @@ from test_types import UnsupportedTestException
 
 
 def write_unit_test(test: Attributes) -> None:
-    with open('unit_test.cpp', 'wt') as f:
-        f.write(f"#include \"{test['target']}\"\n\n")
-        if len(test['include']) > 0:
-            for include in test['include'].split():
-                f.write(f'#include {include}\n')
-        f.write('#include "cs12x_test.h"\n\n')
-
-        f.write('int main() {\n')
-        f.write('    INIT_TEST;\n')
+    with open('UnitTest.java', 'wt') as f:
+        f.write('public class UnitTest {\n')
+        f.write('  public static void main(String... args) {\n')
         f.write('    {}\n'.format('\n    '.join(test['code'].splitlines())))
-        f.write('    RESULT(pass);\n')
-        f.write('    return pass ? 0 : 1;\n')
+        f.write('    if (pass) {\n')
+        f.write('      System.out.println("[PASS] test passed");\n')
+        f.write('    } else {\n')
+        f.write('      System.out.println("[FAIL] test failed");\n')
+        f.write('    }\n')
+        f.write('    System.exit(pass ? 0 : 1);\n')
+        f.write('  }\n')
         f.write('}\n')
 
 def write_performance_test(test: Attributes) -> None:

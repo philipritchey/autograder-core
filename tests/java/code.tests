@@ -23,6 +23,29 @@ Code.java
 </test>
 
 /*
+@number: 4.1
+@name: unit example
+@points: 1
+@show_output: True
+@type: unit
+@target: Code.java
+*/
+<test>
+  String reason = "867 is not prime.";
+  boolean pass;
+  if (Code.isPrime(867)) {
+    System.out.println("[FAIL]" + reason);
+    pass = false;
+  } else {
+    System.out.println("[PASS]" + reason);
+    pass = true;
+  }
+  //assertThat(is_prime(867), not(true));
+  //assertThat(is_prime(5309), is(true));
+  //assertThat(is_prime(8675309), is(true));
+</test>
+
+/*
 @number: 5.1
 @name: i/o example with output shown
 @points: 1
