@@ -20,8 +20,12 @@ for file in "${source[@]}"; do
   fi
 done
 
+# clean up before compiling
+rm -f *.class
+
 printf "compiles without errors? " >> DEBUG
-if javac -Xlint "${source[@]}" 1>OUT 2>ERR; then
+classpath=.:./lib/hamcrest-2.2.jar:./lib/junit-4.13.2.jar
+if javac -Xlint -source 11 -g -cp $classpath "${source[@]}" 1>OUT 2>ERR; then
   printf "OK\n" >> DEBUG
 else
   printf "NO\n" >> DEBUG

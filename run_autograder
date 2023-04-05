@@ -8,7 +8,7 @@ language=java
 #            and files that are provided on backend (see below)
 #            note: _only_ these files will be used during testing
 #files_to_submit=( code.cpp code_tests.cpp code_interactive.cpp code.h )
-files_to_submit=( Code.java )
+files_to_submit=( Code.java CodeTests.java CodeTestRunner.java )
 
 #
 # TODO?(you): list files provided by instructor

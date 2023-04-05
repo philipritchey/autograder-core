@@ -23,6 +23,21 @@ Code.java
 </test>
 
 /*
+@number: 3
+@name: test coverage
+@points: 1
+@show_output: True
+@type: coverage
+@target: CodeTests.java
+@timeout: 30
+*/
+<test>
+  source: Code.java
+  main: CodeTestRunner.java
+  target: Code.java
+</test>
+
+/*
 @number: 4.1.1
 @name: basic unit example
 @points: 0.5

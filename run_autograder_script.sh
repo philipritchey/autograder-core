@@ -121,8 +121,8 @@ elif [ "${language}" == "java" ]; then
   echo "[WARN] java is not yet fully supported"
   cp $AUTOGRADER_CORE_REPO/tests/java/approved_includes.sh $TESTBOX/
   cp $AUTOGRADER_CORE_REPO/tests/java/compiles.sh $TESTBOX/
-  echo "[TODO] coverage report"
-  echo "[TODO] unit testing"
+  cp $AUTOGRADER_CORE_REPO/tests/java/coverage.sh $TESTBOX/
+  echo "[TODO] style check"
   mkdir $TESTBOX/lib
   cp $AUTOGRADER_CORE_REPO/tests/java/lib/hamcrest-2.2.jar $TESTBOX/lib
   cp $AUTOGRADER_CORE_REPO/tests/java/lib/jacocoagent.jar $TESTBOX/lib
