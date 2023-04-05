@@ -119,7 +119,7 @@ if [ "${language}" == "c++" ]; then
 
 elif [ "${language}" == "java" ]; then
   echo "[WARN] java is not yet fully supported"
-  echo "[TODO] approved imports"
+  cp $AUTOGRADER_CORE_REPO/tests/java/approved_includes.sh $TESTBOX/
   cp $AUTOGRADER_CORE_REPO/tests/java/compiles.sh $TESTBOX/
   echo "[TODO] coverage report"
   echo "[TODO] testing library"

@@ -19,11 +19,11 @@ def compile_x_test(src: List[str] = None) -> Tuple[bool,str]:
     ret = p.close()
     return ret == None, output
 
-def compile_unit_test() -> Tuple[bool,str]:
-    return compile_x_test('unit_test')
+def compile_unit_test(src: List[str]) -> Tuple[bool,str]:
+    return compile_x_test(src)
 
-def compile_performance_test() -> Tuple[bool,str]:
-    return compile_x_test('performance_test')
+def compile_performance_test(src: List[str]) -> Tuple[bool,str]:
+    return compile_x_test(src)
 
 def compile_io_test(src: List[str]) -> Tuple[bool,str]:
     return compile_x_test(src)
@@ -47,13 +47,13 @@ def compile_test(test: Attributes) -> Tuple[bool, str]:
     compiles = False
     compile_output = ''
     if test['type'] == 'unit':
-        compiles, compile_output = compile_unit_test()
+        compiles, compile_output = compile_unit_test([test['target'], test['include']])
     elif test['type'] == 'i/o':
         compiles, compile_output = compile_io_test([test['target'], test['include']])
     elif test['type'] == 'script':
         compiles, compile_output = compile_script_test()
     elif test['type'] == 'performance':
-        compiles, compile_output = compile_performance_test()
+        compiles, compile_output = compile_performance_test([test['target'], test['include']])
     elif test['type'] == 'approved_includes':
         compiles, compile_output = compile_approved_includes_test()
     elif test['type'] == 'coverage':

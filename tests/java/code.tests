@@ -1,4 +1,16 @@
 /*
+@number: 00
+@name: approved includes for Code.java
+@points: 1
+@type: approved_includes
+@show_output: True
+@target: Code.java
+*/
+<test>
+java.util.LinkedList
+</test>
+
+/*
 @number: 1
 @name: code compiles without errors or warnings
 @points: 1
