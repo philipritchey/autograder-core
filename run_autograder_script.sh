@@ -98,27 +98,37 @@ for file in "${src_list[@]}"; do
 done
 
 # copy core test runners to testbox
-cp $AUTOGRADER_CORE_REPO/run_tests_$language.py $TESTBOX/run_tests.py
+cp $AUTOGRADER_CORE_REPO/attributes.py $TESTBOX/
+cp $AUTOGRADER_CORE_REPO/config.py $TESTBOX/
+cp $AUTOGRADER_CORE_REPO/run_tests.py $TESTBOX/
+cp $AUTOGRADER_CORE_REPO/test_parsing.py $TESTBOX/
+cp $AUTOGRADER_CORE_REPO/test_types.py $TESTBOX/
 if [ "${language}" == "c++" ]; then
   cp $AUTOGRADER_CORE_REPO/tests/c++/approved_includes.sh $TESTBOX/
   cp $AUTOGRADER_CORE_REPO/tests/c++/compiles.sh $TESTBOX/
   cp $AUTOGRADER_CORE_REPO/tests/c++/coverage.sh $TESTBOX/
   cp $AUTOGRADER_CORE_REPO/tests/c++/cs12x_test.h $TESTBOX/
   cp $AUTOGRADER_CORE_REPO/tests/c++/memory_errors.sh $TESTBOX/
+  cp $AUTOGRADER_CORE_REPO/test_writing_cpp.py $TESTBOX/
+  cp $AUTOGRADER_CORE_REPO/test_compiling_cpp.py $TESTBOX/
+  cp $AUTOGRADER_CORE_REPO/test_running_cpp.py $TESTBOX/
+
 
   testFile=tests.cpp
-  testPrefix="tests_"
+  testPattern="tests_*"
 
 elif [ "${language}" == "java" ]; then
   echo "[WARN] java is not yet fully supported"
   echo "[TODO] approved imports"
-  echo "[TODO] compile test"
   cp $AUTOGRADER_CORE_REPO/tests/java/compiles.sh $TESTBOX/
   echo "[TODO] coverage report"
   echo "[TODO] testing library"
+  cp $AUTOGRADER_CORE_REPO/test_writing_java.py $TESTBOX/
+  cp $AUTOGRADER_CORE_REPO/test_compiling_java.py $TESTBOX/
+  cp $AUTOGRADER_CORE_REPO/test_running_java.py $TESTBOX/
 
   testFile=tests.java
-  testPrefix=Tests
+  testPattern="*.tests"
 
 else
   echo "[FATAL] unsupported language: ${language}"
@@ -131,7 +141,7 @@ cp -r $TESTS/* $TESTBOX/
 # collect and enable tests
 cd $TESTBOX
 touch $testFile
-for file in $TESTS/$testPrefix*; do
+for file in $TESTS/$testPattern; do
   if [ -f "$file" ]; then
     cat $file >> $testFile
     printf "\n" >> $testFile
@@ -146,7 +156,7 @@ for file in "${scripts[@]}"; do
 done
 
 # run tests <tests file> [-r results file]
-flags=""
+flags="-l $language"
 if [ $debugmode -eq 1 ]; then
   flags="$flags --debugmode"
 fi
