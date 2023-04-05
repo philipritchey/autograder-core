@@ -105,9 +105,18 @@ if [ "${language}" == "c++" ]; then
   cp $AUTOGRADER_CORE_REPO/tests/c++/coverage.sh $TESTBOX/
   cp $AUTOGRADER_CORE_REPO/tests/c++/cs12x_test.h $TESTBOX/
   cp $AUTOGRADER_CORE_REPO/tests/c++/memory_errors.sh $TESTBOX/
+
+  testFile=tests.cpp
+
 elif [ "${language}" == "java" ]; then
-  echo "[WARN] java in not yet fully supported"
-  exit 1
+  echo "[WARN] java is not yet fully supported"
+  echo "[TODO] approved imports"
+  echo "[TODO] compile test"
+  echo "[TODO] coverage report"
+  echo "[TODO] testing library"
+
+  testFile=tests.java
+
 else
   echo "[FATAL] unsupported language: ${language}"
   exit 1
@@ -118,18 +127,20 @@ cp -r $TESTS/* $TESTBOX/
 
 # collect and enable tests
 cd $TESTBOX
-touch tests.cpp
+touch $testFile
 for file in $TESTS/tests_*; do
   if [ -f "$file" ]; then
-	cat $file >> tests.cpp
-    printf "\n" >> tests.cpp
+    cat $file >> $testFile
+    printf "\n" >> $testFile
   fi
 done
 
-chmod +x ./approved_includes.sh
-chmod +x ./compiles.sh
-chmod +x ./coverage.sh
-chmod +x ./memory_errors.sh
+scipts=( approved_includes.sh compiles.sh coverage.sh memory_errors.sh )
+for file in "${scripts[@]}"; do
+  if [ -f "$file" ]; then
+    chmod +x $file
+  fi
+done
 
 # run tests <tests file> [-r results file]
 flags="-l ${language}"
@@ -139,4 +150,4 @@ fi
 if [ ! -z  "${tests}" ]; then
   flags="$flags -t $tests"
 fi
-$python run_tests.py $flags tests.cpp -r $RESULTS_DIR/results.json
+$python run_tests.py $flags $testFile -r $RESULTS_DIR/results.json

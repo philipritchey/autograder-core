@@ -449,9 +449,11 @@ def read_coverage_test(fp: FilePosition) -> Tuple[str, str, List[str]]:
 def read_tests(filename: str) -> List[Attributes]:
     with open(filename) as f:
         lines = f.readlines()
+
     # trim empty lines at end of file
-    while lines[-1].strip() == '':
+    while len(lines) > 0 and lines[-1].strip() == '':
         del lines[-1]
+
     fp = FilePosition(0, lines, filename)
     tests = list()
     while fp.index < len(fp.lines):
@@ -862,6 +864,8 @@ def main(args) -> Result:
                 test['skip'] = True
 
 
+    unapproved_includes = False
+    sufficient_coverage = True
     possible = 0.0
     total_time = 0.0
     for test in tests:
@@ -883,9 +887,13 @@ def main(args) -> Result:
         failed_to_compile = False
         if compiles:
             pack = run_test(test)
-            ok, run_output, unapproved_includes, sufficient_coverage, points, run_time = pack
+            ok, run_output, ui, sc, points, run_time = pack
             if not ok:
                 continue
+            if ui:
+                unapproved_includes = True
+            if not sc:
+                sufficient_coverage = False
             total_time += run_time
         else:
             print('[FAIL] failed to compile\n')
