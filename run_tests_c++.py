@@ -28,11 +28,13 @@ DEFAULT_TIMEOUT = 10.0
 DEFAULT_SHOW_OUTPUT = 'false'
 DEFAULT_NUMBER = ''
 DEFAULT_TARGET = ''
+DEFAULT_VISIBILITY = 'visible'
+DEFAULT_STDOUT_VISIBILITY = 'visible'
 
 TIMEOUT_MSSG = 'Timeout during test execution, check for an infinite loop\n'
 OCTOTHORPE_LINE = '#'*27
 OCTOTHORPE_WALL = '#'+' '*25+'#'
-INFO_UNSUPPORTED_TEST = '[INFO] Unsupported Test'
+INFO_UNSUPPORTED_TEST = '[INFO] Unsupported Test Type'
 
 # file contents with position
 class FilePosition:
@@ -57,6 +59,7 @@ class Attributes(TypedDict):
     approved_includes: List[str]
     skip: bool
     script_args: str
+    visibilty: str
 
 def unexpected_end_of_input(fp: FilePosition) -> Exception:
     # filename lineno offset text
@@ -219,6 +222,9 @@ def apply_default_annotations(annotations: Dict[str, Any]) -> None:
     else:
         annotations['skip'] = False
 
+    if 'visibility' not in annotations:
+        annotations['visibility'] = DEFAULT_VISIBILITY
+
 def read_attributes(fp: FilePosition) -> Attributes:
     # skip blank lines
     skip_blank_lines(fp)
@@ -237,7 +243,8 @@ def read_attributes(fp: FilePosition) -> Attributes:
             'script_content': '',
             'approved_includes': [],
             'skip': False,
-            'script_args': ''
+            'script_args': '',
+            'visibility': ''
         }
     if fp.index >= len(fp.lines):
         # at end of file
@@ -256,6 +263,7 @@ def read_attributes(fp: FilePosition) -> Attributes:
     attributes['timeout'] = annotations['timeout']
     attributes['include'] = annotations['include']
     attributes['skip'] = annotations['skip']
+    attributes['visibility'] = annotations['visibility']
 
     return attributes
 
@@ -495,7 +503,7 @@ def read_tests(filename: str) -> List[Attributes]:
             tests.append(attributes)
 
         else:
-            print('WARNING: undefined test type: {}.  this one will be ignored: {}'.format(test_type, attributes['name']))
+            print(f'WARNING: unsupported test type: {test_type}.  this one will be ignored: {attributes["number"]} {attributes["name"]}')
             _ = eat_block_of_test(fp)
 
         fp.index += 1
@@ -680,7 +688,7 @@ def run_script_test(timeout: float, args: str = '') -> Tuple[bool,str,float]:
     debug_string = ""
     output_string = "0"
     try:
-        output, err = p.communicate(timeout=timeout)
+        _, _ = p.communicate(timeout=timeout)
 
         if os.path.exists('./OUTPUT'):
             with open('./OUTPUT', 'r') as file:
@@ -714,24 +722,38 @@ def run_memory_errors_test(timeout: float) -> Tuple[bool,str,float]:
     return run_script_test(timeout)
 
 class TestResult(TypedDict):
-    number: str
-    name: str
-    score: float
-    max_score: float
-    output: str
-    tags: Optional[List[str]]
+    number:     Optional[str]
+    name:       Optional[str]
+    score:      Optional[float]
+    max_score:  Optional[float]
+    status:     Optional[str]
+    output:     Optional[str]
+    tags:       Optional[List[str]]
     visibility: Optional[str]
     extra_data: Optional[Dict[Any,Any]]
 
 class Result(TypedDict):
-    score: float
-    output: str
-    execution_time: float
-    visibility: str
-    stdout_visibility: str
-    tests: List[TestResult]
+    score:             Optional[float]
+    output:            Optional[str]
+    execution_time:    Optional[float]
+    visibility:        Optional[str]
+    stdout_visibility: Optional[str]
+    tests:             Optional[List[TestResult]]
 
-def write_test(test: Attributes) -> bool:
+class UnsupportedTestException(RuntimeError):
+    pass
+
+SUPPORTED_TEST_TYPES = [
+    'unit',
+    'i/o',
+    'script',
+    'performance',
+    'approved_includes',
+    'coverage',
+    'compile',
+    'memory_errors']
+
+def write_test(test: Attributes):
     if test['type'] == 'unit':
         write_unit_test(test)
     elif test['type'] == 'i/o':
@@ -749,14 +771,12 @@ def write_test(test: Attributes) -> bool:
     elif test['type'] == 'memory_errors':
         write_memory_errors_test(test)
     else:
-        print(INFO_UNSUPPORTED_TEST)
-        return False
-    return True
+        # don't try to write an unsupported test
+        raise UnsupportedTestException(test['type'])
 
-def compile_test(test: Attributes) -> Tuple[bool, bool, str]:
+def compile_test(test: Attributes) -> Tuple[bool, str]:
     compiles = False
     compile_output = ''
-    ok = True
     if test['type'] == 'unit':
         compiles, compile_output = compile_unit_test()
     elif test['type'] == 'i/o':
@@ -774,11 +794,11 @@ def compile_test(test: Attributes) -> Tuple[bool, bool, str]:
     elif test['type'] == 'memory_errors':
         compiles, compile_output = compile_memory_errors_test()
     else:
-        print(INFO_UNSUPPORTED_TEST)
-        ok = False
-    return ok, compiles, compile_output
+        # don't try to compile an unsupported test
+        raise UnsupportedTestException(test['type'])
+    return compiles, compile_output
 
-def run_test(test: Attributes) -> Tuple[bool, str, bool, bool, float, float]:
+def run_test(test: Attributes) -> Tuple[str, bool, bool, float, float]:
     max_points = float(test['points'])
     runs = True
     point_multiplier = 100.0
@@ -807,8 +827,8 @@ def run_test(test: Attributes) -> Tuple[bool, str, bool, bool, float, float]:
     elif test['type'] == 'memory_errors':
         runs, run_output, point_multiplier = run_memory_errors_test(timeout)
     else:
-        print(INFO_UNSUPPORTED_TEST)
-        return False, '', False, False, 0.0, 0.0
+        # don't try to run an unsupported test
+        raise UnsupportedTestException(test['type'])
     time_end = time()
     run_time = time_end - time_start
 
@@ -822,7 +842,7 @@ def run_test(test: Attributes) -> Tuple[bool, str, bool, bool, float, float]:
         print('[FAIL] incorrect behavior\n')
         points = 0
 
-    return True, run_output, unapproved_includes, sufficient_coverage, points, run_time
+    return run_output, unapproved_includes, sufficient_coverage, points, run_time
 
 def main(args) -> Result:
     filename = args.tests_path
@@ -872,32 +892,40 @@ def main(args) -> Result:
         if test['skip']:
             #print(f"test {test['number']}: {test['name']}\n[SKIP]")
             continue
-        max_points = float(test['points'])
-        possible += max_points
         print(f"test {test['number']}: {test['name']}")
 
-        ok = write_test(test)
-        if not ok:
-            continue
+        max_points = float(test['points'])
+        status = 'pre-write'
+        compile_output = str()
+        run_output = str()
+        possible += max_points
 
-        ok, compiles, compile_output = compile_test(test)
-        if not ok:
-            continue
+        write_test(test)
 
-        failed_to_compile = False
+        status = 'created'
+
+        compiles, compile_output = compile_test(test)
+
+        status = 'compiled'
+
+        failed_to_compile = not compiles
         if compiles:
             pack = run_test(test)
-            ok, run_output, ui, sc, points, run_time = pack
-            if not ok:
-                continue
+            run_output, ui, sc, points, run_time = pack
+            if 0 < points < max_points:
+                status = "partial"
+            elif points >= max_points:
+                status = "passed"
             if ui:
+                status = 'failed'
                 unapproved_includes = True
             if not sc:
+                status = 'failed'
                 sufficient_coverage = False
             total_time += run_time
         else:
             print('[FAIL] failed to compile\n')
-            failed_to_compile = True
+            status = 'failed'
             points = 0
 
         result_score += points
@@ -907,9 +935,10 @@ def main(args) -> Result:
             'name': test['name'],
             'score': points,
             'max_score': max_points,
+            'status': status,
             'output': '',
             'tags': [],
-            'visibility': 'visible',
+            'visibility': test['visibility'],
             'extra_data': {}
             }
 
@@ -956,12 +985,25 @@ def main(args) -> Result:
     #     print(OCTOTHORPE_WALL)
     #     print(OCTOTHORPE_LINE)
 
+    passed = 0
+    failed = 0
+    for test in test_results:
+        status = test['status']
+        if status == 'passed':
+            passed += 1
+        elif status == 'failed':
+            failed += 1
+
     t = int(result_score * 10000 + 0.5)
     result_score = t / 10000
-
     str_score = f'{result_score:6.2f}'
     str_possible = f'{possible:6.2f}'
+
     print(OCTOTHORPE_LINE)
+    print(OCTOTHORPE_WALL)
+    print(f'# {len(test_results):3d} tests {" "*13} #')
+    print(f'# {passed:3d} tests passed {" "*6} #')
+    print(f'# {failed:3d} tests failed {" "*6} #')
     print(OCTOTHORPE_WALL)
     if unapproved_includes or not sufficient_coverage:
         str_score = str_score.replace(' ', '~')
@@ -980,8 +1022,8 @@ def main(args) -> Result:
         'score': recorded_score,
         'output': result_output,
         'execution_time': total_time,
-        'visibility': 'visible',
-        'stdout_visibility': 'visible',
+        'visibility': DEFAULT_VISIBILITY,
+        'stdout_visibility': DEFAULT_STDOUT_VISIBILITY,
         'tests': test_results
         }
 
@@ -1026,7 +1068,6 @@ if __name__ == '__main__':
     parser.add_argument('-r', '--results_path', type=str, default='results.json', help='path to results (output) [default=./results.json]')
     parser.add_argument('-d', '--debugmode', help='force show test output', action='store_true')
     parser.add_argument('-t', '--tests', type=str, default='*')
-    parser.add_argument('-l', '--language', type=str, default='c++')
 
     args = parser.parse_args()
     results_filename = args.results_path
@@ -1036,7 +1077,6 @@ if __name__ == '__main__':
     #print(json.dumps(results, sort_keys=True, indent=4))
     with open(results_filename,'wt') as f:
         json.dump(results, f, sort_keys=True, indent=4)
-
 
     # keep max score over all previous submissions
     if os.path.exists('/autograder/'):

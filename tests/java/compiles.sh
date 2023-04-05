@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# c++ compile test script
+# java compile test script
 
 fail () {
   printf "FAIL\n" >> DEBUG
@@ -21,7 +21,7 @@ for file in "${source[@]}"; do
 done
 
 printf "compiles without errors? " >> DEBUG
-if g++ -std=c++17 -Wall -Wextra -Weffc++ -pedantic-errors "${source[@]}" 1>OUT 2>ERR; then
+if javac -Xlint "${source[@]}" 1>OUT 2>ERR; then
   printf "OK\n" >> DEBUG
 else
   printf "NO\n" >> DEBUG

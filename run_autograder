@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
 # TODO(you): define the expected language
-language=c++
+#language=c++
+language=java
 
 # TODO(you): list files that student must submit
 #            and files that are provided on backend (see below)
