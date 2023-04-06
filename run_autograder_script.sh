@@ -124,7 +124,6 @@ elif [ "${language}" == "java" ]; then
   #cp -r $AUTOGRADER_CORE_REPO/tests/java/lib/ $TESTBOX/lib/
   #cp $AUTOGRADER_CORE_REPO/tests/java/TestRunner.java $TESTBOX/
   #cp $AUTOGRADER_CORE_REPO/tests/java/UnitTestRunner.java $TESTBOX/
-  echo "[TODO] performance testing"
   cp $AUTOGRADER_CORE_REPO/test_writing_java.py $TESTBOX/
   cp $AUTOGRADER_CORE_REPO/test_compiling_java.py $TESTBOX/
   cp $AUTOGRADER_CORE_REPO/test_running_java.py $TESTBOX/

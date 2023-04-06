@@ -22,7 +22,7 @@ def compile_unit_test(src: List[str]) -> Tuple[bool,str]:
     return compile_x_test(src + ['UnitTest.java', 'UnitTestRunner.java', 'TestRunner.java'])
 
 def compile_performance_test(src: List[str]) -> Tuple[bool,str]:
-    return compile_x_test(src)
+    return compile_x_test(src + ['PerformanceTest.java'])
 
 def compile_io_test(src: List[str]) -> Tuple[bool,str]:
     return compile_x_test(src)

@@ -18,20 +18,11 @@ def write_unit_test(test: Attributes) -> None:
         f.write('}\n')
 
 def write_performance_test(test: Attributes) -> None:
-    with open('performance_test.cpp', 'wt') as f:
-        f.write(f"#include \"{test['target']}\"\n\n")
-        f.write('#include <iostream>\n')
-        f.write('#include <chrono>\n')
-        if len(test['include']) > 0:
-            for include in test['include'].split():
-                f.write(f'#include {include}\n')
-        f.write('#include "cs12x_test.h"\n\n')
-
-        f.write('int main() {\n')
-        f.write('    INIT_TEST;\n')
+    with open('PerformanceTest.java', 'wt') as f:
+        f.write('public class PerformanceTest {\n')
+        f.write('  public static void main(String[] args) {\n')
         f.write('    {}\n'.format('\n    '.join(test['code'].splitlines())))
-        f.write('    RESULT(pass);\n')
-        f.write('    return pass ? 0 : 1;\n')
+        f.write('  }\n')
         f.write('}\n')
 
 # Writes out the input and output strings
