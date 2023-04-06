@@ -6,6 +6,7 @@ from typing import Tuple
 from attributes import Attributes
 
 from config import JAVA_CLASSPATH, TIMEOUT_MSSG
+from results import PartialTestResult
 from test_types import UnsupportedTestException
 
 
@@ -119,7 +120,7 @@ def run_memory_errors_test(timeout: float) -> Tuple[bool,str,float]:
 def run_style_test(timeout: float) -> Tuple[bool,str,float]:
     return run_script_test(timeout)
 
-def run_test(test: Attributes) -> Tuple[str, bool, bool, float, float]:
+def run_test(test: Attributes) -> PartialTestResult:
     max_points = float(test['points'])
     runs = True
     point_multiplier = 100.0
@@ -165,4 +166,11 @@ def run_test(test: Attributes) -> Tuple[str, bool, bool, float, float]:
         print('[FAIL] incorrect behavior\n')
         points = 0
 
-    return run_output, unapproved_includes, sufficient_coverage, points, run_time
+    result: PartialTestResult = {
+        'run_output': run_output,
+        'unapproved_includes': unapproved_includes,
+        'sufficient_coverage': sufficient_coverage,
+        'points': points,
+        'run_time': run_time
+    }
+    return result

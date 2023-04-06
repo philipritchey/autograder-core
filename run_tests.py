@@ -8,56 +8,37 @@ TODO(pcr):
 * use @target attribute for coverage tests and some other test(s) that don't use it but could/should
 '''
 
-from typing import List, Dict, Any, TypedDict, Optional
+from typing import List, Dict, Any, TypedDict
 from os.path import exists as path_exists
 import json
-from argparse import ArgumentParser
+from argparse import ArgumentParser, Namespace
 from config import DEFAULT_STDOUT_VISIBILITY, DEFAULT_VISIBILITY, OCTOTHORPE_LINE, OCTOTHORPE_WALL
+from results import Result, TestResult
 from test_parsing import read_tests
 
-class TestResult(TypedDict):
-    number:     str
-    name:       str
-    score:      float
-    max_score:  float
-    status:     str
-    output:     str
-    tags:       List[str]
-    visibility: str
-    extra_data: Dict[Any,Any]
-
-class Result(TypedDict):
-    score:             float
-    output:            str
-    execution_time:    float
-    visibility:        str
-    stdout_visibility: str
-    tests:             List[TestResult]
-
-def main(args) -> Result:
-    filename = args.tests_path
-    test_number = args.tests
-    debugmode = args.debugmode
+def main(args: Namespace) -> Result:
+    filename: str = args.tests_path
+    test_number: str = args.tests
+    debugmode: bool = args.debugmode
     if debugmode:
         print('===DEBUGMODE===')
 
-    result_score = 0.0
+    result_score: float = 0.0
     test_results: List[TestResult] = list()
-    extra_data = None
-    leaderboard = None
+    #extra_data: Optional[ExtraData] = None
+    #leaderboard: Optional[LeaderboardEntry] = None
 
-    fail_result: Result = {
-        'score': 0.0,
-        'output': '',
-        'execution_time': 0.0,
-        'visibility': 'visible',
-        'stdout_visibility': 'visible',
-        'tests': []
-        }
     try:
         tests = read_tests(filename)
     except Exception as err:
-        fail_result['output'] = repr(err)
+        fail_result: Result = {
+            'score': 0.0,
+            'output': repr(err),
+            'execution_time': 0.0,
+            'visibility': 'visible',
+            'stdout_visibility': 'visible',
+            'tests': []
+        }
         print('[FATAL] Error occured while reading tests:')
         print(err)
         return fail_result
@@ -82,9 +63,10 @@ def main(args) -> Result:
         if test['skip']:
             #print(f"test {test['number']}: {test['name']}\n[SKIP]")
             continue
+
         print(f"test {test['number']}: {test['name']}")
 
-        max_points = float(test['points'])
+        max_points = test['points']
         status = 'pre-write'
         compile_output = str()
         run_output = str()
@@ -100,25 +82,27 @@ def main(args) -> Result:
 
         failed_to_compile = not compiles
         if compiles:
-            pack = run_test(test)
-            run_output, ui, sc, points, run_time = pack
+            result = run_test(test)
+            run_output = result['run_output']
+            points = result['points']
             if 0 < points < max_points:
                 status = "partial"
             elif points >= max_points:
                 status = "passed"
             else:  # points <= 0
                 status = 'failed'
-            if ui:
+            if result['unapproved_includes']:
                 status = 'failed'
                 unapproved_includes = True
-            if not sc:
+            if not result['sufficient_coverage']:
                 status = 'failed'
                 sufficient_coverage = False
-            total_time += run_time
+            total_time += result['run_time']
         else:
             print('[FAIL] failed to compile\n')
             status = 'failed'
             points = 0
+            run_output = ''
 
         result_score += points
 
@@ -189,8 +173,7 @@ def main(args) -> Result:
         elif status == 'partial':
             partial += 1
 
-    t = int(result_score * 10000 + 0.5)
-    result_score = t / 10000
+    result_score = int(result_score * 10000 + 0.5) / 10000
     str_score = f'{result_score:6.2f}'
     str_possible = f'{possible:6.2f}'
 
@@ -223,10 +206,10 @@ def main(args) -> Result:
         'tests': test_results
         }
 
-    if extra_data:
-        results['extra_data'] = dict()
-    if leaderboard:
-        results['leaderboard'] = leaderboard
+    #if extra_data:
+    #    results['extra_data'] = dict()
+    #if leaderboard:
+    #    results['leaderboard'] = leaderboard
 
     return results
 
