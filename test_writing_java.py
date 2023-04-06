@@ -6,7 +6,7 @@ def write_unit_test(test: Attributes) -> None:
         f.write('import static org.hamcrest.MatcherAssert.assertThat;\n')
         f.write('import static org.hamcrest.Matchers.*;\n')
         f.write('import static org.junit.Assert.assertThrows;\n\n')
-        
+
         f.write('import junit.framework.TestCase;\n')
         f.write('import org.junit.Test;\n\n')
 
@@ -62,6 +62,10 @@ def write_memory_errors_test(test: Attributes) -> None:
     test['script_content'] = f"./memory_errors.sh {' '.join(test['approved_includes'])}"
     write_script_test(test)
 
+def write_style_test(test: Attributes) -> None:
+    test['script_content'] = f"./check_style.sh {' '.join(test['approved_includes'])}"
+    write_script_test(test)
+
 def write_test(test: Attributes):
     if test['type'] == 'unit':
         write_unit_test(test)
@@ -79,6 +83,8 @@ def write_test(test: Attributes):
         write_compile_test(test)
     elif test['type'] == 'memory_errors':
         write_memory_errors_test(test)
+    elif test['type'] == 'style':
+        write_style_test(test)
     else:
         # don't try to write an unsupported test
         raise UnsupportedTestException(test['type'])

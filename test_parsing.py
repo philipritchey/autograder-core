@@ -137,8 +137,8 @@ def verify_required_annotations(annotations: Dict[str, Any], fp: FilePosition) -
 
     for attribute in required_attributes:
         # if test type is not script or attribute is not target
-        #   -> target is not required for script tests
-        if attribute != 'target' or annotations['type'] != 'script':
+        #   -> target is not required for script tests or style tests
+        if attribute != 'target' or annotations['type'] not in ['script', 'style']:
             if attribute not in annotations:
                 raise KeyError(f'({fp.filename}:{fp.index+1}) missing required attribute: {attribute}\n{additonal_details}')
             if annotations[attribute] == '':
@@ -229,25 +229,32 @@ def read_block_of_test(fp: FilePosition) -> str:
 
     return code
 
-def read_unit_test(fp: FilePosition) -> str:
-    # go to next line
-    line = goto_next_line(fp)
-
+def expect_start_of_test_block(fp: FilePosition) -> None:
     # expect start of test block
+    line = goto_next_line(fp)
     if line != BEGIN_TEST_DELIMITER:
         # filename lineno offset text
         raise SyntaxError(f'missing expected start of test block: "{BEGIN_TEST_DELIMITER}"', (fp.filename, fp.index+1, 1, line))
+
+
+def expect_end_of_test_block(fp: FilePosition) -> None:
+    line = goto_next_line(fp)
+    if line != END_TEST_DELIMITER:
+        # filename lineno offset text
+        raise SyntaxError(f'missing expected end of test block: "{END_TEST_DELIMITER}"', (fp.filename, fp.index+1, 1, line))
+
+
+def read_unit_test(fp: FilePosition) -> str:
+
+    expect_start_of_test_block(fp)
 
     # expect next lines to be unit test code
     code = read_block_of_test(fp)
     return code
 
 def read_io_test(fp: FilePosition) -> Tuple[str, str]:
-    # go to next line
-    line = goto_next_line(fp)
-    if line != BEGIN_TEST_DELIMITER:
-        # filename lineno offset text
-        raise SyntaxError(f'missing expected start of test block: "{BEGIN_TEST_DELIMITER}"', (fp.filename, fp.index+1, 1, line))
+
+    expect_start_of_test_block(fp)
 
     input_filename = None
     output_filename = None
@@ -273,13 +280,7 @@ def read_io_test(fp: FilePosition) -> Tuple[str, str]:
             # filename lineno offset text
             raise SyntaxError(f'unexpected tag ({tag}) in i/o test', (fp.filename, fp.index+1, 1, line))
 
-
-    # go to next line
-    line = goto_next_line(fp)
-
-    if line != END_TEST_DELIMITER:
-        # filename lineno offset text
-        raise SyntaxError(f'missing expected end of test block: "{END_TEST_DELIMITER}"', (fp.filename, fp.index+1, 1, line))
+    expect_end_of_test_block(fp)
 
     if not input_filename:
         raise SyntaxError('missing output filename in i/o test', (fp.filename, fp.index+1, 1, line))
@@ -303,11 +304,8 @@ def read_io_test(fp: FilePosition) -> Tuple[str, str]:
     return expected_input, expected_output
 
 def read_script_test(fp: FilePosition) -> Tuple[str, str]:
-    # go to next line
-    line = goto_next_line(fp)
-    if line != BEGIN_TEST_DELIMITER:
-        # filename lineno offset text
-        raise SyntaxError(f'missing expected start of test block: "{BEGIN_TEST_DELIMITER}"', (fp.filename, fp.index+1, 1, line))
+
+    expect_start_of_test_block(fp)
 
     # go to next line
     line = goto_next_line(fp)
@@ -326,10 +324,7 @@ def read_script_test(fp: FilePosition) -> Tuple[str, str]:
 
     # print("Script filename: " + script_filename_string)
 
-    line = goto_next_line(fp)
-    if line != END_TEST_DELIMITER:
-        # filename lineno offset text
-        raise SyntaxError(f'missing expected end of test block: "{END_TEST_DELIMITER}"', (fp.filename, fp.index+1, 1, line))
+    expect_end_of_test_block(fp)
 
     try:
         with open(script_filename_string, 'r') as f:
@@ -340,13 +335,8 @@ def read_script_test(fp: FilePosition) -> Tuple[str, str]:
     return script_args, script_content
 
 def read_approved_includes(fp: FilePosition) -> List[str]:
-     # go to next line
-    line = goto_next_line(fp)
 
-    # expect start of test block
-    if line != BEGIN_TEST_DELIMITER:
-        # filename lineno offset text
-        raise SyntaxError(f'missing expected start of test block: "{BEGIN_TEST_DELIMITER}"', (fp.filename, fp.index+1, 1, line))
+    expect_start_of_test_block(fp)
 
     # go to next line
     line = goto_next_line(fp)
@@ -359,13 +349,8 @@ def read_approved_includes(fp: FilePosition) -> List[str]:
     return approved_includes
 
 def read_coverage_test(fp: FilePosition) -> Tuple[str, str, List[str]]:
-    # go to next line
-    line = goto_next_line(fp)
 
-    # expect start of test block
-    if line != BEGIN_TEST_DELIMITER:
-        # filename lineno offset text
-        raise SyntaxError(f'missing expected start of test block: "{BEGIN_TEST_DELIMITER}"', (fp.filename, fp.index+1, 1, line))
+    expect_start_of_test_block(fp)
 
     source = list()
     target = str()
@@ -439,7 +424,7 @@ def read_tests(filename: str) -> List[Attributes]:
             attributes['script_content'] = script_content
             tests.append(attributes)
 
-        elif test_type == 'approved_includes' or test_type == 'compile' or test_type == 'memory_errors':
+        elif test_type in ['approved_includes', 'compile', 'memory_errors', 'style']:
             approved_includes = read_approved_includes(fp)
             attributes['approved_includes'] = approved_includes
             tests.append(attributes)

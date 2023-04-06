@@ -104,32 +104,26 @@ cp $AUTOGRADER_CORE_REPO/run_tests.py $TESTBOX/
 cp $AUTOGRADER_CORE_REPO/test_parsing.py $TESTBOX/
 cp $AUTOGRADER_CORE_REPO/test_types.py $TESTBOX/
 if [ "${language}" == "c++" ]; then
-  cp $AUTOGRADER_CORE_REPO/tests/c++/approved_includes.sh $TESTBOX/
-  cp $AUTOGRADER_CORE_REPO/tests/c++/compiles.sh $TESTBOX/
-  cp $AUTOGRADER_CORE_REPO/tests/c++/coverage.sh $TESTBOX/
-  cp $AUTOGRADER_CORE_REPO/tests/c++/cs12x_test.h $TESTBOX/
-  cp $AUTOGRADER_CORE_REPO/tests/c++/memory_errors.sh $TESTBOX/
+  #cp $AUTOGRADER_CORE_REPO/tests/c++/approved_includes.sh $TESTBOX/
+  #cp $AUTOGRADER_CORE_REPO/tests/c++/compiles.sh $TESTBOX/
+  #cp $AUTOGRADER_CORE_REPO/tests/c++/coverage.sh $TESTBOX/
+  #cp $AUTOGRADER_CORE_REPO/tests/c++/cs12x_test.h $TESTBOX/
+  #cp $AUTOGRADER_CORE_REPO/tests/c++/memory_errors.sh $TESTBOX/
   cp $AUTOGRADER_CORE_REPO/test_writing_cpp.py $TESTBOX/
   cp $AUTOGRADER_CORE_REPO/test_compiling_cpp.py $TESTBOX/
   cp $AUTOGRADER_CORE_REPO/test_running_cpp.py $TESTBOX/
-
 
   testFile=tests.cpp
   testPattern="tests_*"
 
 elif [ "${language}" == "java" ]; then
   echo "[WARN] java is not yet fully supported"
-  cp $AUTOGRADER_CORE_REPO/tests/java/approved_includes.sh $TESTBOX/
-  cp $AUTOGRADER_CORE_REPO/tests/java/compiles.sh $TESTBOX/
-  cp $AUTOGRADER_CORE_REPO/tests/java/coverage.sh $TESTBOX/
-  echo "[TODO] style check"
-  mkdir $TESTBOX/lib
-  cp $AUTOGRADER_CORE_REPO/tests/java/lib/hamcrest-2.2.jar $TESTBOX/lib
-  cp $AUTOGRADER_CORE_REPO/tests/java/lib/jacocoagent.jar $TESTBOX/lib
-  cp $AUTOGRADER_CORE_REPO/tests/java/lib/jacococli.jar $TESTBOX/lib
-  cp $AUTOGRADER_CORE_REPO/tests/java/lib/junit-4.13.2.jar $TESTBOX/lib
-  cp $AUTOGRADER_CORE_REPO/tests/java/TestRunner.java $TESTBOX/
-  cp $AUTOGRADER_CORE_REPO/tests/java/UnitTestRunner.java $TESTBOX/
+  #cp $AUTOGRADER_CORE_REPO/tests/java/approved_includes.sh $TESTBOX/
+  #cp $AUTOGRADER_CORE_REPO/tests/java/compiles.sh $TESTBOX/
+  #cp $AUTOGRADER_CORE_REPO/tests/java/coverage.sh $TESTBOX/
+  #cp -r $AUTOGRADER_CORE_REPO/tests/java/lib/ $TESTBOX/lib/
+  #cp $AUTOGRADER_CORE_REPO/tests/java/TestRunner.java $TESTBOX/
+  #cp $AUTOGRADER_CORE_REPO/tests/java/UnitTestRunner.java $TESTBOX/
   echo "[TODO] performance testing"
   cp $AUTOGRADER_CORE_REPO/test_writing_java.py $TESTBOX/
   cp $AUTOGRADER_CORE_REPO/test_compiling_java.py $TESTBOX/
@@ -156,7 +150,7 @@ for file in $TESTS/$testPattern; do
   fi
 done
 
-scripts=( approved_includes.sh compiles.sh coverage.sh memory_errors.sh )
+scripts=( approved_includes.sh compiles.sh coverage.sh memory_errors.sh check_style.sh )
 for file in "${scripts[@]}"; do
   if [ -f "$file" ]; then
     chmod +x $file

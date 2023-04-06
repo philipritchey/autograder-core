@@ -42,6 +42,9 @@ def compile_compile_test() -> Tuple[bool,str]:
 def compile_memory_errors_test() -> Tuple[bool,str]:
     return True, ""
 
+def compile_style_test() -> Tuple[bool,str]:
+    return True, ""
+
 def compile_test(test: Attributes) -> Tuple[bool, str]:
     compiles = False
     compile_output = ''
@@ -61,6 +64,8 @@ def compile_test(test: Attributes) -> Tuple[bool, str]:
         compiles, compile_output = compile_compile_test()
     elif test['type'] == 'memory_errors':
         compiles, compile_output = compile_memory_errors_test()
+    elif test['type'] == 'style':
+        compiles, compile_output = compile_style_test()
     else:
         # don't try to compile an unsupported test
         raise UnsupportedTestException(test['type'])

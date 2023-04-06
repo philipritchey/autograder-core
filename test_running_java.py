@@ -123,6 +123,9 @@ def run_compile_test(timeout: float) -> Tuple[bool,str,float]:
 def run_memory_errors_test(timeout: float) -> Tuple[bool,str,float]:
     return run_script_test(timeout)
 
+def run_style_test(timeout: float) -> Tuple[bool,str,float]:
+    return run_script_test(timeout)
+
 def run_test(test: Attributes) -> Tuple[str, bool, bool, float, float]:
     max_points = float(test['points'])
     runs = True
@@ -151,6 +154,8 @@ def run_test(test: Attributes) -> Tuple[str, bool, bool, float, float]:
         runs, run_output, point_multiplier = run_compile_test(timeout)
     elif test['type'] == 'memory_errors':
         runs, run_output, point_multiplier = run_memory_errors_test(timeout)
+    elif test['type'] == 'style':
+        runs, run_output, point_multiplier = run_style_test(timeout)
     else:
         # don't try to run an unsupported test
         raise UnsupportedTestException(test['type'])

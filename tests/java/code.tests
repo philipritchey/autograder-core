@@ -20,6 +20,8 @@ java.util.LinkedList
 */
 <test>
 Code.java
+CodeTests.java
+CodeTestRunner.java
 </test>
 
 /*
@@ -113,4 +115,15 @@ Code.java
 <test>
   input: io_tests/example/input.txt
   output: io_tests/example/output.txt
+</test>
+
+/*
+@number: 10
+@name: check style
+@points: 1
+@show_output: false
+@type: style
+*/
+<test>
+Code.java
 </test>

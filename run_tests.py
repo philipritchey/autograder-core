@@ -106,6 +106,8 @@ def main(args) -> Result:
                 status = "partial"
             elif points >= max_points:
                 status = "passed"
+            else:  # points <= 0
+                status = 'failed'
             if ui:
                 status = 'failed'
                 unapproved_includes = True
@@ -177,12 +179,15 @@ def main(args) -> Result:
 
     passed = 0
     failed = 0
+    partial = 0
     for test in test_results:
         status = test['status']
         if status == 'passed':
             passed += 1
         elif status == 'failed':
             failed += 1
+        elif status == 'partial':
+            partial += 1
 
     t = int(result_score * 10000 + 0.5)
     result_score = t / 10000
@@ -192,8 +197,9 @@ def main(args) -> Result:
     print(OCTOTHORPE_LINE)
     print(OCTOTHORPE_WALL)
     print(f'# {len(test_results):3d} tests {" "*13} #')
-    print(f'# {passed:3d} tests passed {" "*6} #')
-    print(f'# {failed:3d} tests failed {" "*6} #')
+    print(f'#   {passed:3d} passed            #')
+    print(f'#   {partial:3d} partial           #')
+    print(f'#   {failed:3d} failed            #')
     print(OCTOTHORPE_WALL)
     if unapproved_includes or not sufficient_coverage:
         str_score = str_score.replace(' ', '~')
@@ -289,7 +295,7 @@ if __name__ == '__main__':
             'stdout_visibility': 'visible',
             'tests': []
             }
-    
+
     #print(json.dumps(results, sort_keys=True, indent=4))
     with open(results_filename,'wt') as f:
         json.dump(results, f, sort_keys=True, indent=4)
