@@ -100,6 +100,7 @@ done
 # copy core test runners to testbox
 cp $AUTOGRADER_CORE_REPO/attributes.py $TESTBOX/
 cp $AUTOGRADER_CORE_REPO/config.py $TESTBOX/
+cp $AUTOGRADER_CORE_REPO/results.py $TESTBOX/
 cp $AUTOGRADER_CORE_REPO/run_tests.py $TESTBOX/
 cp $AUTOGRADER_CORE_REPO/test_parsing.py $TESTBOX/
 cp $AUTOGRADER_CORE_REPO/test_types.py $TESTBOX/
