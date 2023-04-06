@@ -117,7 +117,6 @@ if [ "${language}" == "c++" ]; then
   testPattern="tests_*"
 
 elif [ "${language}" == "java" ]; then
-  echo "[WARN] java is not yet fully supported"
   #cp $AUTOGRADER_CORE_REPO/tests/java/approved_includes.sh $TESTBOX/
   #cp $AUTOGRADER_CORE_REPO/tests/java/compiles.sh $TESTBOX/
   #cp $AUTOGRADER_CORE_REPO/tests/java/coverage.sh $TESTBOX/

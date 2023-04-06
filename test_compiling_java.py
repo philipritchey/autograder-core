@@ -6,7 +6,7 @@ from config import JAVA_CLASSPATH, JAVA_FLAGS, JAVAC
 from test_types import UnsupportedTestException
 
 
-def compile_x_test(src: List[str] = None) -> Tuple[bool,str]:
+def compile_x_test(src: List[str]) -> Tuple[bool,str]:
     SRC = ' '.join(src)
 
     compile_cmd = '{} {} {} 2>&1'.format(JAVAC, JAVA_FLAGS, SRC)

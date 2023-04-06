@@ -16,23 +16,23 @@ from config import DEFAULT_STDOUT_VISIBILITY, DEFAULT_VISIBILITY, OCTOTHORPE_LIN
 from test_parsing import read_tests
 
 class TestResult(TypedDict):
-    number:     Optional[str]
-    name:       Optional[str]
-    score:      Optional[float]
-    max_score:  Optional[float]
-    status:     Optional[str]
-    output:     Optional[str]
-    tags:       Optional[List[str]]
-    visibility: Optional[str]
-    extra_data: Optional[Dict[Any,Any]]
+    number:     str
+    name:       str
+    score:      float
+    max_score:  float
+    status:     str
+    output:     str
+    tags:       List[str]
+    visibility: str
+    extra_data: Dict[Any,Any]
 
 class Result(TypedDict):
-    score:             Optional[float]
-    output:            Optional[str]
-    execution_time:    Optional[float]
-    visibility:        Optional[str]
-    stdout_visibility: Optional[str]
-    tests:             Optional[List[TestResult]]
+    score:             float
+    output:            str
+    execution_time:    float
+    visibility:        str
+    stdout_visibility: str
+    tests:             List[TestResult]
 
 def main(args) -> Result:
     filename = args.tests_path
@@ -180,8 +180,8 @@ def main(args) -> Result:
     passed = 0
     failed = 0
     partial = 0
-    for test in test_results:
-        status = test['status']
+    for test_result in test_results:
+        status = test_result['status']
         if status == 'passed':
             passed += 1
         elif status == 'failed':
@@ -271,6 +271,15 @@ if __name__ == '__main__':
     results_filename = args.results_path
     language = args.language
 
+    results: Result = {
+        'score': 0,
+        'output': '',
+        'execution_time': 0,
+        'visibility': DEFAULT_VISIBILITY,
+        'stdout_visibility': DEFAULT_STDOUT_VISIBILITY,
+        'tests': []
+        }
+
     if language == 'c++':
         from test_writing_cpp import write_test
         from test_compiling_cpp import compile_test
@@ -286,15 +295,9 @@ if __name__ == '__main__':
         results = main(args)
 
     else:
-
-        results: Result = {
-            'score': 0,
-            'output': f'Unsupported Language: {language}',
-            'execution_time': 0,
-            'visibility': 'visible',
-            'stdout_visibility': 'visible',
-            'tests': []
-            }
+        results['output'] = f'Unsupported Language: {language}'
+        results['visibility'] = 'visible'
+        results['stdout_visibility'] = 'visible'
 
     #print(json.dumps(results, sort_keys=True, indent=4))
     with open(results_filename,'wt') as f:
