@@ -158,7 +158,7 @@ def apply_default_annotations(annotations: Dict[str, Any]) -> None:
 
     # set show_output to default if not specified
     if 'show_output' not in annotations:
-        if annotations['type'] == 'approved_includes' or annotations['type'] == 'performance' or annotations['type'] == 'coverage' or annotations['type'] == 'compile' or annotations['type'] == 'memory_errors':
+        if annotations['type'] == 'approved_includes' or annotations['type'] == 'coverage' or annotations['type'] == 'compile':
             annotations['show_output'] = 'True'
         else:
             annotations['show_output'] = DEFAULT_SHOW_OUTPUT

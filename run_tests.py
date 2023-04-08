@@ -8,7 +8,7 @@ TODO(pcr):
 * use @target attribute for coverage tests and some other test(s) that don't use it but could/should
 '''
 
-from typing import List, Dict, Any, TypedDict
+from typing import List
 from os.path import exists as path_exists
 import json
 from argparse import ArgumentParser, Namespace
