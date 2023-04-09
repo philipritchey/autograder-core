@@ -18,4 +18,4 @@ INFO_UNSUPPORTED_TEST = '[INFO] Unsupported Test'
 # java compilation config
 JAVA_CLASSPATH = ".:./lib/hamcrest-2.2.jar:./lib/junit-4.13.2.jar"
 JAVAC = 'javac'
-JAVA_FLAGS = '-Xlint -source 11 -g -cp ' + JAVA_CLASSPATH
+JAVA_FLAGS = '-Xlint -g -cp ' + JAVA_CLASSPATH
