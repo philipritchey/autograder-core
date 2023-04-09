@@ -305,7 +305,7 @@ if __name__ == '__main__':
 
         if (previousMaxScore > float(currentResult['score'])):
             currentResult["output"] += "\n"
-            currentResult["output"] += "Your current submission's score was " + str(float(currentResult["score"])) + ", however you get to keep your maximum submission score of " + str(previousMaxScore) + "\n"
+            currentResult["output"] += f'Your current submission\'s score was {float(currentResult["score"]):0.2f}, however you get to keep your maximum submission score of {previousMaxScore:0.2f}\n'
             currentResult['score'] = previousMaxScore
 
         submission_cnt += 1
