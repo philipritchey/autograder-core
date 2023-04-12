@@ -8,56 +8,37 @@ TODO(pcr):
 * use @target attribute for coverage tests and some other test(s) that don't use it but could/should
 '''
 
-from typing import List, Dict, Any, TypedDict, Optional
+from typing import List
 from os.path import exists as path_exists
 import json
-from argparse import ArgumentParser
+from argparse import ArgumentParser, Namespace
 from config import DEFAULT_STDOUT_VISIBILITY, DEFAULT_VISIBILITY, OCTOTHORPE_LINE, OCTOTHORPE_WALL
+from results import Result, TestResult
 from test_parsing import read_tests
 
-class TestResult(TypedDict):
-    number:     Optional[str]
-    name:       Optional[str]
-    score:      Optional[float]
-    max_score:  Optional[float]
-    status:     Optional[str]
-    output:     Optional[str]
-    tags:       Optional[List[str]]
-    visibility: Optional[str]
-    extra_data: Optional[Dict[Any,Any]]
-
-class Result(TypedDict):
-    score:             Optional[float]
-    output:            Optional[str]
-    execution_time:    Optional[float]
-    visibility:        Optional[str]
-    stdout_visibility: Optional[str]
-    tests:             Optional[List[TestResult]]
-
-def main(args) -> Result:
-    filename = args.tests_path
-    test_number = args.tests
-    debugmode = args.debugmode
+def main(args: Namespace) -> Result:
+    filename: str = args.tests_path
+    test_number: str = args.tests
+    debugmode: bool = args.debugmode
     if debugmode:
         print('===DEBUGMODE===')
 
-    result_score = 0.0
+    result_score: float = 0.0
     test_results: List[TestResult] = list()
-    extra_data = None
-    leaderboard = None
+    #extra_data: Optional[ExtraData] = None
+    #leaderboard: Optional[LeaderboardEntry] = None
 
-    fail_result: Result = {
-        'score': 0.0,
-        'output': '',
-        'execution_time': 0.0,
-        'visibility': 'visible',
-        'stdout_visibility': 'visible',
-        'tests': []
-        }
     try:
         tests = read_tests(filename)
     except Exception as err:
-        fail_result['output'] = repr(err)
+        fail_result: Result = {
+            'score': 0.0,
+            'output': repr(err),
+            'execution_time': 0.0,
+            'visibility': 'visible',
+            'stdout_visibility': 'visible',
+            'tests': []
+        }
         print('[FATAL] Error occured while reading tests:')
         print(err)
         return fail_result
@@ -82,9 +63,10 @@ def main(args) -> Result:
         if test['skip']:
             #print(f"test {test['number']}: {test['name']}\n[SKIP]")
             continue
+
         print(f"test {test['number']}: {test['name']}")
 
-        max_points = float(test['points'])
+        max_points = test['points']
         status = 'pre-write'
         compile_output = str()
         run_output = str()
@@ -100,23 +82,27 @@ def main(args) -> Result:
 
         failed_to_compile = not compiles
         if compiles:
-            pack = run_test(test)
-            run_output, ui, sc, points, run_time = pack
+            result = run_test(test)
+            run_output = result['run_output']
+            points = result['points']
             if 0 < points < max_points:
                 status = "partial"
             elif points >= max_points:
                 status = "passed"
-            if ui:
+            else:  # points <= 0
+                status = 'failed'
+            if result['unapproved_includes']:
                 status = 'failed'
                 unapproved_includes = True
-            if not sc:
+            if not result['sufficient_coverage']:
                 status = 'failed'
                 sufficient_coverage = False
-            total_time += run_time
+            total_time += result['run_time']
         else:
             print('[FAIL] failed to compile\n')
             status = 'failed'
             points = 0
+            run_output = ''
 
         result_score += points
 
@@ -177,23 +163,26 @@ def main(args) -> Result:
 
     passed = 0
     failed = 0
-    for test in test_results:
-        status = test['status']
+    partial = 0
+    for test_result in test_results:
+        status = test_result['status']
         if status == 'passed':
             passed += 1
         elif status == 'failed':
             failed += 1
+        elif status == 'partial':
+            partial += 1
 
-    t = int(result_score * 10000 + 0.5)
-    result_score = t / 10000
+    result_score = int(result_score * 10000 + 0.5) / 10000
     str_score = f'{result_score:6.2f}'
     str_possible = f'{possible:6.2f}'
 
     print(OCTOTHORPE_LINE)
     print(OCTOTHORPE_WALL)
     print(f'# {len(test_results):3d} tests {" "*13} #')
-    print(f'# {passed:3d} tests passed {" "*6} #')
-    print(f'# {failed:3d} tests failed {" "*6} #')
+    print(f'#   {passed:3d} passed            #')
+    print(f'#   {partial:3d} partial           #')
+    print(f'#   {failed:3d} failed            #')
     print(OCTOTHORPE_WALL)
     if unapproved_includes or not sufficient_coverage:
         str_score = str_score.replace(' ', '~')
@@ -217,10 +206,10 @@ def main(args) -> Result:
         'tests': test_results
         }
 
-    if extra_data:
-        results['extra_data'] = dict()
-    if leaderboard:
-        results['leaderboard'] = leaderboard
+    #if extra_data:
+    #    results['extra_data'] = dict()
+    #if leaderboard:
+    #    results['leaderboard'] = leaderboard
 
     return results
 
@@ -265,6 +254,15 @@ if __name__ == '__main__':
     results_filename = args.results_path
     language = args.language
 
+    results: Result = {
+        'score': 0,
+        'output': '',
+        'execution_time': 0,
+        'visibility': DEFAULT_VISIBILITY,
+        'stdout_visibility': DEFAULT_STDOUT_VISIBILITY,
+        'tests': []
+        }
+
     if language == 'c++':
         from test_writing_cpp import write_test
         from test_compiling_cpp import compile_test
@@ -280,16 +278,10 @@ if __name__ == '__main__':
         results = main(args)
 
     else:
+        results['output'] = f'Unsupported Language: {language}'
+        results['visibility'] = 'visible'
+        results['stdout_visibility'] = 'visible'
 
-        results: Result = {
-            'score': 0,
-            'output': f'Unsupported Language: {language}',
-            'execution_time': 0,
-            'visibility': 'visible',
-            'stdout_visibility': 'visible',
-            'tests': []
-            }
-    
     #print(json.dumps(results, sort_keys=True, indent=4))
     with open(results_filename,'wt') as f:
         json.dump(results, f, sort_keys=True, indent=4)
@@ -313,7 +305,7 @@ if __name__ == '__main__':
 
         if (previousMaxScore > float(currentResult['score'])):
             currentResult["output"] += "\n"
-            currentResult["output"] += "Your current submission's score was " + str(float(currentResult["score"])) + ", however you get to keep your maximum submission score of " + str(previousMaxScore) + "\n"
+            currentResult["output"] += f'Your current submission\'s score was {float(currentResult["score"]):0.2f}, however you get to keep your maximum submission score of {previousMaxScore:0.2f}\n'
             currentResult['score'] = previousMaxScore
 
         submission_cnt += 1

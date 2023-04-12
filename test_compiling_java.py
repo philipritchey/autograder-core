@@ -6,7 +6,7 @@ from config import JAVA_CLASSPATH, JAVA_FLAGS, JAVAC
 from test_types import UnsupportedTestException
 
 
-def compile_x_test(src: List[str] = None) -> Tuple[bool,str]:
+def compile_x_test(src: List[str]) -> Tuple[bool,str]:
     SRC = ' '.join(src)
 
     compile_cmd = '{} {} {} 2>&1'.format(JAVAC, JAVA_FLAGS, SRC)
@@ -22,7 +22,7 @@ def compile_unit_test(src: List[str]) -> Tuple[bool,str]:
     return compile_x_test(src + ['UnitTest.java', 'UnitTestRunner.java', 'TestRunner.java'])
 
 def compile_performance_test(src: List[str]) -> Tuple[bool,str]:
-    return compile_x_test(src)
+    return compile_x_test(src + ['PerformanceTest.java'])
 
 def compile_io_test(src: List[str]) -> Tuple[bool,str]:
     return compile_x_test(src)
@@ -40,6 +40,9 @@ def compile_compile_test() -> Tuple[bool,str]:
     return True, ""
 
 def compile_memory_errors_test() -> Tuple[bool,str]:
+    return True, ""
+
+def compile_style_test() -> Tuple[bool,str]:
     return True, ""
 
 def compile_test(test: Attributes) -> Tuple[bool, str]:
@@ -61,6 +64,8 @@ def compile_test(test: Attributes) -> Tuple[bool, str]:
         compiles, compile_output = compile_compile_test()
     elif test['type'] == 'memory_errors':
         compiles, compile_output = compile_memory_errors_test()
+    elif test['type'] == 'style':
+        compiles, compile_output = compile_style_test()
     else:
         # don't try to compile an unsupported test
         raise UnsupportedTestException(test['type'])

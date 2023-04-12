@@ -6,6 +6,7 @@ from typing import Tuple
 from attributes import Attributes
 
 from config import JAVA_CLASSPATH, TIMEOUT_MSSG
+from results import PartialTestResult
 from test_types import UnsupportedTestException
 
 
@@ -18,11 +19,11 @@ def class_name(filename):
     # convert "Code.java" -> "Code"
     return filename[:-5]
 
-def run_unit_test(timeout: float) -> Tuple[bool,str]:
-    run_cmd = ["java", "-classpath", JAVA_CLASSPATH, 'UnitTestRunner', "2>&1"]
+def run_code(class_name: str, timeout: float) -> Tuple[bool,str]:
+    run_cmd = ["java", "-classpath", JAVA_CLASSPATH, class_name, "2>&1"]
     p = subprocess.Popen(run_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     try:
-        output_en, _ = p.communicate(timeout=timeout) #p.stdout.decode('utf-8')
+        output_en, _ = p.communicate(timeout=timeout)
         output = output_en.decode('utf-8')
     except subprocess.TimeoutExpired as e:
         output = TIMEOUT_MSSG
@@ -31,18 +32,11 @@ def run_unit_test(timeout: float) -> Tuple[bool,str]:
     ret = p.returncode
     return ret == 0, output
 
+def run_unit_test(timeout: float) -> Tuple[bool,str]:
+    return run_code('UnitTestRunner', timeout)
+
 def run_performance_test(timeout: float) -> Tuple[bool,str]:
-    run_cmd = ["./performance_test", "2>&1"]
-    p = subprocess.Popen(run_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    try:
-        output_en, _ = p.communicate(timeout=timeout) #p.stdout.decode('utf-8')
-        output = output_en.decode('utf-8')
-    except subprocess.TimeoutExpired as e:
-        output = "Timeout during test execution, check for an infinite loop\n"
-    except Exception as e:
-        output = str(e)
-    ret = p.returncode
-    return ret == 0, output
+    return run_code('PerformanceTest', timeout)
 
 def run_io_test(timeout: float, main: str) -> Tuple[bool,str]:
     run_cmd = ["java", "-classpath", ".", class_name(main), "2>&1"]
@@ -123,7 +117,10 @@ def run_compile_test(timeout: float) -> Tuple[bool,str,float]:
 def run_memory_errors_test(timeout: float) -> Tuple[bool,str,float]:
     return run_script_test(timeout)
 
-def run_test(test: Attributes) -> Tuple[str, bool, bool, float, float]:
+def run_style_test(timeout: float) -> Tuple[bool,str,float]:
+    return run_script_test(timeout)
+
+def run_test(test: Attributes) -> PartialTestResult:
     max_points = float(test['points'])
     runs = True
     point_multiplier = 100.0
@@ -151,6 +148,8 @@ def run_test(test: Attributes) -> Tuple[str, bool, bool, float, float]:
         runs, run_output, point_multiplier = run_compile_test(timeout)
     elif test['type'] == 'memory_errors':
         runs, run_output, point_multiplier = run_memory_errors_test(timeout)
+    elif test['type'] == 'style':
+        runs, run_output, point_multiplier = run_style_test(timeout)
     else:
         # don't try to run an unsupported test
         raise UnsupportedTestException(test['type'])
@@ -167,4 +166,11 @@ def run_test(test: Attributes) -> Tuple[str, bool, bool, float, float]:
         print('[FAIL] incorrect behavior\n')
         points = 0
 
-    return run_output, unapproved_includes, sufficient_coverage, points, run_time
+    result: PartialTestResult = {
+        'run_output': run_output,
+        'unapproved_includes': unapproved_includes,
+        'sufficient_coverage': sufficient_coverage,
+        'points': points,
+        'run_time': run_time
+    }
+    return result

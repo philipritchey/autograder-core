@@ -8,6 +8,8 @@ usage() {
   echo "  -t <number>   run test(s) with specified number"
 }
 
+# default language is c++ (legacy)
+language=c++
 
 debugmode=0
 while getopts "dhl:t:" flag; do
@@ -60,22 +62,28 @@ else
   TESTBOX=testbox
   REPO=$BASE_DIR
   AUTOGRADER_CORE_REPO=$BASE_DIR/../autograder-core
-  SUBMISSION=$BASE_DIR/solution/$language
+  if [ -d $BASE_DIR/solution/$language ]; then
+    SUBMISSION=$BASE_DIR/solution/$language
+  else
+    SUBMISSION=$BASE_DIR/solution/
+  fi
   RESULTS_DIR=$BASE_DIR
 
 fi
 
 case "$language" in
-  c++)
-    TESTS=$REPO/tests/c++
-    ;;
-  java)
-    TESTS=$REPO/tests/java
+  c++ | java)
     ;;
   *)
     echo "Unsupported Language: $language"
     exit 1
 esac
+
+if [ -d $REPO/tests/$language ]; then
+  TESTS=$REPO/tests/$language
+else
+  TESTS=$REPO/tests
+fi
 
 rm -rf $TESTBOX
 mkdir $TESTBOX
@@ -98,39 +106,33 @@ for file in "${src_list[@]}"; do
 done
 
 # copy core test runners to testbox
+cp $AUTOGRADER_CORE_REPO/run_tests.py $TESTBOX/
 cp $AUTOGRADER_CORE_REPO/attributes.py $TESTBOX/
 cp $AUTOGRADER_CORE_REPO/config.py $TESTBOX/
-cp $AUTOGRADER_CORE_REPO/run_tests.py $TESTBOX/
+cp $AUTOGRADER_CORE_REPO/results.py $TESTBOX/
 cp $AUTOGRADER_CORE_REPO/test_parsing.py $TESTBOX/
 cp $AUTOGRADER_CORE_REPO/test_types.py $TESTBOX/
+cp -r $AUTOGRADER_CORE_REPO/tests/$language/* $TESTBOX/
 if [ "${language}" == "c++" ]; then
-  cp $AUTOGRADER_CORE_REPO/tests/c++/approved_includes.sh $TESTBOX/
-  cp $AUTOGRADER_CORE_REPO/tests/c++/compiles.sh $TESTBOX/
-  cp $AUTOGRADER_CORE_REPO/tests/c++/coverage.sh $TESTBOX/
-  cp $AUTOGRADER_CORE_REPO/tests/c++/cs12x_test.h $TESTBOX/
-  cp $AUTOGRADER_CORE_REPO/tests/c++/memory_errors.sh $TESTBOX/
+  #cp $AUTOGRADER_CORE_REPO/tests/c++/approved_includes.sh $TESTBOX/
+  #cp $AUTOGRADER_CORE_REPO/tests/c++/compiles.sh $TESTBOX/
+  #cp $AUTOGRADER_CORE_REPO/tests/c++/coverage.sh $TESTBOX/
+  #cp $AUTOGRADER_CORE_REPO/tests/c++/cs12x_test.h $TESTBOX/
+  #cp $AUTOGRADER_CORE_REPO/tests/c++/memory_errors.sh $TESTBOX/
   cp $AUTOGRADER_CORE_REPO/test_writing_cpp.py $TESTBOX/
   cp $AUTOGRADER_CORE_REPO/test_compiling_cpp.py $TESTBOX/
   cp $AUTOGRADER_CORE_REPO/test_running_cpp.py $TESTBOX/
-
 
   testFile=tests.cpp
   testPattern="tests_*"
 
 elif [ "${language}" == "java" ]; then
-  echo "[WARN] java is not yet fully supported"
-  cp $AUTOGRADER_CORE_REPO/tests/java/approved_includes.sh $TESTBOX/
-  cp $AUTOGRADER_CORE_REPO/tests/java/compiles.sh $TESTBOX/
-  cp $AUTOGRADER_CORE_REPO/tests/java/coverage.sh $TESTBOX/
-  echo "[TODO] style check"
-  mkdir $TESTBOX/lib
-  cp $AUTOGRADER_CORE_REPO/tests/java/lib/hamcrest-2.2.jar $TESTBOX/lib
-  cp $AUTOGRADER_CORE_REPO/tests/java/lib/jacocoagent.jar $TESTBOX/lib
-  cp $AUTOGRADER_CORE_REPO/tests/java/lib/jacococli.jar $TESTBOX/lib
-  cp $AUTOGRADER_CORE_REPO/tests/java/lib/junit-4.13.2.jar $TESTBOX/lib
-  cp $AUTOGRADER_CORE_REPO/tests/java/TestRunner.java $TESTBOX/
-  cp $AUTOGRADER_CORE_REPO/tests/java/UnitTestRunner.java $TESTBOX/
-  echo "[TODO] performance testing"
+  #cp $AUTOGRADER_CORE_REPO/tests/java/approved_includes.sh $TESTBOX/
+  #cp $AUTOGRADER_CORE_REPO/tests/java/compiles.sh $TESTBOX/
+  #cp $AUTOGRADER_CORE_REPO/tests/java/coverage.sh $TESTBOX/
+  #cp -r $AUTOGRADER_CORE_REPO/tests/java/lib/ $TESTBOX/lib/
+  #cp $AUTOGRADER_CORE_REPO/tests/java/TestRunner.java $TESTBOX/
+  #cp $AUTOGRADER_CORE_REPO/tests/java/UnitTestRunner.java $TESTBOX/
   cp $AUTOGRADER_CORE_REPO/test_writing_java.py $TESTBOX/
   cp $AUTOGRADER_CORE_REPO/test_compiling_java.py $TESTBOX/
   cp $AUTOGRADER_CORE_REPO/test_running_java.py $TESTBOX/
@@ -156,7 +158,7 @@ for file in $TESTS/$testPattern; do
   fi
 done
 
-scripts=( approved_includes.sh compiles.sh coverage.sh memory_errors.sh )
+scripts=( approved_includes.sh compiles.sh coverage.sh memory_errors.sh check_style.sh )
 for file in "${scripts[@]}"; do
   if [ -f "$file" ]; then
     chmod +x $file

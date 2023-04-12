@@ -20,6 +20,8 @@ java.util.LinkedList
 */
 <test>
 Code.java
+CodeTests.java
+CodeTestRunner.java
 </test>
 
 /*
@@ -84,7 +86,7 @@ Code.java
 @target: Code.java
 */
 <test>
-  assertThat(Code.isPrime(867), not(true));
+  assertThat(Code.isPrime(867), is(false));
   assertThat(Code.isPrime(5309), is(true));
   assertThat(Code.isPrime(8675309), is(true));
 </test>
@@ -113,4 +115,42 @@ Code.java
 <test>
   input: io_tests/example/input.txt
   output: io_tests/example/output.txt
+</test>
+
+/*
+@number: 6
+@name: performance example
+@points: 1
+@show_output: True
+@type: performance
+@target: Code.java
+@timeout: 30
+*/
+<test>
+    long start = System.currentTimeMillis();
+    long cnt = 1;
+    for (int n = 3; n < 2000000; n++) {
+      if (Code.isPrime(n)) {
+        cnt++;
+      }
+    }
+    long end = System.currentTimeMillis();
+    long milliseconds = end - start;
+    System.out.println("operation took " + milliseconds + " ms.");
+    System.out.println("  found " + cnt + " primes.");
+    if (cnt != 148933) {
+      System.out.println("[FAIL] incorrect number of primes.");
+      System.exit(1);
+    }
+</test>
+
+/*
+@number: 10
+@name: check style
+@points: 1
+@show_output: false
+@type: style
+*/
+<test>
+Code.java
 </test>

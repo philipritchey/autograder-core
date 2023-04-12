@@ -103,10 +103,6 @@ if [ ! -z  "${tests}" ]; then
   flags="$flags -t $tests"
 fi
 
-if [ ! -z "${flags}" ]; then
-  ./ras $flags "${files_to_submit[@]}" "${provided_files[@]}"
-else
-  ./ras "${files_to_submit[@]}" "${provided_files[@]}"
-fi
+./ras $flags "${files_to_submit[@]}" "${provided_files[@]}"
 
 rm ras

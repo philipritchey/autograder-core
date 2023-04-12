@@ -17,4 +17,4 @@ class Attributes(TypedDict):
     approved_includes: List[str]
     skip: bool
     script_args: str
-    visibilty: str
+    visibility: str
