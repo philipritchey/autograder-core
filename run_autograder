@@ -67,7 +67,11 @@ else
   # we are NOT in a gradescope-like environment
   AUTOGRADER_CORE_REPO=$BASE_DIR/../autograder-core
   REPO=$BASE_DIR
-  SUBMISSION=$BASE_DIR/solution/$language
+  if [ -d "$BASE_DIR/solution/$language" ]; then
+    SUBMISSION=$BASE_DIR/solution/$language
+  else
+    SUBMISSION=$BASE_DIR/solution
+  fi
 
   if [ ! -d "$AUTOGRADER_CORE_REPO" ]; then
     echo "[FATAL] autograder-core repo is not where it is expected to be ($(realpath $AUTOGRADER_CORE_REPO))"
