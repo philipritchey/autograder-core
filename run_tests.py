@@ -303,14 +303,15 @@ if __name__ == '__main__':
         with open('/autograder/results/results.json', 'r') as f:
             currentResult = json.load(f)
 
-        if (previousMaxScore > float(currentResult['score'])):
+        if previousMaxScore > float(currentResult['score']):
             currentResult["output"] += "\n"
             currentResult["output"] += f'Your current submission\'s score was {float(currentResult["score"]):0.2f}, however you get to keep your maximum submission score of {previousMaxScore:0.2f}\n'
             currentResult['score'] = previousMaxScore
 
         submission_cnt += 1
         currentResult["output"] += f"This is your {submission_cnt}{ordinal_suffix(submission_cnt)} submission.\n"
-        currentResult["output"] += snarky_comment_about_number_of_submissions(submission_cnt) + "\n"
+        if currentResult['score']  < 90:
+            currentResult["output"] += snarky_comment_about_number_of_submissions(submission_cnt) + "\n"
 
         with open('/autograder/results/results.json', 'w') as f:
             json.dump(currentResult, f, sort_keys=True, indent=4)
