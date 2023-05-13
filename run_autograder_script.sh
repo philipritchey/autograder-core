@@ -114,17 +114,17 @@ cp $AUTOGRADER_CORE_REPO/test_parsing.py $TESTBOX/
 cp $AUTOGRADER_CORE_REPO/test_types.py $TESTBOX/
 cp -r $AUTOGRADER_CORE_REPO/tests/$language/* $TESTBOX/
 if [ "${language}" == "c++" ]; then
-  cp $AUTOGRADER_CORE_REPO/lib/cpp/test_writing.py $TESTBOX/
-  cp $AUTOGRADER_CORE_REPO/lib/cpp/test_compiling.py $TESTBOX/
-  cp $AUTOGRADER_CORE_REPO/lib/cpp/test_running.py $TESTBOX/
+  cp $AUTOGRADER_CORE_REPO/support/cpp/test_writing.py $TESTBOX/
+  cp $AUTOGRADER_CORE_REPO/support/cpp/test_compiling.py $TESTBOX/
+  cp $AUTOGRADER_CORE_REPO/support/cpp/test_running.py $TESTBOX/
 
   testFile=tests.cpp
   testPattern="tests_*"
 
 elif [ "${language}" == "java" ]; then
-  cp $AUTOGRADER_CORE_REPO/lib/java/test_writing.py $TESTBOX/
-  cp $AUTOGRADER_CORE_REPO/lib/java/test_compiling.py $TESTBOX/
-  cp $AUTOGRADER_CORE_REPO/lib/java/test_running.py $TESTBOX/
+  cp $AUTOGRADER_CORE_REPO/support/java/test_writing.py $TESTBOX/
+  cp $AUTOGRADER_CORE_REPO/support/java/test_compiling.py $TESTBOX/
+  cp $AUTOGRADER_CORE_REPO/support/java/test_running.py $TESTBOX/
 
   testFile=tests.java
   testPattern="*.tests"
