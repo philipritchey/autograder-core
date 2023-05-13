@@ -114,28 +114,17 @@ cp $AUTOGRADER_CORE_REPO/test_parsing.py $TESTBOX/
 cp $AUTOGRADER_CORE_REPO/test_types.py $TESTBOX/
 cp -r $AUTOGRADER_CORE_REPO/tests/$language/* $TESTBOX/
 if [ "${language}" == "c++" ]; then
-  #cp $AUTOGRADER_CORE_REPO/tests/c++/approved_includes.sh $TESTBOX/
-  #cp $AUTOGRADER_CORE_REPO/tests/c++/compiles.sh $TESTBOX/
-  #cp $AUTOGRADER_CORE_REPO/tests/c++/coverage.sh $TESTBOX/
-  #cp $AUTOGRADER_CORE_REPO/tests/c++/cs12x_test.h $TESTBOX/
-  #cp $AUTOGRADER_CORE_REPO/tests/c++/memory_errors.sh $TESTBOX/
-  cp $AUTOGRADER_CORE_REPO/test_writing_cpp.py $TESTBOX/
-  cp $AUTOGRADER_CORE_REPO/test_compiling_cpp.py $TESTBOX/
-  cp $AUTOGRADER_CORE_REPO/test_running_cpp.py $TESTBOX/
+  cp $AUTOGRADER_CORE_REPO/lib/cpp/test_writing.py $TESTBOX/
+  cp $AUTOGRADER_CORE_REPO/lib/cpp/test_compiling.py $TESTBOX/
+  cp $AUTOGRADER_CORE_REPO/lib/cpp/test_running.py $TESTBOX/
 
   testFile=tests.cpp
   testPattern="tests_*"
 
 elif [ "${language}" == "java" ]; then
-  #cp $AUTOGRADER_CORE_REPO/tests/java/approved_includes.sh $TESTBOX/
-  #cp $AUTOGRADER_CORE_REPO/tests/java/compiles.sh $TESTBOX/
-  #cp $AUTOGRADER_CORE_REPO/tests/java/coverage.sh $TESTBOX/
-  #cp -r $AUTOGRADER_CORE_REPO/tests/java/lib/ $TESTBOX/lib/
-  #cp $AUTOGRADER_CORE_REPO/tests/java/TestRunner.java $TESTBOX/
-  #cp $AUTOGRADER_CORE_REPO/tests/java/UnitTestRunner.java $TESTBOX/
-  cp $AUTOGRADER_CORE_REPO/test_writing_java.py $TESTBOX/
-  cp $AUTOGRADER_CORE_REPO/test_compiling_java.py $TESTBOX/
-  cp $AUTOGRADER_CORE_REPO/test_running_java.py $TESTBOX/
+  cp $AUTOGRADER_CORE_REPO/lib/java/test_writing.py $TESTBOX/
+  cp $AUTOGRADER_CORE_REPO/lib/java/test_compiling.py $TESTBOX/
+  cp $AUTOGRADER_CORE_REPO/lib/java/test_running.py $TESTBOX/
 
   testFile=tests.java
   testPattern="*.tests"

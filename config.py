@@ -15,6 +15,10 @@ OCTOTHORPE_LINE = '#'*27
 OCTOTHORPE_WALL = '#'+' '*25+'#'
 INFO_UNSUPPORTED_TEST = '[INFO] Unsupported Test'
 
+# cpp compilation config
+CXX = 'g++'
+CXX_FLAGS = '-std=c++17 -g'
+
 # java compilation config
 JAVA_CLASSPATH = ".:./lib/hamcrest-2.2.jar:./lib/junit-4.13.2.jar"
 JAVAC = 'javac'

@@ -8,13 +8,57 @@ TODO(pcr):
 * use @target attribute for coverage tests and some other test(s) that don't use it but could/should
 '''
 
-from typing import List
+from typing import List, Dict, Any
 from os.path import exists as path_exists
 import json
 from argparse import ArgumentParser, Namespace
 from config import DEFAULT_STDOUT_VISIBILITY, DEFAULT_VISIBILITY, OCTOTHORPE_LINE, OCTOTHORPE_WALL
 from results import Result, TestResult
 from test_parsing import read_tests
+
+def print_results(params: Dict[str, Any]) -> None:
+    test_results = params['test_results']
+    unapproved_includes = params['unapproved_includes']
+    sufficient_coverage = params['sufficient_coverage']
+    possible = params['possible']
+    result_score = params['result_score']
+    recorded_score = params['recorded_score']
+
+    passed = 0
+    failed = 0
+    partial = 0
+    for test_result in test_results:
+        status = test_result['status']
+        if status == 'passed':
+            passed += 1
+        elif status == 'failed':
+            failed += 1
+        elif status == 'partial':
+            partial += 1
+
+    result_score = int(result_score * 10000 + 0.5) / 10000
+    str_score = f'{result_score:6.2f}'
+    str_possible = f'{possible:6.2f}'
+
+    print(OCTOTHORPE_LINE)
+    print(OCTOTHORPE_WALL)
+    print(f'# {len(test_results):3d} tests {" "*13} #')
+    print(f'#   {passed:3d} passed            #')
+    print(f'#   {partial:3d} partial           #')
+    print(f'#   {failed:3d} failed            #')
+    print(OCTOTHORPE_WALL)
+    if unapproved_includes or not sufficient_coverage:
+        str_score = str_score.replace(' ', '~')
+        print(f'# points:~{str_score}~/ {str_possible} #')
+        print(f'#         {recorded_score:6.2f} / {str_possible} #')
+    else:
+        print(f'# points: {str_score} / {str_possible} #')
+    print(OCTOTHORPE_WALL)
+    print(OCTOTHORPE_LINE)
+    if unapproved_includes:
+        print('!!! ZERO DUE TO UNAPPROVED INCLUDES')
+    if not sufficient_coverage:
+        print('!!! ZERO DUE TO INSUFFICIENT COVERAGE')
 
 def main(args: Namespace) -> Result:
     filename: str = args.tests_path
@@ -80,23 +124,27 @@ def main(args: Namespace) -> Result:
 
         status = 'compiled'
 
-        failed_to_compile = not compiles
         if compiles:
             result = run_test(test)
+
             run_output = result['run_output']
             points = result['points']
+
             if 0 < points < max_points:
                 status = "partial"
             elif points >= max_points:
                 status = "passed"
             else:  # points <= 0
                 status = 'failed'
+
             if result['unapproved_includes']:
                 status = 'failed'
                 unapproved_includes = True
+
             if not result['sufficient_coverage']:
                 status = 'failed'
                 sufficient_coverage = False
+
             total_time += result['run_time']
         else:
             print('[FAIL] failed to compile\n')
@@ -130,7 +178,7 @@ def main(args: Namespace) -> Result:
                     test_result['output'] += '\n\n'
                 test_result['output'] += run_output.strip()
         else:
-            if failed_to_compile:
+            if not compiles:
                 test_result['output']  += 'Failed to compile.\n'
             test_result['output'] += 'Output is intentionally hidden'
 
@@ -161,41 +209,15 @@ def main(args: Namespace) -> Result:
     #     print(OCTOTHORPE_WALL)
     #     print(OCTOTHORPE_LINE)
 
-    passed = 0
-    failed = 0
-    partial = 0
-    for test_result in test_results:
-        status = test_result['status']
-        if status == 'passed':
-            passed += 1
-        elif status == 'failed':
-            failed += 1
-        elif status == 'partial':
-            partial += 1
-
-    result_score = int(result_score * 10000 + 0.5) / 10000
-    str_score = f'{result_score:6.2f}'
-    str_possible = f'{possible:6.2f}'
-
-    print(OCTOTHORPE_LINE)
-    print(OCTOTHORPE_WALL)
-    print(f'# {len(test_results):3d} tests {" "*13} #')
-    print(f'#   {passed:3d} passed            #')
-    print(f'#   {partial:3d} partial           #')
-    print(f'#   {failed:3d} failed            #')
-    print(OCTOTHORPE_WALL)
-    if unapproved_includes or not sufficient_coverage:
-        str_score = str_score.replace(' ', '~')
-        print(f'# points:~{str_score}~/ {str_possible} #')
-        print(f'#         {recorded_score:6.2f} / {str_possible} #')
-    else:
-        print(f'# points: {str_score} / {str_possible} #')
-    print(OCTOTHORPE_WALL)
-    print(OCTOTHORPE_LINE)
-    if unapproved_includes:
-        print('!!! ZERO DUE TO UNAPPROVED INCLUDES')
-    if not sufficient_coverage:
-        print('!!! ZERO DUE TO INSUFFICIENT COVERAGE')
+    params = {
+        'test_results': test_results,
+        'unapproved_includes': unapproved_includes,
+        'sufficient_coverage': sufficient_coverage,
+        'possible': possible,
+        'result_score': result_score,
+        'recorded_score': recorded_score
+    }
+    print_results(params)
 
     results: Result = {
         'score': recorded_score,
@@ -263,22 +285,19 @@ if __name__ == '__main__':
         'tests': []
         }
 
-    if language == 'c++':
-        from test_writing_cpp import write_test
-        from test_compiling_cpp import compile_test
-        from test_running_cpp import run_test
+    original_language = language
+    if language.lower() == 'c++':
+        language = 'cpp'
+    if language.lower() in ['cpp', 'java']:
+        from test_writing import write_test
+        from test_compiling import compile_test
+        from test_running import run_test
 
-        results = main(args)
-
-    elif language == 'java':
-        from test_writing_java import write_test
-        from test_compiling_java import compile_test
-        from test_running_java import run_test
-
+        # read, write, compile, and run tests
         results = main(args)
 
     else:
-        results['output'] = f'Unsupported Language: {language}'
+        results['output'] = f'Unsupported Language: {original_language}'
         results['visibility'] = 'visible'
         results['stdout_visibility'] = 'visible'
 
