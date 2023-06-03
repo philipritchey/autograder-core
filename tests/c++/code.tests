@@ -180,8 +180,7 @@ code.cpp
 @type: type
 @target: target
 */
-<test>
-</test>
+<test/>
 
 /*
 @skip: True

@@ -119,7 +119,7 @@ if [ "${language}" == "c++" ]; then
   cp $AUTOGRADER_CORE_REPO/support/cpp/test_running.py $TESTBOX/
 
   testFile=tests.cpp
-  testPattern="tests_*"
+  testPattern="*.tests"
 
 elif [ "${language}" == "java" ]; then
   cp $AUTOGRADER_CORE_REPO/support/java/test_writing.py $TESTBOX/
