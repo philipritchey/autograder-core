@@ -57,7 +57,7 @@ def write_style_test(test: Attributes) -> None:
     test['script_content'] = f"./check_style.sh {' '.join(test['approved_includes'])}"
     write_script_test(test)
 
-def write_test(test: Attributes):
+def write_test(test: Attributes) -> None:
     if test['type'] == 'unit':
         write_unit_test(test)
     elif test['type'] == 'i/o':

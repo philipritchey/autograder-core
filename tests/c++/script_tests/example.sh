@@ -1,5 +1,7 @@
 #! /usr/bin/env bash
 
+# an example script (custom) test
+
 usage() {
   echo "Usage: $0 [-h]"
   echo "  -h show this help message and exit"

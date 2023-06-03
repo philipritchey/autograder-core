@@ -27,16 +27,18 @@ cp ssh_config /root/.ssh/config
 #
 # Make sure to include your private key here (as `deploy_key`)
 #   this is the deploy key for the assignment-specific repo
-#   how-t0:
+#   how-to:
 #     $ ssh-keygen -t ed25519 -C "gradescope deploy key"
 #     save as ./deploy_key in assignment folder
 #     no passphrase
+#     $ mv ./deploy_key ./secrets/deploy_key
 #     add a new deploy key on github (Repo/Settings/Security/Deploy Keys)
-#       paste contents of deploy_key.pub
+#       paste contents of ./deploy_key.pub
 mv deploy_key /root/.ssh/deploy_key
 chmod 600 /root/.ssh/deploy_key
 
-# you can get an `autograder_core_deploy_key` from pcr@tamu.edu
+# you should fork https://github.com/philipritchey/autograder-core and follow
+# the above instructions to make your own autograder-core deploy key(s)
 mv autograder_core_deploy_key /root/.ssh/autograder_core_deploy_key
 chmod 600 /root/.ssh/autograder_core_deploy_key
 

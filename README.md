@@ -1,19 +1,14 @@
 # autograder-core
 the core autograder functionality common to all assignments.
 
-* You do **not** need a copy of these in your assignment-specific repo
-  1. `run_tests.py` - the workhorse
-  1. `tests/cs12x_test.h` - bootleg version of GoogleTest (C++ testing framework)
-  1. `tests/approved_includes.sh` - script for verifying that all includes are approved
-  1. `tests/compiles.sh` - script for verifying that the code compiles
-  1. `tests/coverage.sh` - script for measuring code coverage of test
-  1. `tests/memory_errors.sh` - script for testing for the presence of memory errors
-  1. `run_autograder_script.sh` - the part of the full autograder script that is not assignment-specific
+| :exclamation:  You need a copy of these, specialized for your assignment, in your assignment-specific repo |
+|-----------------------------------------------------------------------------------------------------------------|
 
-* You need a copy of these, specialized for your assignment, in your assignment-specific repo
-  1. `run_autograder` - boilerplate for gradescope autograding entry point
-  1. `setup.sh` - boilerplate for gradescope container setup
-  1. `ssh_config` - ssh configuration file for pulling from 2 repos with 2 identities
+
+Easy way: [Use the autograded-assignment-template repo](https://github.com/philipritchey/autograded-assignment-template)
+
+| :warning: You do **not** need a copy of these in your assignment-specific repo |
+|--------------------------------------------------------------------------------|
 
 
 ## get started integrating with your assignment-specific repo
@@ -141,7 +136,7 @@ this is how you should package the autograder files for gradescope.  do this fro
 1. `deploy_key` - private key for accessing the assignment-specific repository
 1. `autograder_core_deploy_key` - private key for accessing the autograder-core repository
 
-an `autograder_core_deploy_key` can be obtained by emailing pcr@tamu.edu
+you should fork this repo and make your own `autograder_core_deploy_key`.
 
 ## running autograder on gradescope (or locally)
 this is how you can use the `run_autograder` script when debugging on gradescope.
