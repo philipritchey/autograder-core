@@ -1,9 +1,9 @@
 | file | description |
 |------|-------------|
 | `documentation/files.md` | descriptions of all files |
-| `support/cpp/test_compiling.py` | helper methods for compiling c++ tests<br/>contains the method `compile_test(test: Attributes) -> Tuple[bool, str]` |
-| `support/cpp/test_running.py` | helper methods for running c++ tests<br/>contains the method `run_test(test: Attributes) -> PartialTestResult` |
-| `support/cpp/test_writing.py` | helper methods for writing c++ tests<br/>contains the method `write_test(test: Attributes) -> None` |
+| `support/c++/test_compiling.py` | helper methods for compiling c++ tests<br/>contains the method `compile_test(test: Attributes) -> Tuple[bool, str]` |
+| `support/c++/test_running.py` | helper methods for running c++ tests<br/>contains the method `run_test(test: Attributes) -> PartialTestResult` |
+| `support/c++/test_writing.py` | helper methods for writing c++ tests<br/>contains the method `write_test(test: Attributes) -> None` |
 | `support/java/test_compiling.py` | helper methods for compiling java tests<br/>contains the method `compile_test(test: Attributes) -> Tuple[bool, str]` |
 | `support/java/test_running.py` | helper methods for running java tests<br/>contains the method `run_test(test: Attributes) -> PartialTestResult` |
 | `support/java/test_writing.py` | helper methods for writing java tests<br/>contains the method `write_test(test: Attributes) -> None` |
