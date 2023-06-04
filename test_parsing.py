@@ -1,10 +1,16 @@
+'''
+Methods for parsing test specifications.
+'''
+
 from typing import List, Tuple, Dict, Any
 from attributes import Attributes
 
 from config import BEGIN_TEST_DELIMITER, DEFAULT_NUMBER, DEFAULT_POINTS, DEFAULT_SHOW_OUTPUT, DEFAULT_TARGET, DEFAULT_TIMEOUT, DEFAULT_VISIBILITY, EMPTY_TEST_BLOCK, END_TEST_DELIMITER, VISIBILITY_OPTIONS
 
-# file contents with position
 class FilePosition:
+    '''
+    Stores file contents with position
+    '''
     def __init__(self, index: int, lines: List[str], filename: str):
         self.index: int = index
         self.lines: List[str] = lines
@@ -58,9 +64,11 @@ def eat_empty_test_block(fp: FilePosition) -> str:
         if line != END_TEST_DELIMITER:
             raise SyntaxError(f'expected end of test: "{END_TEST_DELIMITER}"', (fp.filename, fp.index+1, 1, line))
         return line
-    elif line != EMPTY_TEST_BLOCK:
+
+    if line != EMPTY_TEST_BLOCK:
         # filename lineno offset text
         raise SyntaxError(f'expected empty test block: "{EMPTY_TEST_BLOCK}"', (fp.filename, fp.index+1, 1, line))
+
     return line
 
 def current_line(fp: FilePosition) -> str:
@@ -91,7 +99,7 @@ def read_annotations(fp: FilePosition) -> Dict[str, Any]:
     attr_dict: Dict[str, Any] = dict()
     while line.startswith('@'):
         try:
-            tag,value = line.split(sep=':', maxsplit=1)
+            tag, value = line.split(sep=':', maxsplit=1)
         except ValueError:
             raise SyntaxError('missing attribute value? (attributes look like "@name: value")', (fp.filename, fp.index+1, 1, line))
         tag = tag.strip()[1:]
@@ -136,7 +144,7 @@ def read_annotations(fp: FilePosition) -> Dict[str, Any]:
 def verify_required_annotations(annotations: Dict[str, Any], fp: FilePosition) -> None:
     # verify all required attributes are present
     # 'target' not required for script or style or compile or memory errors tests
-    exempt_types = ['script', 'style', 'compile', 'memory_errors']
+    exempt_types = ('script', 'style', 'compile', 'memory_errors')
     required_attributes = ('name', 'points', 'type', 'target')
 
     additonal_details = str()
@@ -184,22 +192,22 @@ def read_attributes(fp: FilePosition) -> Attributes:
     # skip blank lines
     skip_blank_lines(fp)
     attributes: Attributes = {
-            'number': '',
-            'name': '',
-            'points': 0.0,
-            'type': '',
-            'target': '',
-            'show_output': '',
-            'timeout': 0.0,
-            'include': '',
-            'code': '',
-            'expected_input':'',
-            'expected_output': '',
-            'script_content': '',
-            'approved_includes': [],
-            'skip': False,
-            'script_args': '',
-            'visibility': ''
+        'number': '',
+        'name': '',
+        'points': 0.0,
+        'type': '',
+        'target': '',
+        'show_output': '',
+        'timeout': 0.0,
+        'include': '',
+        'code': '',
+        'expected_input':'',
+        'expected_output': '',
+        'script_content': '',
+        'approved_includes': [],
+        'skip': False,
+        'script_args': '',
+        'visibility': ''
         }
     if fp.index >= len(fp.lines):
         # at end of file
@@ -319,8 +327,9 @@ def read_script_test(fp: FilePosition) -> Tuple[str, str]:
     script_args = str()
     script_content = str()
     if len(values) == 0:
-            raise SyntaxError('missing expected name of script, e.g. scripts/example.sh', (fp.filename, fp.index+1, 1, line))
-    elif len(values) == 1:
+        raise SyntaxError('missing expected name of script, e.g. scripts/example.sh', (fp.filename, fp.index+1, 1, line))
+
+    if len(values) == 1:
         # does not have args (only script path)
         script_filename_string = line
     else:
@@ -410,7 +419,7 @@ def read_tests(filename: str) -> List[Attributes]:
             break
 
         test_type = attributes['type']
-        if test_type == 'unit' or test_type == 'performance':
+        if test_type in ('unit', 'performance'):
             code = read_unit_test(fp)
             attributes['code'] = code
             tests.append(attributes)
@@ -427,7 +436,7 @@ def read_tests(filename: str) -> List[Attributes]:
             attributes['script_content'] = script_content
             tests.append(attributes)
 
-        elif test_type in ['approved_includes', 'compile', 'memory_errors', 'style']:
+        elif test_type in ('approved_includes', 'compile', 'memory_errors', 'style'):
             approved_includes = read_approved_includes(fp)
             attributes['approved_includes'] = approved_includes
             tests.append(attributes)

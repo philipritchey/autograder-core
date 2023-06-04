@@ -1,7 +1,12 @@
+'''
+Data structure(s) for attributes of tests.
+'''
 from typing import List, TypedDict
 
-
 class Attributes(TypedDict):
+    '''
+    Data structure for storing all information about a test.
+    '''
     number: str
     name: str
     points: float

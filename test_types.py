@@ -1,4 +1,11 @@
+'''
+Information about supported test types.
+'''
+
 class UnsupportedTestException(RuntimeError):
+    '''
+    Raised when the test type is not supported.
+    '''
     pass
 
 SUPPORTED_TEST_TYPES = [

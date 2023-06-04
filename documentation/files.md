@@ -47,6 +47,6 @@
 | `setup.sh` | boilerplate for gradescope container setup<br/>:note: your assignment-specific repository needs a copy of this file<br/> see [autograded assignment template](https://github.com/philipritchey/autograded-assignment-template)  |
 | `ssh_config` | ssh configuration file for pulling from 2 repos with 2 identities<br/>:note: your assignment-specific repository needs a copy of this file<br/> see [autograded assignment template](https://github.com/philipritchey/autograded-assignment-template)  |
 | `test_parsing.py` | methods for parsing test specifications<br/>contains the method `read_tests(filename: str) -> List[Attributes]` |
-| `test_types.py` | coantins `UnsupportedTestException` and the (currently unused) list of supported test types |
+| `test_types.py` | contains `UnsupportedTestException` and the (currently unused) list of supported test types |
 
 

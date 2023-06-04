@@ -17,6 +17,9 @@ from results import Result, TestResult
 from test_parsing import read_tests
 
 def print_results(params: Dict[str, Any]) -> None:
+    '''
+    pretty-print the results
+    '''
     test_results = params['test_results']
     unapproved_includes = params['unapproved_includes']
     sufficient_coverage = params['sufficient_coverage']
@@ -179,12 +182,12 @@ def main(args: Namespace) -> Result:
                 test_result['output'] += run_output.strip()
         else:
             if not compiles:
-                test_result['output']  += 'Failed to compile.\n'
+                test_result['output'] += 'Failed to compile.\n'
             test_result['output'] += 'Output is intentionally hidden'
 
         test_results.append(test_result)
 
-    recorded_score = result_score;
+    recorded_score = result_score
     result_output = ''
     if unapproved_includes:
         recorded_score = 0
@@ -235,33 +238,40 @@ def main(args: Namespace) -> Result:
 
     return results
 
-def snarky_comment_about_number_of_submissions(n: int) -> str:
-    if n < 4:
-        return "That's OK.  Make sure that you reflect on the feedback and think before you code.  Before making another submission, write test cases to reproduce the errors and then use your favorite debugging technique to isolate and fix the errors.  You can do it!"
-    if n < 7:
-        return "You should take some time before your next submission to think about the errors and how to fix them.  Start by reproducing the errors with test cases locally."
-    if n < 10:
-        return "Why don't you take a break, take a walk, take nap, and come back to this after you've had a chance to think a bit more.  Remember: start by reproducing the error, then isolate it and fix it."
-    if n < 15:
-        return "It looks like you're having difficulty finding and fixing your errors.  You should come to office hours.  We can help you."
-    if n < 20:
-        return "If you haven't gone to office hours yet, you really should.  We want to help you.  How's your coverage?  You can't test what you don't cover."
-    if n < 30:
-        return "Did you know that you can not only compile locally, but you can also test locally?  You should try it."
-    if n < 40:
-        return "literally nobody: \n             you: autograder go brrr."
-    if n < 50:
-        return "I'm almost out of snarky ways to comment on how many submissions you've made.  That's how many submissions you've made."
-    if n < 75:
-        return "Big yikes.  No cap, fam, take several seats. This ain't it, chief.  Your code and development process are sus AF.  Periodt."
-    if n < 100:
-        return "Your number of submissions to this assignment is too damn high."
-    return "I'm not even mad, that's amazing."
+def snarky_comment_about_number_of_submissions(num_submissions: int) -> str:
+    '''
+    make a snarky comment based on their number of submissions
+    '''
+    comment = "I'm not even mad, that's amazing."
+    if num_submissions < 4:
+        comment = "That's OK.  Make sure that you reflect on the feedback and think before you code.  Before making another submission, write test cases to reproduce the errors and then use your favorite debugging technique to isolate and fix the errors.  You can do it!"
+    elif num_submissions < 7:
+        comment = "You should take some time before your next submission to think about the errors and how to fix them.  Start by reproducing the errors with test cases locally."
+    elif num_submissions < 10:
+        comment = "Why don't you take a break, take a walk, take nap, and come back to this after you've had a chance to think a bit more.  Remember: start by reproducing the error, then isolate it and fix it."
+    elif num_submissions < 15:
+        comment = "It looks like you're having difficulty finding and fixing your errors.  You should come to office hours.  We can help you."
+    elif num_submissions < 20:
+        comment = "If you haven't gone to office hours yet, you really should.  We want to help you.  How's your coverage?  You can't test what you don't cover."
+    elif num_submissions < 30:
+        comment = "Did you know that you can not only compile locally, but you can also test locally?  You should try it."
+    elif num_submissions < 40:
+        comment = "literally nobody: \n             you: autograder go brrr."
+    elif num_submissions < 50:
+        comment = "I'm almost out of snarky ways to comment on how many submissions you've made.  That's how many submissions you've made."
+    elif num_submissions < 75:
+        comment = "Big yikes.  No cap, fam, take several seats. This ain't it, chief.  Your code and development process are sus AF.  Periodt."
+    elif num_submissions < 100:
+        comment = "Your number of submissions to this assignment is too damn high."
+    return comment
 
-def ordinal_suffix(n: int) -> str:
-    if n > 10 and n < 20:
+def ordinal_suffix(number: int) -> str:
+    '''
+    determine the ordinal suffix for the given integer, e.g. 1st, 2nd, 3rd, 4th, etc.
+    '''
+    if 10 < number < 20:
         return "th"
-    return ["th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th"][n%10]
+    return ["th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th"][number % 10]
 
 if __name__ == '__main__':
     parser = ArgumentParser()
@@ -289,6 +299,7 @@ if __name__ == '__main__':
     if language.lower() == 'c++':
         language = 'cpp'
     if language.lower() in ['cpp', 'java']:
+        # these are importable once all the files are collected in the testbox
         from test_writing import write_test
         from test_compiling import compile_test
         from test_running import run_test
@@ -302,7 +313,7 @@ if __name__ == '__main__':
         results['stdout_visibility'] = 'visible'
 
     #print(json.dumps(results, sort_keys=True, indent=4))
-    with open(results_filename,'wt') as f:
+    with open(results_filename, 'wt') as f:
         json.dump(results, f, sort_keys=True, indent=4)
 
 
@@ -316,7 +327,7 @@ if __name__ == '__main__':
             submission_cnt = len(previousResultJson['previous_submissions'])
             for prevSubmission in previousResultJson['previous_submissions']:
                 previousScore = float(prevSubmission["score"])
-                if (previousScore > previousMaxScore):
+                if previousScore > previousMaxScore:
                     previousMaxScore = previousScore
 
         with open('/autograder/results/results.json', 'r') as f:
@@ -329,7 +340,7 @@ if __name__ == '__main__':
 
         submission_cnt += 1
         currentResult["output"] += f"This is your {submission_cnt}{ordinal_suffix(submission_cnt)} submission.\n"
-        if currentResult['score']  < 90:
+        if currentResult['score'] < 90:
             currentResult["output"] += snarky_comment_about_number_of_submissions(submission_cnt) + "\n"
 
         with open('/autograder/results/results.json', 'w') as f:
