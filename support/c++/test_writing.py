@@ -29,7 +29,11 @@ def write_performance_test(test: Attributes) -> None:
 
         f.write('int main() {\n')
         f.write('    INIT_TEST;\n')
+        f.write('    auto start = std::chrono::steady_clock::now();\n')
         f.write('    {}\n'.format('\n    '.join(test['code'].splitlines())))
+        f.write('    auto end = std::chrono::steady_clock::now();\n')
+        f.write('    auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();\n')
+        f.write('    std::cout << "operation took " << microseconds << " µs." << std::endl;\n')
         f.write('    RESULT(pass);\n')
         f.write('    return pass ? 0 : 1;\n')
         f.write('}\n')

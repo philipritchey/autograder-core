@@ -1,7 +1,7 @@
 from typing import List, Tuple, Dict, Any
 from attributes import Attributes
 
-from config import BEGIN_TEST_DELIMITER, DEFAULT_NUMBER, DEFAULT_POINTS, DEFAULT_SHOW_OUTPUT, DEFAULT_TARGET, DEFAULT_TIMEOUT, DEFAULT_VISIBILITY, EMPTY_TEST_BLOCK, END_TEST_DELIMITER
+from config import BEGIN_TEST_DELIMITER, DEFAULT_NUMBER, DEFAULT_POINTS, DEFAULT_SHOW_OUTPUT, DEFAULT_TARGET, DEFAULT_TIMEOUT, DEFAULT_VISIBILITY, EMPTY_TEST_BLOCK, END_TEST_DELIMITER, VISIBILITY_OPTIONS
 
 # file contents with position
 class FilePosition:
@@ -104,17 +104,24 @@ def read_annotations(fp: FilePosition) -> Dict[str, Any]:
             try:
                 points = float(value)
             except ValueError:
-                print(f'[WARNING] ({fp.filename}:{fp.index+1}) points attribute has invalid value, using default value ({DEFAULT_POINTS})')
+                print(f'[WARNING] ({fp.filename}:{fp.index+1}) points attribute has invalid value ({value}), using default value ({DEFAULT_POINTS})')
             attr_dict['points'] = points
-        elif tag =='timeout':
+        elif tag == 'timeout':
             timeout = DEFAULT_TIMEOUT
             try:
                 timeout = float(value)
                 if timeout <= 0:
                     raise ValueError('timeout must be positive')
             except ValueError:
-                print(f'[WARNING] ({fp.filename}:{fp.index+1}) timeout attribute has invalid value, using default value ({DEFAULT_TIMEOUT})')
+                print(f'[WARNING] ({fp.filename}:{fp.index+1}) timeout attribute has invalid value ({value}), using default value ({DEFAULT_TIMEOUT})')
             attr_dict['timeout'] = timeout
+        elif tag == 'visibility':
+            visibility = DEFAULT_VISIBILITY
+            if value not in VISIBILITY_OPTIONS:
+                print(f'[WARNING] ({fp.filename}:{fp.index+1}) visibility attribute has invalid value ({value}), using default value ({DEFAULT_VISIBILITY})')
+            else:
+                visibility = value
+            attr_dict['visibility'] = visibility
         else:
             attr_dict[tag] = value
 
@@ -128,7 +135,8 @@ def read_annotations(fp: FilePosition) -> Dict[str, Any]:
 
 def verify_required_annotations(annotations: Dict[str, Any], fp: FilePosition) -> None:
     # verify all required attributes are present
-    # 'target' not required for script tests
+    # 'target' not required for script or style or compile or memory errors tests
+    exempt_types = ['script', 'style', 'compile', 'memory_errors']
     required_attributes = ('name', 'points', 'type', 'target')
 
     additonal_details = str()
@@ -136,9 +144,7 @@ def verify_required_annotations(annotations: Dict[str, Any], fp: FilePosition) -
         additonal_details += f'  {attr}: {annotations[attr]}\n'
 
     for attribute in required_attributes:
-        # if test type is not script or attribute is not target
-        #   -> target is not required for script tests or style tests
-        if attribute != 'target' or annotations['type'] not in ['script', 'style']:
+        if attribute != 'target' or annotations['type'] not in exempt_types:
             if attribute not in annotations:
                 raise KeyError(f'({fp.filename}:{fp.index+1}) missing required attribute: {attribute}\n{additonal_details}')
             if annotations[attribute] == '':
@@ -348,12 +354,11 @@ def read_approved_includes(fp: FilePosition) -> List[str]:
 
     return approved_includes
 
-def read_coverage_test(fp: FilePosition) -> Tuple[str, str, List[str]]:
+def read_coverage_test(fp: FilePosition) -> Tuple[str, List[str]]:
 
     expect_start_of_test_block(fp)
 
     source = list()
-    target = str()
     main = str()
 
     # go to next line
@@ -370,8 +375,6 @@ def read_coverage_test(fp: FilePosition) -> Tuple[str, str, List[str]]:
 
         if tag == 'source':
             source = values.split()
-        elif tag == 'target':
-            target = values.strip()
         elif tag == 'main':
             main = values.strip()
         else:
@@ -381,11 +384,11 @@ def read_coverage_test(fp: FilePosition) -> Tuple[str, str, List[str]]:
         # go to next line
         line = goto_next_line(fp)
 
-    if not (target and main):
+    if not main:
         # filename lineno offset text
         raise SyntaxError('missing expected main and/or target in coverage test', (fp.filename, fp.index+1, 1, line))
 
-    return target, main, source
+    return main, source
 
 
 def read_tests(filename: str) -> List[Attributes]:
@@ -430,8 +433,7 @@ def read_tests(filename: str) -> List[Attributes]:
             tests.append(attributes)
 
         elif test_type == 'coverage':
-            target, main, source = read_coverage_test(fp)
-            attributes['target'] = target
+            main, source = read_coverage_test(fp)
             attributes['include'] = main
             attributes['approved_includes'] = source
             tests.append(attributes)

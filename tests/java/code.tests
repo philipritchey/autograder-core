@@ -16,7 +16,6 @@ java.util.LinkedList
 @points: 1
 @show_output: True
 @type: compile
-@target: Code.java
 */
 <test>
 Code.java
@@ -30,13 +29,12 @@ CodeTestRunner.java
 @points: 1
 @show_output: True
 @type: coverage
-@target: CodeTests.java
+@target: Code.java
 @timeout: 30
 */
 <test>
   source: Code.java
   main: CodeTestRunner.java
-  target: Code.java
 </test>
 
 /*
@@ -127,16 +125,12 @@ CodeTestRunner.java
 @timeout: 30
 */
 <test>
-    long start = System.currentTimeMillis();
     long cnt = 1;
     for (int n = 3; n < 2000000; n++) {
       if (Code.isPrime(n)) {
         cnt++;
       }
     }
-    long end = System.currentTimeMillis();
-    long milliseconds = end - start;
-    System.out.println("operation took " + milliseconds + " ms.");
     System.out.println("  found " + cnt + " primes.");
     if (cnt != 148933) {
       System.out.println("[FAIL] incorrect number of primes.");

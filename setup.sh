@@ -4,6 +4,9 @@
 apt-get update
 apt-get -y upgrade
 
+#
+# TODO?(you)
+#
 # install dependencies
 apt-get -y install apt-utils valgrind num-utils
 

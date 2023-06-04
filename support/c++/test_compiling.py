@@ -11,7 +11,7 @@ def compile_x_test(name: str, src: List[str] = None) -> Tuple[bool,str]:
         SRC = ' '.join(src)
     else:
         SRC = f'{name}.cpp'
-    compile_cmd = '{} {} -o {} {} 2>&1'.format(CXX, CXX_FLAGS, name, SRC)
+    compile_cmd = f'{CXX} {CXX_FLAGS} -o {name} {SRC} 2>&1'
     p = popen(compile_cmd)
     try:
         output = p.read()
@@ -41,8 +41,8 @@ def compile_coverage_test() -> Tuple[bool,str]:
 def compile_compile_test() -> Tuple[bool,str]:
     return True, ""
 
-def compile_memory_errors_test() -> Tuple[bool,str]:
-    return True, ""
+def compile_memory_errors_test(src: List[str]) -> Tuple[bool,str]:
+    return compile_x_test('memory_error_test', src)
 
 
 def compile_test(test: Attributes) -> Tuple[bool, str]:
@@ -63,7 +63,7 @@ def compile_test(test: Attributes) -> Tuple[bool, str]:
     elif test['type'] == 'compile':
         compiles, compile_output = compile_compile_test()
     elif test['type'] == 'memory_errors':
-        compiles, compile_output = compile_memory_errors_test()
+        compiles, compile_output = compile_memory_errors_test(test['approved_includes'])
     else:
         # don't try to compile an unsupported test
         raise UnsupportedTestException(test['type'])

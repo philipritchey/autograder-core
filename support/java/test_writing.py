@@ -21,7 +21,11 @@ def write_performance_test(test: Attributes) -> None:
     with open('PerformanceTest.java', 'wt') as f:
         f.write('public class PerformanceTest {\n')
         f.write('  public static void main(String[] args) {\n')
+        f.write('    long start = System.currentTimeMillis();\n')
         f.write('    {}\n'.format('\n    '.join(test['code'].splitlines())))
+        f.write('    long end = System.currentTimeMillis();\n')
+        f.write('    long milliseconds = end - start;\n')
+        f.write('    System.out.println("operation took " + milliseconds + " ms.");\n')
         f.write('  }\n')
         f.write('}\n')
 
@@ -49,10 +53,6 @@ def write_compile_test(test: Attributes) -> None:
     test['script_content'] = f"./compiles.sh {' '.join(test['approved_includes'])}"
     write_script_test(test)
 
-def write_memory_errors_test(test: Attributes) -> None:
-    test['script_content'] = f"./memory_errors.sh {' '.join(test['approved_includes'])}"
-    write_script_test(test)
-
 def write_style_test(test: Attributes) -> None:
     test['script_content'] = f"./check_style.sh {' '.join(test['approved_includes'])}"
     write_script_test(test)
@@ -72,8 +72,6 @@ def write_test(test: Attributes) -> None:
         write_coverage_test(test)
     elif test['type'] == 'compile':
         write_compile_test(test)
-    elif test['type'] == 'memory_errors':
-        write_memory_errors_test(test)
     elif test['type'] == 'style':
         write_style_test(test)
     else:

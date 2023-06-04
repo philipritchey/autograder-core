@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
 
+#
 # TODO(you): define the expected language
-#language=c++
-language=java
+#
+language=c++
+#language=java
 
-# TODO(you): list files that student must submit
-#            and files that are provided on backend (see below)
-#            note: _only_ these files will be used during testing
-#files_to_submit=( code.cpp code_tests.cpp code_interactive.cpp code.h )
-files_to_submit=( Code.java CodeTests.java CodeTestRunner.java )
+#
+# TODO(you): list files that the student must submit
+#
+files_to_submit=( code.cpp code_tests.cpp code_interactive.cpp code.h )
+#files_to_submit=( Code.java CodeTests.java CodeTestRunner.java )
 
 #
 # TODO?(you): list files provided by instructor

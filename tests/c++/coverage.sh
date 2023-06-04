@@ -30,7 +30,7 @@ done
 # clean up before compile and run
 rm -f *.gcda *.gcno *.gcov
 
-# compile and execute code with coverage
+# compile code with coverage and execute
 if g++ -std=c++17 --coverage "${source[@]}" "$main" >>DEBUG 2>&1; then
   echo -e "\nCompiles without error\n" >> DEBUG
 else

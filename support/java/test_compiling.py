@@ -39,9 +39,6 @@ def compile_coverage_test() -> Tuple[bool,str]:
 def compile_compile_test() -> Tuple[bool,str]:
     return True, ""
 
-def compile_memory_errors_test() -> Tuple[bool,str]:
-    return True, ""
-
 def compile_style_test() -> Tuple[bool,str]:
     return True, ""
 
@@ -62,8 +59,6 @@ def compile_test(test: Attributes) -> Tuple[bool, str]:
         compiles, compile_output = compile_coverage_test()
     elif test['type'] == 'compile':
         compiles, compile_output = compile_compile_test()
-    elif test['type'] == 'memory_errors':
-        compiles, compile_output = compile_memory_errors_test()
     elif test['type'] == 'style':
         compiles, compile_output = compile_style_test()
     else:

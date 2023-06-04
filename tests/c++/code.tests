@@ -48,7 +48,6 @@ code.h
 @points: 1
 @show_output: True
 @type: compile
-@target: code.cpp
 */
 <test>
 code_tests.cpp
@@ -61,7 +60,6 @@ code.cpp
 @points: 1
 @show_output: True
 @type: memory_errors
-@target: code.cpp
 @timeout: 30
 */
 <test>
@@ -75,13 +73,12 @@ code.cpp
 @points: 1
 @show_output: True
 @type: coverage
-@target: code_tests.cpp
+@target: code.cpp
 @timeout: 30
 */
 <test>
   source: code.cpp
   main: code_tests.cpp
-  target: code.cpp
 </test>
 
 /*
@@ -149,14 +146,10 @@ code.cpp
 @timeout: 30
 */
 <test>
-    auto start = std::chrono::steady_clock::now();
     size_t cnt = 1;
     for (unsigned n = 3; n < 2000000; n++) {
       if (is_prime(n)) cnt++;
     }
-    auto end = std::chrono::steady_clock::now();
-    auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
-    std::cout << "operation took " << microseconds << " µs." << std::endl;
     std::cout << "  found " << cnt << " primes." << std::endl;
     EXPECT_EQ(cnt, 148933);
 </test>
@@ -172,15 +165,6 @@ code.cpp
 <test>
   script_tests/example.sh
 </test>
-
-/*
-@number: number
-@name: semantically invalid test
-@points: -F
-@type: type
-@target: target
-*/
-<test/>
 
 /*
 @skip: True
@@ -204,3 +188,12 @@ code.cpp
 <test>
   script_tests/example.sh -h
 </test>
+
+/*
+@number: ten
+@name: semantically invalid test
+@points: -F
+@type: scantron
+@target: target
+*/
+<test/>
