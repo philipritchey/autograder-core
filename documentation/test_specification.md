@@ -1,3 +1,5 @@
+[Documentation](README.md)
+
 # writing tests
 
 tests must be located in `tests/<language>` in your assignment-specific repo and the filename(s) must match `*.tests`.
@@ -37,7 +39,7 @@ tests must be located in `tests/<language>` in your assignment-specific repo and
 * [i/o](#io-tests)
 * [memory errors](#memory-error-tests)
 * [performance](#performance-tests)
-* [script / custom](#script-tests)
+* [script / custom](#scriptcustom-tests)
 * [style](#style-tests)
 * [unit](#unit-tests)
 
@@ -278,7 +280,7 @@ code.cpp
 </test>
 ```
 
-# script/custom tests
+# script / custom tests
 [top](#jump-to-documentation-by-type)
 
 * the body of the test is a single line which is the path to an executable script
