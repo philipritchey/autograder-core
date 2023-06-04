@@ -167,7 +167,6 @@ code.cpp
 @points: 1
 @show_output: True
 @type: script
-@target: code_interactive.cpp
 */
 <test>
   script_tests/example.sh
