@@ -39,7 +39,7 @@ tests must be located in `tests/<language>` in your assignment-specific repo and
 * [i/o](#io-tests)
 * [memory errors](#memory-error-tests)
 * [performance](#performance-tests)
-* [script / custom](#scriptcustom-tests)
+* [script / custom](#script--custom-tests)
 * [style](#style-tests)
 * [unit](#unit-tests)
 
