@@ -56,5 +56,5 @@ ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
 username=your_username
 repository=repository_for_assignment
 git clone git@assignment:$username/$repository.git /autograder/autograder-code
-git clone git@core:CSCE-12x/autograder-core.git /autograder/autograder-core
+git clone git@core:philipritchey/autograder-core.git /autograder/autograder-core
 
