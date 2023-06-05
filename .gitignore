@@ -5,6 +5,7 @@ starter/
 results.json
 testbox/
 .vscode
+secrets/
 
 # coverage
 *.gcno

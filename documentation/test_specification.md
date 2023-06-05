@@ -2,7 +2,9 @@
 
 # writing tests
 
-tests must be located in `tests/<language>` in your assignment-specific repo and the filename(s) must match `*.tests`.
+test specifications must be located in `tests/<language>` in your assignment-specific repo and the filename(s) must match `*.tests`.
+
+see also: [https://github.com/philipritchey/autograded-assignment-template](autograded assignment template).
 
 ## test attributes
 
@@ -342,7 +344,7 @@ Code.java
         return 0; // signal success to test runner
       }
       ```
-  * for java, use either junit or hamcrest syntax
+  * for java, use hamcrest syntax
     * or go old school:
       ```java
       if (actual_value != expected_value) {

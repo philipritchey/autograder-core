@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# TODO(you): define the expected language
+# TODO(you): define the expected language (c++ or java)
 #
 language=c++
 #language=java
