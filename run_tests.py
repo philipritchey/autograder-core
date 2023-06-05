@@ -322,8 +322,10 @@ if __name__ == '__main__':
         # running on gradescope
         previousMaxScore = 0.0
         submission_cnt = 0
+        total_points = 100.0
         with open('/autograder/submission_metadata.json', 'r') as f:
             previousResultJson = json.load(f)
+            total_points = float(previousResultJson['assignment']['total_points'])
             submission_cnt = len(previousResultJson['previous_submissions'])
             for prevSubmission in previousResultJson['previous_submissions']:
                 previousScore = float(prevSubmission["score"])
@@ -340,7 +342,7 @@ if __name__ == '__main__':
 
         submission_cnt += 1
         currentResult["output"] += f"This is your {submission_cnt}{ordinal_suffix(submission_cnt)} submission.\n"
-        if currentResult['score'] < 90:
+        if currentResult['score'] < total_points * 0.90:
             currentResult["output"] += snarky_comment_about_number_of_submissions(submission_cnt) + "\n"
 
         with open('/autograder/results/results.json', 'w') as f:
