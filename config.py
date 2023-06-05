@@ -3,6 +3,8 @@ Constants that are more-or-less configurable.
 '''
 
 # delimiters
+BEGIN_MULTILINE_COMMENT_DELIMITER = '/*'
+END_MULTILINE_COMMENT_DELIMITER = '*/'
 BEGIN_TEST_DELIMITER = '<test>'
 END_TEST_DELIMITER = '</test>'
 EMPTY_TEST_BLOCK = '<test/>'
@@ -34,6 +36,9 @@ TIMEOUT_MSSG = 'Timeout during test execution, check for an infinite loop\n'
 OCTOTHORPE_LINE = '#'*27
 OCTOTHORPE_WALL = '#'+' '*25+'#'
 INFO_UNSUPPORTED_TEST = '[INFO] Unsupported Test'
+
+# snarky comment control
+SNARKY_SUBMISSION_CNT_THRESHHOLD = 0.9  # be snarky when score < 90%
 
 # cpp compilation config
 CXX = 'g++'

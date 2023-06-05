@@ -6,7 +6,6 @@ class UnsupportedTestException(RuntimeError):
     '''
     Raised when the test type is not supported.
     '''
-    pass
 
 SUPPORTED_TEST_TYPES = [
     'approved_includes',

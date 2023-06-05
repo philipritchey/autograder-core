@@ -8,13 +8,19 @@ TODO(pcr):
 * use @target attribute for coverage tests and some other test(s) that don't use it but could/should
 '''
 
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Tuple
 from os.path import exists as path_exists
 import json
 from argparse import ArgumentParser, Namespace
-from config import DEFAULT_STDOUT_VISIBILITY, DEFAULT_VISIBILITY, OCTOTHORPE_LINE, OCTOTHORPE_WALL
+from config import DEFAULT_STDOUT_VISIBILITY, DEFAULT_VISIBILITY, OCTOTHORPE_LINE, OCTOTHORPE_WALL,\
+    SNARKY_SUBMISSION_CNT_THRESHHOLD
 from results import Result, TestResult
 from test_parsing import read_tests
+
+ # these are importable once all the files are collected in the testbox
+from test_writing import write_test
+from test_compiling import compile_test
+from test_running import run_test
 
 def print_results(params: Dict[str, Any]) -> None:
     '''
@@ -64,6 +70,11 @@ def print_results(params: Dict[str, Any]) -> None:
         print('!!! ZERO DUE TO INSUFFICIENT COVERAGE')
 
 def main(args: Namespace) -> Result:
+    '''
+    read, write, compile, run, and collect results of all tests.
+    '''
+
+
     filename: str = args.tests_path
     test_number: str = args.tests
     debugmode: bool = args.debugmode
@@ -96,7 +107,10 @@ def main(args: Namespace) -> Result:
         #   '5' means run all tests numbered 5: 5[.1, 5.2, ...]
         #   '5.2' means run all tests numbered 5.2: 5.2[.1, 5.2.2, ...]
         for test in tests:
-            if test['number'] == test_number or (test['number'].startswith(test_number) and (len(test['number']) == len(test_number) or test['number'][len(test_number)] == '.')):
+            if test['number'] == (test_number or
+                                  (test['number'].startswith(test_number) and
+                                   (len(test['number']) == len(test_number) or
+                                    test['number'][len(test_number)] == '.'))):
                 test['skip'] = False
             else:
                 test['skip'] = True
@@ -244,26 +258,46 @@ def snarky_comment_about_number_of_submissions(num_submissions: int) -> str:
     '''
     comment = "I'm not even mad, that's amazing."
     if num_submissions < 4:
-        comment = "That's OK.  Make sure that you reflect on the feedback and think before you code.  Before making another submission, write test cases to reproduce the errors and then use your favorite debugging technique to isolate and fix the errors.  You can do it!"
+        comment = (
+            "That's OK.  Make sure that you reflect on the feedback and think before you code.  "
+            "Before making another submission, write test cases to reproduce the errors and then "
+            "use your favorite debugging technique to isolate and fix the errors.  You can do it!")
     elif num_submissions < 7:
-        comment = "You should take some time before your next submission to think about the errors and how to fix them.  Start by reproducing the errors with test cases locally."
+        comment = (
+            "You should take some time before your next submission to think about the errors and "
+            "how to fix them.  Start by reproducing the errors with test cases locally.")
     elif num_submissions < 10:
-        comment = "Why don't you take a break, take a walk, take nap, and come back to this after you've had a chance to think a bit more.  Remember: start by reproducing the error, then isolate it and fix it."
+        comment = (
+            "Why don't you take a break, take a walk, take nap, and come back to this "
+            "after you've had a chance to think a bit more.  "
+            "Remember: start by reproducing the error, then isolate it and fix it.")
     elif num_submissions < 15:
-        comment = "It looks like you're having difficulty finding and fixing your errors.  You should come to office hours.  We can help you."
+        comment = (
+            "It looks like you're having difficulty finding and fixing your errors.  "
+            "You should come to office hours.  We can help you.")
     elif num_submissions < 20:
-        comment = "If you haven't gone to office hours yet, you really should.  We want to help you.  How's your coverage?  You can't test what you don't cover."
+        comment = (
+            "If you haven't gone to office hours yet, you really should.  "
+            "We want to help you.  How's your coverage?  You can't test what you don't cover.")
     elif num_submissions < 30:
-        comment = "Did you know that you can not only compile locally, but you can also test locally?  You should try it."
+        comment = (
+            "Did you know that you can not only compile locally, but you can also test locally?  "
+            "You should try it.")
     elif num_submissions < 40:
-        comment = "literally nobody: \n             you: autograder go brrr."
+        comment = (
+            "literally nobody: \n"
+            "             you: autograder go brrr.")
     elif num_submissions < 50:
-        comment = "I'm almost out of snarky ways to comment on how many submissions you've made.  That's how many submissions you've made."
+        comment = (
+            "I'm almost out of snarky ways to comment on how many submissions you've made.  "
+            "That's how many submissions you've made.")
     elif num_submissions < 75:
-        comment = "Big yikes.  No cap, fam, take several seats. This ain't it, chief.  Your code and development process are sus AF.  Periodt."
+        comment = (
+            "Big yikes.  No cap, fam, take several seats.  This ain't it, chief.  "
+            "Your code and development process are sus AF.  Periodt.")
     elif num_submissions < 100:
         comment = "Your number of submissions to this assignment is too damn high."
-    return comment
+    return comment + '\n'
 
 def ordinal_suffix(number: int) -> str:
     '''
@@ -273,15 +307,117 @@ def ordinal_suffix(number: int) -> str:
         return "th"
     return ["th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th"][number % 10]
 
-if __name__ == '__main__':
+def get_command_line_args() -> Namespace:
+    '''
+    parse the command line arguments.
+    '''
     parser = ArgumentParser()
-    parser.add_argument('tests_path', type=str, help='path to tests (input)')
-    parser.add_argument('-r', '--results_path', type=str, default='results.json', help='path to results (output) [default=./results.json]')
-    parser.add_argument('-d', '--debugmode', help='force show test output', action='store_true')
-    parser.add_argument('-t', '--tests', type=str, default='*', help='test(s) to run by prefix [default=*]')
-    parser.add_argument('-l', '--language', type=str, default='c++', help='supported languages: c++, java')
+    parser.add_argument(
+        'tests_path',
+        type=str,
+        help='path to tests (input)')
+    parser.add_argument(
+        '-r',
+        '--results_path',
+        type=str,
+        default='results.json',
+        help='path to results (output) [default=./results.json]')
+    parser.add_argument(
+        '-d',
+        '--debugmode',
+        help='force show test output',
+        action='store_true')
+    parser.add_argument(
+        '-t',
+        '--tests',
+        type=str,
+        default='*',
+        help='test(s) to run by prefix [default=*]')
+    parser.add_argument(
+        '-l',
+        '--language',
+        type=str,
+        default='c++',
+        help='supported languages: c++, java')
 
-    args = parser.parse_args()
+    return parser.parse_args()
+
+def get_max_score() -> float:
+    '''
+    find the max score overall previous submissions.
+    '''
+    previous_max_score = 0.0
+    with open('/autograder/submission_metadata.json', 'r') as file:
+        previous_result_json = json.load(file)
+        for previous_submission in previous_result_json['previous_submissions']:
+            previous_score = float(previous_submission["score"])
+            if previous_score > previous_max_score:
+                previous_max_score = previous_score
+
+    return previous_max_score
+
+def keep_max_score(current_result: Any) -> None:
+    '''
+    override the score in the current result with the max score over all submissions.
+    '''
+    previous_max_score = get_max_score()
+    if previous_max_score > float(current_result['score']):
+        current_result["output"] += "\n"
+        current_result["output"] += (
+            f'Your current submission\'s score was {float(current_result["score"]):0.2f},'
+            f' however you get to keep your maximum submission score of {previous_max_score:0.2f}'
+            '\n')
+        current_result['score'] = previous_max_score
+
+def get_number_of_submissions_and_total_points() -> Tuple[int, float]:
+    '''
+    count the number of submissons and get the total points for the assignment.
+    '''
+    submission_cnt = 0
+    total_points = 100.0
+    with open('/autograder/submission_metadata.json', 'r') as file:
+        previous_result_json = json.load(file)
+        total_points = float(previous_result_json['assignment']['total_points'])
+        submission_cnt = len(previous_result_json['previous_submissions'])
+
+    return submission_cnt + 1, total_points
+
+def report_submission_count(current_result: Any) -> None:
+    '''
+    add a message about the number of submissions to the results object.
+    '''
+    submission_cnt, total_points = get_number_of_submissions_and_total_points()
+    current_result["output"] += (
+        f"This is your {submission_cnt}{ordinal_suffix(submission_cnt)} submission.\n")
+    if current_result['score'] < total_points * SNARKY_SUBMISSION_CNT_THRESHHOLD:
+        current_result["output"] += snarky_comment_about_number_of_submissions(submission_cnt)
+
+def running_on_gradescope() -> bool:
+    '''
+    return true if we think we are in a gradescope container.
+    '''
+    return path_exists('/autograder/')
+
+def read_results_from_file(filename: str) -> Any:
+    '''
+    read results (should be a Dict) from file.
+    '''
+    with open(filename, 'r') as file:
+        results = json.load(file)
+    return results
+
+def write_results_to_file(results: Any, filename: str) -> None:
+    '''
+    write results (should be a Dict) to file.
+    '''
+    with open(filename, 'wt') as file:
+        json.dump(results, file, sort_keys=True, indent=4)
+
+def run_autograder() -> None:
+    '''
+    do the main-main autograding process.
+    '''
+    args = get_command_line_args()
 
     results_filename = args.results_path
     language = args.language
@@ -296,14 +432,7 @@ if __name__ == '__main__':
         }
 
     original_language = language
-    if language.lower() == 'c++':
-        language = 'cpp'
-    if language.lower() in ['cpp', 'java']:
-        # these are importable once all the files are collected in the testbox
-        from test_writing import write_test
-        from test_compiling import compile_test
-        from test_running import run_test
-
+    if language.lower() in ('c++', 'cpp', 'java'):
         # read, write, compile, and run tests
         results = main(args)
 
@@ -312,39 +441,13 @@ if __name__ == '__main__':
         results['visibility'] = 'visible'
         results['stdout_visibility'] = 'visible'
 
-    #print(json.dumps(results, sort_keys=True, indent=4))
-    with open(results_filename, 'wt') as f:
-        json.dump(results, f, sort_keys=True, indent=4)
+    write_results_to_file(results, results_filename)
 
+    if running_on_gradescope():
+        current_result = read_results_from_file('/autograder/results/results.json')
+        keep_max_score(current_result)
+        report_submission_count(current_result)
+        write_results_to_file(current_result, '/autograder/results/results.json')
 
-    # keep max score over all previous submissions
-    if path_exists('/autograder/'):
-        # running on gradescope
-        previousMaxScore = 0.0
-        submission_cnt = 0
-        total_points = 100.0
-        with open('/autograder/submission_metadata.json', 'r') as f:
-            previousResultJson = json.load(f)
-            total_points = float(previousResultJson['assignment']['total_points'])
-            submission_cnt = len(previousResultJson['previous_submissions'])
-            for prevSubmission in previousResultJson['previous_submissions']:
-                previousScore = float(prevSubmission["score"])
-                if previousScore > previousMaxScore:
-                    previousMaxScore = previousScore
-
-        with open('/autograder/results/results.json', 'r') as f:
-            currentResult = json.load(f)
-
-        if previousMaxScore > float(currentResult['score']):
-            currentResult["output"] += "\n"
-            currentResult["output"] += f'Your current submission\'s score was {float(currentResult["score"]):0.2f}, however you get to keep your maximum submission score of {previousMaxScore:0.2f}\n'
-            currentResult['score'] = previousMaxScore
-
-        submission_cnt += 1
-        currentResult["output"] += f"This is your {submission_cnt}{ordinal_suffix(submission_cnt)} submission.\n"
-        if currentResult['score'] < total_points * 0.90:
-            currentResult["output"] += snarky_comment_about_number_of_submissions(submission_cnt) + "\n"
-
-        with open('/autograder/results/results.json', 'w') as f:
-            json.dump(currentResult, f, sort_keys=True, indent=4)
-    # else running on local so no need to compute max score
+if __name__ == '__main__':
+    run_autograder()
