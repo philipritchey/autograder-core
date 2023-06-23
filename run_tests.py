@@ -16,6 +16,7 @@ from config import DEFAULT_STDOUT_VISIBILITY, DEFAULT_VISIBILITY, OCTOTHORPE_LIN
     SNARKY_SUBMISSION_CNT_THRESHHOLD
 from results import Result, TestResult
 from test_parsing import read_tests
+from attributes import Attributes
 
  # these are importable once all the files are collected in the testbox
 from test_writing import write_test
@@ -69,11 +70,37 @@ def print_results(params: Dict[str, Any]) -> None:
     if not sufficient_coverage:
         print('!!! ZERO DUE TO INSUFFICIENT COVERAGE')
 
+def apply_test_filter(test_number: str, tests: List[Attributes]) -> None:
+    '''
+    run only those tests with number that matches test_number
+      '*' means run all tests
+      '5' means run all tests numbered 5: 5[.1, 5.2, ...]
+      '5.2' means run all tests numbered 5.2: 5.2[.1, 5.2.2, ...]
+    '''
+    if test_number != '*':
+        for test in tests:
+            if test['number'] == (test_number or
+                                  (test['number'].startswith(test_number) and
+                                   (len(test['number']) == len(test_number) or
+                                    test['number'][len(test_number)] == '.'))):
+                test['skip'] = False
+            else:
+                test['skip'] = True
+
+def possible_points(tests: List[Attributes]) -> float:
+    '''
+    sum of all possible points
+    '''
+    possible = 0.0
+    for test in tests:
+        if not test['skip']:
+            possible += test['points']
+    return possible
+
 def main(args: Namespace) -> Result:
     '''
     read, write, compile, run, and collect results of all tests.
     '''
-
 
     filename: str = args.tests_path
     test_number: str = args.tests
@@ -88,7 +115,7 @@ def main(args: Namespace) -> Result:
 
     try:
         tests = read_tests(filename)
-    except Exception as err:
+    except(SyntaxError, KeyError, ValueError) as err:
         fail_result: Result = {
             'score': 0.0,
             'output': repr(err),
@@ -102,23 +129,10 @@ def main(args: Namespace) -> Result:
         return fail_result
 
 
-    if test_number != '*':
-        # run only those tests with number that matches test_number
-        #   '5' means run all tests numbered 5: 5[.1, 5.2, ...]
-        #   '5.2' means run all tests numbered 5.2: 5.2[.1, 5.2.2, ...]
-        for test in tests:
-            if test['number'] == (test_number or
-                                  (test['number'].startswith(test_number) and
-                                   (len(test['number']) == len(test_number) or
-                                    test['number'][len(test_number)] == '.'))):
-                test['skip'] = False
-            else:
-                test['skip'] = True
-
+    apply_test_filter(test_number, tests)
 
     unapproved_includes = False
     sufficient_coverage = True
-    possible = 0.0
     total_time = 0.0
     for test in tests:
         if test['skip']:
@@ -131,7 +145,6 @@ def main(args: Namespace) -> Result:
         status = 'pre-write'
         compile_output = str()
         run_output = str()
-        possible += max_points
 
         write_test(test)
 
@@ -226,31 +239,31 @@ def main(args: Namespace) -> Result:
     #     print(OCTOTHORPE_WALL)
     #     print(OCTOTHORPE_LINE)
 
-    params = {
-        'test_results': test_results,
-        'unapproved_includes': unapproved_includes,
-        'sufficient_coverage': sufficient_coverage,
-        'possible': possible,
-        'result_score': result_score,
-        'recorded_score': recorded_score
-    }
-    print_results(params)
-
-    results: Result = {
-        'score': recorded_score,
-        'output': result_output,
-        'execution_time': total_time,
-        'visibility': DEFAULT_VISIBILITY,
-        'stdout_visibility': DEFAULT_STDOUT_VISIBILITY,
-        'tests': test_results
-        }
+    print_results(
+        {
+            'test_results': test_results,
+            'unapproved_includes': unapproved_includes,
+            'sufficient_coverage': sufficient_coverage,
+            'possible': possible_points(tests),
+            'result_score': result_score,
+            'recorded_score': recorded_score
+        })
 
     #if extra_data:
     #    results['extra_data'] = dict()
     #if leaderboard:
     #    results['leaderboard'] = leaderboard
 
-    return results
+    return Result(
+        {
+            'score': recorded_score,
+            'output': result_output,
+            'execution_time': total_time,
+            'visibility': DEFAULT_VISIBILITY,
+            'stdout_visibility': DEFAULT_STDOUT_VISIBILITY,
+            'tests': test_results
+        }
+    )
 
 def snarky_comment_about_number_of_submissions(num_submissions: int) -> str:
     '''
