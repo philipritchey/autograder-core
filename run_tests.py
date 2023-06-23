@@ -422,14 +422,23 @@ def run_autograder() -> None:
     results_filename = args.results_path
     language = args.language
 
+    # in case of resource exhaustion, pre-write a results file
+    kill_mssg = '''
+        the autograding process was killed,
+        probably because it ran out of memory,
+        probably because of too much output,
+        probably because of a print statement in an infinite loop.
+        check your code for infinite loops and other code that might print too much.
+        '''
     results: Result = {
-        'score': 0,
-        'output': '',
-        'execution_time': 0,
-        'visibility': DEFAULT_VISIBILITY,
-        'stdout_visibility': DEFAULT_STDOUT_VISIBILITY,
+        'score': 0.0,
+        'output': kill_mssg,
+        'execution_time': 0.0,
+        'visibility': 'visible',
+        'stdout_visibility': 'visible',
         'tests': []
         }
+    write_results_to_file(results, results_filename)
 
     original_language = language
     if language.lower() in ('c++', 'cpp', 'java'):
@@ -437,6 +446,7 @@ def run_autograder() -> None:
         results = main(args)
 
     else:
+        # TODO(pcr): does this need to be student-facing? no, right?
         results['output'] = f'Unsupported Language: {original_language}'
         results['visibility'] = 'visible'
         results['stdout_visibility'] = 'visible'
