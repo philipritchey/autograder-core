@@ -451,7 +451,10 @@ def run_autograder() -> None:
         'stdout_visibility': 'visible',
         'tests': []
         }
-    write_results_to_file(results, results_filename)
+
+    if running_on_gradescope():
+        keep_max_score(results)
+        write_results_to_file(results, '/autograder/results/results.json')
 
     original_language = language
     if language.lower() in ('c++', 'cpp', 'java'):
