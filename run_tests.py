@@ -79,10 +79,13 @@ def apply_test_filter(test_number: str, tests: List[Attributes]) -> None:
     '''
     if test_number != '*':
         for test in tests:
-            if test['number'] == (test_number or
-                                  (test['number'].startswith(test_number) and
-                                   (len(test['number']) == len(test_number) or
-                                    test['number'][len(test_number)] == '.'))):
+            if (test['number'] == test_number or
+                    (test['number'].startswith(test_number) and
+                        (len(test['number']) == len(test_number) or
+                            test['number'][len(test_number)] == '.'
+                        )
+                    )
+               ):
                 test['skip'] = False
             else:
                 test['skip'] = True
