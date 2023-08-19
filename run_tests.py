@@ -110,6 +110,8 @@ def main(args: Namespace) -> Result:
     debugmode: bool = args.debugmode
     if debugmode:
         print('===DEBUGMODE===')
+        print(f'filename: {filename}')
+        print(f'test_number: {test_number}')
 
     result_score: float = 0.0
     test_results: List[TestResult] = list()
@@ -131,8 +133,13 @@ def main(args: Namespace) -> Result:
         print(err)
         return fail_result
 
+    if debugmode:
+        print(f'read {len(tests)} tests')
 
     apply_test_filter(test_number, tests)
+
+    if debugmode:
+        print(f'{len([test for test in tests if not test["skip"]])} tests will be run')
 
     unapproved_includes = False
     sufficient_coverage = True
