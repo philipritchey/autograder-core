@@ -72,7 +72,7 @@ else
 fi
 
 case "$language" in
-  c++ | java)
+  c++ | java | python)
     ;;
   *)
     echo "Unsupported Language: $language"
@@ -127,6 +127,14 @@ elif [ "${language}" == "java" ]; then
   cp $AUTOGRADER_CORE_REPO/support/java/test_running.py $TESTBOX/
 
   testFile=tests.java
+  testPattern="*.tests"
+
+elif [ "${language}" == "python" ]; then
+  cp $AUTOGRADER_CORE_REPO/support/python/test_writing.py $TESTBOX/
+  cp $AUTOGRADER_CORE_REPO/support/python/test_compiling.py $TESTBOX/
+  cp $AUTOGRADER_CORE_REPO/support/python/test_running.py $TESTBOX/
+
+  testFile=tests.py
   testPattern="*.tests"
 
 else
