@@ -467,7 +467,7 @@ def run_autograder() -> None:
         write_results_to_file(results, '/autograder/results/results.json')
 
     original_language = language
-    if language.lower() in ('c++', 'cpp', 'java'):
+    if language.lower() in ('c++', 'cpp', 'java', 'python'):
         # read, write, compile, and run tests
         results = main(args)
 
