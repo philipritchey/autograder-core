@@ -20,7 +20,7 @@ def class_name(filename):
     return filename[:-5]
 
 def run_code(class_name: str, timeout: float) -> Tuple[bool,str]:
-    run_cmd = ["python3", class_name]
+    run_cmd = ["python3.12", class_name]
     p = subprocess.Popen(run_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     try:
         _, output_err = p.communicate(timeout=timeout)
@@ -39,7 +39,7 @@ def run_performance_test(timeout: float) -> Tuple[bool,str]:
     return run_code('PerformanceTest', timeout)
 
 def run_io_test(timeout: float, main: str) -> Tuple[bool,str]:
-    run_cmd = ["python3", main]
+    run_cmd = ["python3.12", main]
     with open('input.txt', 'r') as file:
         input_data = file.read()
     p = subprocess.Popen(run_cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
