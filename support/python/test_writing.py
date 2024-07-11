@@ -5,7 +5,12 @@ def write_unit_test(test: Attributes) -> None:
     with open('UnitTest.py', 'wt') as f:
         f.write('import unittest\n')
         f.write('from ' + test['target'][:-3] + ' import *\n')
-        
+
+        if 'include' in test.keys():
+            if len(test['include']) > 0:
+                for include in test['include'].split():
+                    f.write('from ' + include + ' import *\n')
+
         f.write('class UnitTest(unittest.TestCase):\n')
         f.write('    def test_1(self):\n')
         lines = test['code'].split('\n')
