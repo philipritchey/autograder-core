@@ -32,7 +32,18 @@ done
 shift $(( OPTIND - 1 ))
 
 # python version check (requires 3.8+)
-python=python3.12
+python=python3
+typeset -i python3_version=$($python --version | cut -d. -f2)
+if [ $python3_version -lt 8 ]; then
+  if [ "$(which python3.8)" == ""  ]; then
+    echo "[FATAL] requires Python 3.8+ (because pcr _insists_ on using type hints)"
+    echo "        for gradescope: make sure setup.sh includes the python3.8 install steps"
+    echo "        for local: follow the python3.8 install steps in setup.sh"
+    exit 1
+  else
+    python=python3.8
+  fi
+fi
 
 BASE_DIR=$(pwd)
 

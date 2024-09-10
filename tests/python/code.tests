@@ -1,0 +1,292 @@
+/*
+@number: 1.1
+@name: Test for Q1
+@points: 1
+@show_output: True
+@type: i/o
+@target: q1.py
+*/
+<test>
+  input: io_tests/q1_1_in.txt
+  output: io_tests/q1_1_out.txt
+</test>
+
+/*
+@number: 1.2
+@name: Test for Q1
+@points: 1
+@show_output: True
+@type: i/o
+@target: q1.py
+*/
+<test>
+  input: io_tests/q1_2_in.txt
+  output: io_tests/q1_2_out.txt
+</test>
+
+/*
+@number: 1.3
+@name: Test for Q1
+@points: 1
+@show_output: False
+@type: i/o
+@target: q1.py
+*/
+<test>
+  input: io_tests/q1_3_in.txt
+  output: io_tests/q1_3_out.txt
+</test>
+
+/*
+@number: 2.1
+@name: Test for Q2
+@points: 1
+@show_output: True
+@type: i/o
+@target: q2.py
+*/
+<test>
+    input: io_tests/q2_1_in.txt
+    output: io_tests/q2_1_out.txt
+</test>
+
+/*
+@number: 2.2
+@name: Test for Q2
+@points: 1
+@show_output: True
+@type: i/o
+@target: q2.py
+*/
+<test>
+    input: io_tests/q2_2_in.txt
+    output: io_tests/q2_2_out.txt
+</test>
+
+/*
+@number: 2.3
+@name: Test for Q2
+@points: 1
+@show_output: False
+@type: i/o
+@target: q2.py
+*/
+<test>
+    input: io_tests/q2_3_in.txt
+    output: io_tests/q2_3_out.txt
+</test>
+
+/*
+@number: 3.1
+@name: Test for Q3
+@points: 1
+@show_output: True
+@type: i/o
+@target: q3.py
+*/
+<test>
+  input: io_tests/q3_1_in.txt
+  output: io_tests/q3_1_out.txt
+</test>
+
+/*
+@number: 3.2
+@name: Test for Q3
+@points: 1
+@show_output: True
+@type: i/o
+@target: q3.py
+*/
+<test>
+  input: io_tests/q3_2_in.txt
+  output: io_tests/q3_2_out.txt
+</test>
+
+/*
+@number: 3.3
+@name: Test for Q3
+@points: 1
+@show_output: False
+@type: i/o
+@target: q3.py
+*/
+<test>
+  input: io_tests/q3_3_in.txt
+  output: io_tests/q3_3_out.txt
+</test>
+
+/*
+@number: 4.1
+@name: Test for Q4
+@points: 1
+@show_output: True
+@type: i/o
+@target: q4.py
+*/
+<test>
+  input: io_tests/q4_1_in.txt
+  output: io_tests/q4_1_out.txt
+</test>
+
+/*
+@number: 4.2
+@name: Test for Q4
+@points: 1
+@show_output: True
+@type: i/o
+@target: q4.py
+*/
+<test>
+  input: io_tests/q4_2_in.txt
+  output: io_tests/q4_2_out.txt
+</test>
+
+/*
+@number: 4.3
+@name: Test for Q4
+@points: 1
+@show_output: True
+@type: i/o
+@target: q4.py
+*/
+<test>
+  input: io_tests/q4_3_in.txt
+  output: io_tests/q4_3_out.txt
+</test>
+
+/*
+@number: 4.4
+@name: Test for Q4
+@points: 1
+@show_output: True
+@type: i/o
+@target: q4.py
+*/
+<test>
+  input: io_tests/q4_4_in.txt
+  output: io_tests/q4_4_out.txt
+</test>
+
+/*
+@number: 4.5
+@name: Test for Q4
+@points: 1
+@show_output: False
+@type: i/o
+@target: q4.py
+*/
+<test>
+  input: io_tests/q4_5_in.txt
+  output: io_tests/q4_5_out.txt
+</test>
+
+/*
+@number: 1.1
+@name: Element Construction
+@points: 1
+@show_output: True
+@type: unit
+@target: lw19.py
+*/
+<test>
+x = Element('Sodium', 11, [11, 12, 13])
+</test>
+
+/*
+@number: 1.2
+@name: Element Construction : invalid protons 1
+@points: 1
+@show_output: True
+@type: unit
+@target: lw19.py
+*/
+<test>
+try:
+    x = Element('Sodium', -1, [11, 12, 13])
+except InvalidProtonNumberError as E:
+    self.assertEqual(str(E), "Proton number cannot be negative")
+    return
+raise Exception("Test Failed")
+</test>
+
+/*
+@number: 1.3
+@name: Element Construction : undiscovered element
+@points: 1
+@show_output: True
+@type: unit
+@target: lw19.py
+*/
+<test>
+try:
+    x = Element('Sodium', 120, [11, 12, 13])
+except UndiscoveredElementError as E:
+    self.assertEqual(str(E), "Proton number is higher than the maximum element discovered so far")
+    return
+raise Exception("Test Failed")
+</test>
+
+/*
+@number: 1.4
+@name: Element Construction : invalid neutrons
+@points: 1
+@show_output: True
+@type: unit
+@target: lw19.py
+*/
+<test>
+try:
+    x = Element('Sodium', 11, [-11, 12, 13])
+except InvalidNeutronNumberError as E:
+    self.assertEqual(str(E), "Number of neutrons can not be negative")
+    return
+raise Exception("Test Failed")
+</test>
+
+/*
+@number: 1.5
+@name: Element Construction : invalid protons, invalid neutrons
+@points: 1
+@show_output: True
+@type: unit
+@target: lw19.py
+*/
+<test>
+try:
+    x = Element('Sodium', -11, [-11, 12, 13])
+except InvalidProtonNumberError as E:
+    self.assertEqual(str(E), "Proton number cannot be negative")
+    return
+raise Exception("Test Failed")
+</test>
+
+/*
+@number: 1.6
+@name: Element Construction : undiscovered element, invalid neutrons
+@points: 1
+@show_output: True
+@type: unit
+@target: lw19.py
+*/
+<test>
+try:
+    x = Element('Sodium', 120, [-11, 12, 13])
+except UndiscoveredElementError as E:
+    self.assertEqual(str(E), "Proton number is higher than the maximum element discovered so far")
+    return
+raise Exception("Test Failed")
+</test>
+
+/*
+@number: 1.7
+@name: Element Isotopes
+@points: 2
+@show_output: True
+@type: unit
+@target: lw19.py
+*/
+<test>
+x = Element('Sodium', 11, [11, 12, 13])
+self.assertEqual(x.getIsotopes(), ['Sodium-22', 'Sodium-23', 'Sodium-24'])
+</test>
+
