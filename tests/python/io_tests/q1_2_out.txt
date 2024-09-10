@@ -1,0 +1,3 @@
+Enter an upper case char:
+Lowercase letter for G is: g
+

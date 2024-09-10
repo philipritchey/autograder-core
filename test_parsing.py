@@ -38,7 +38,7 @@ def goto_next_line(file_pos: FilePosition) -> str:
 
     # skip blank lines
     skip_blank_lines(file_pos)
-    line = file_pos.lines[file_pos.index].strip()
+    line = file_pos.lines[file_pos.index].rstrip()
 
     return line
 
@@ -46,7 +46,7 @@ def skip_blank_lines(file_pos: FilePosition) -> None:
     '''
     skip blank lines.
     '''
-    while file_pos.index < len(file_pos.lines) and not file_pos.lines[file_pos.index].strip():
+    while file_pos.index < len(file_pos.lines) and not file_pos.lines[file_pos.index].rstrip():
         file_pos.index += 1
 
 def eat_block_of_test(file_pos: FilePosition) -> str:
@@ -101,7 +101,7 @@ def current_line(file_pos: FilePosition) -> str:
     '''
     get the current line from the file position structure.
     '''
-    return file_pos.lines[file_pos.index].strip()
+    return file_pos.lines[file_pos.index].rstrip()
 
 def expect_start_of_multiline_comment(file_pos: FilePosition) -> None:
     '''
@@ -136,7 +136,7 @@ def read_annotations(file_pos: FilePosition) -> Dict[str, Any]:
     expect_start_of_multiline_comment(file_pos)
 
     # go to next line
-    line = goto_next_line(file_pos)
+    line = goto_next_line(file_pos).rstrip()
 
     attr_dict: Dict[str, Any] = dict()
     while line.startswith('@'):

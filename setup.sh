@@ -57,4 +57,3 @@ username=your_username
 repository=repository_for_assignment
 git clone git@assignment:$username/$repository.git /autograder/autograder-code
 git clone git@core:$username/autograder-core.git /autograder/autograder-core
-
