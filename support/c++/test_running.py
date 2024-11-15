@@ -21,6 +21,8 @@ def run_unit_test(timeout: float) -> Tuple[bool,str]:
     except Exception as e:
         output = str(e)
     ret = p.returncode
+    if ret != 0:
+        output += '\nTest execution ended with abnormal return code, check for crashes\n'
     return ret == 0, output
 
 def run_performance_test(timeout: float) -> Tuple[bool,str]:
