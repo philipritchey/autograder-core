@@ -2,9 +2,11 @@
 
 | file | description |
 | ---- | ----------- |
+| `config.py` | Constants that are more-or-less configurable. |
 | `documentation/files.md` | descriptions of all files |
 | `documentation/README.md` | links to documentation |
 | `documentation/test_specifications.md` | documentation on the test specification format |
+| `snarky_submission_comments.py` | configuration for snarky comments about the number of submissions |
 | `support/c++/test_compiling.py` | helper methods for compiling c++ tests<br/>contains the method `compile_test(test: Attributes) -> Tuple[bool, str]` |
 | `support/c++/test_running.py` | helper methods for running c++ tests<br/>contains the method `run_test(test: Attributes) -> PartialTestResult` |
 | `support/c++/test_writing.py` | helper methods for writing c++ tests<br/>contains the method `write_test(test: Attributes) -> None` |
