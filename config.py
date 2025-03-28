@@ -33,6 +33,7 @@ DEFAULT_STDOUT_VISIBILITY = VISIBLE
 
 # output
 TIMEOUT_MSSG = 'Timeout during test execution, check for an infinite loop\n'
+CRASH_MSSG = '\nTest execution ended with abnormal return code, check for crashes\n'
 OCTOTHORPE_LINE = '#'*27
 OCTOTHORPE_WALL = '#'+' '*25+'#'
 INFO_UNSUPPORTED_TEST = '[INFO] Unsupported Test'

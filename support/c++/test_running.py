@@ -5,7 +5,7 @@ from time import time
 from typing import Tuple
 from attributes import Attributes
 
-from config import TIMEOUT_MSSG
+from config import TIMEOUT_MSSG, CRASH_MSSG
 from results import PartialTestResult
 from test_types import UnsupportedTestException
 
@@ -14,26 +14,30 @@ def run_unit_test(timeout: float) -> Tuple[bool,str]:
     run_cmd = ["./unit_test", "2>&1"]
     p = subprocess.Popen(run_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     try:
-        output_en, err_en = p.communicate(timeout=timeout) #p.stdout.decode('utf-8')
+        output_en, _ = p.communicate(timeout=timeout) #p.stdout.decode('utf-8')
         output = output_en.decode('utf-8')
     except subprocess.TimeoutExpired as e:
         output = TIMEOUT_MSSG
     except Exception as e:
         output = str(e)
     ret = p.returncode
+    if ret != 0:
+        output += CRASH_MSSG
     return ret == 0, output
 
 def run_performance_test(timeout: float) -> Tuple[bool,str]:
     run_cmd = ["./performance_test", "2>&1"]
     p = subprocess.Popen(run_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     try:
-        output_en, err_en = p.communicate(timeout=timeout) #p.stdout.decode('utf-8')
+        output_en, _ = p.communicate(timeout=timeout) #p.stdout.decode('utf-8')
         output = output_en.decode('utf-8')
     except subprocess.TimeoutExpired as e:
-        output = "Timeout during test execution, check for an infinite loop\n"
+        output = TIMEOUT_MSSG
     except Exception as e:
         output = str(e)
     ret = p.returncode
+    if ret != 0:
+        output += CRASH_MSSG
     return ret == 0, output
 
 def remove_end_of_line_whitespace(s: str) -> str:
