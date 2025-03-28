@@ -2,9 +2,8 @@
 
 '''
 TODO(pcr):
-* move configuration stuff to configuration file (and let it be assignment-specific)
+* enable assignment-specific configuration stuff
 * refine attribute requirements
-* add command line option to run a specific test or set of tests
 * use @target attribute for coverage tests and some other test(s) that don't use it but could/should
 '''
 
@@ -12,8 +11,13 @@ from typing import List, Dict, Any, Tuple
 from os.path import exists as path_exists
 import json
 from argparse import ArgumentParser, Namespace
-from config import DEFAULT_STDOUT_VISIBILITY, DEFAULT_VISIBILITY, OCTOTHORPE_LINE, OCTOTHORPE_WALL,\
-    SNARKY_SUBMISSION_CNT_THRESHHOLD
+from config import (
+    DEFAULT_STDOUT_VISIBILITY,
+    DEFAULT_VISIBILITY,
+    OCTOTHORPE_LINE,
+    OCTOTHORPE_WALL,
+    SNARKY_SUBMISSION_CNT_THRESHHOLD)
+from snarky_submission_comments import snarky_comment_about_number_of_submissions
 from results import Result, TestResult
 from test_parsing import read_tests
 from attributes import Attributes
@@ -274,53 +278,6 @@ def main(args: Namespace) -> Result:
             'tests': test_results
         }
     )
-
-def snarky_comment_about_number_of_submissions(num_submissions: int) -> str:
-    '''
-    make a snarky comment based on their number of submissions
-    '''
-    comment = "I'm not even mad, that's amazing."
-    if num_submissions < 4:
-        comment = (
-            "That's OK.  Make sure that you reflect on the feedback and think before you code.  "
-            "Before making another submission, write test cases to reproduce the errors and then "
-            "use your favorite debugging technique to isolate and fix the errors.  You can do it!")
-    elif num_submissions < 7:
-        comment = (
-            "You should take some time before your next submission to think about the errors and "
-            "how to fix them.  Start by reproducing the errors with test cases locally.")
-    elif num_submissions < 10:
-        comment = (
-            "Why don't you take a break, take a walk, take nap, and come back to this "
-            "after you've had a chance to think a bit more.  "
-            "Remember: start by reproducing the error, then isolate it and fix it.")
-    elif num_submissions < 15:
-        comment = (
-            "It looks like you're having difficulty finding and fixing your errors.  "
-            "You should come to office hours.  We can help you.")
-    elif num_submissions < 20:
-        comment = (
-            "If you haven't gone to office hours yet, you really should.  "
-            "We want to help you.  How's your coverage?  You can't test what you don't cover.")
-    elif num_submissions < 30:
-        comment = (
-            "Did you know that you can not only compile locally, but you can also test locally?  "
-            "You should try it.")
-    elif num_submissions < 40:
-        comment = (
-            "literally nobody: \n"
-            "             you: autograder go brrr.")
-    elif num_submissions < 50:
-        comment = (
-            "I'm almost out of snarky ways to comment on how many submissions you've made.  "
-            "That's how many submissions you've made.")
-    elif num_submissions < 75:
-        comment = (
-            "Big yikes.  No cap, fam, take several seats.  This ain't it, chief.  "
-            "Your code and development process are sus AF.  Periodt.")
-    elif num_submissions < 100:
-        comment = "Your number of submissions to this assignment is too damn high."
-    return comment + '\n'
 
 def ordinal_suffix(number: int) -> str:
     '''
