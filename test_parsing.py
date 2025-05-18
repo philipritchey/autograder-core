@@ -19,14 +19,14 @@ class FilePosition:
     lines: List[str]
     filename: str
 
-def unexpected_end_of_input(file_pos: FilePosition) -> Exception:
+def unexpected_end_of_input(file_pos: FilePosition) -> SyntaxError:
     '''
     construct a syntax error reaching an unexpected end of input.
     '''
     # filename lineno offset text
     return SyntaxError(
         'unexpected end of input',
-        (file_pos.filename, file_pos.index, file_pos.lines[-1]))
+        (file_pos.filename, file_pos.index+1, 1, file_pos.lines[file_pos.index]))
 
 def goto_next_line(file_pos: FilePosition) -> str:
     '''
@@ -364,6 +364,7 @@ def read_io_test(file_pos: FilePosition) -> Tuple[str, str]:
 
     input_filename = None
     output_filename = None
+    line = ''
 
     for _ in range(2):
         # go to next line
@@ -371,11 +372,11 @@ def read_io_test(file_pos: FilePosition) -> Tuple[str, str]:
 
         try:
             tag, value = line.split(':')
-        except ValueError:
+        except ValueError as exc:
             # filename lineno offset text
             raise SyntaxError(
                 'expected "tag: value" pair',
-                (file_pos.filename, file_pos.index+1, 1, line))
+                (file_pos.filename, file_pos.index+1, 1, line)) from exc
 
         tag = tag.strip()
         value = value.strip()
@@ -404,20 +405,20 @@ def read_io_test(file_pos: FilePosition) -> Tuple[str, str]:
     expected_input = None
     expected_output = None
     try:
-        with open(input_filename, 'r') as file:
+        with open(input_filename, 'r', encoding='utf-8') as file:
             expected_input = file.read()
-    except FileNotFoundError:
+    except FileNotFoundError as exc:
         raise SyntaxError(
             f'input file not found: {input_filename}',
-            (file_pos.filename, file_pos.index+1, 1, line))
+            (file_pos.filename, file_pos.index+1, 1, line)) from exc
 
     try:
-        with open(output_filename, 'r') as file:
+        with open(output_filename, 'r', encoding='utf-8') as file:
             expected_output = file.read()
-    except FileNotFoundError:
+    except FileNotFoundError as exc:
         raise SyntaxError(
             f'output file not found: {output_filename}',
-            (file_pos.filename, file_pos.index+1, 1, line))
+            (file_pos.filename, file_pos.index+1, 1, line)) from exc
 
     return expected_input, expected_output
 
@@ -468,7 +469,7 @@ def read_approved_includes(file_pos: FilePosition) -> List[str]:
     # go to next line
     line = goto_next_line(file_pos)
 
-    approved_includes = list()
+    approved_includes: list[str] = []
     while line != END_TEST_DELIMITER:
         approved_includes.append(line)
         line = goto_next_line(file_pos)
@@ -482,7 +483,7 @@ def read_coverage_test(file_pos: FilePosition) -> Tuple[str, List[str]]:
 
     expect_start_of_test_block(file_pos)
 
-    source = list()
+    source: list[str] = []
     main = str()
 
     # go to next line
@@ -491,11 +492,11 @@ def read_coverage_test(file_pos: FilePosition) -> Tuple[str, List[str]]:
     while line != END_TEST_DELIMITER:
         try:
             tag, values = line.split(':')
-        except ValueError:
+        except ValueError as exc:
             # filename lineno offset text
             raise SyntaxError(
                 'expected "tag: value" pair',
-                (file_pos.filename, file_pos.index+1, 1, line))
+                (file_pos.filename, file_pos.index+1, 1, line)) from exc
 
         tag = tag.strip()
 
@@ -525,7 +526,7 @@ def read_tests(filename: str) -> List[Attributes]:
     '''
     read tests from file into a list.
     '''
-    with open(filename) as file:
+    with open(filename, encoding='utf-8') as file:
         lines = file.readlines()
 
     # trim empty lines at end of file
@@ -533,7 +534,7 @@ def read_tests(filename: str) -> List[Attributes]:
         del lines[-1]
 
     file_pos = FilePosition(0, lines, filename)
-    tests = list()
+    tests: list[Attributes] = []
     while file_pos.index < len(file_pos.lines):
         # expect next lines to be only attributes and values
         attributes = read_attributes(file_pos)
