@@ -13,7 +13,7 @@ from os.path import exists as path_exists
 import json
 from argparse import ArgumentParser, Namespace
 from config import DEFAULT_STDOUT_VISIBILITY, DEFAULT_VISIBILITY, OCTOTHORPE_LINE, OCTOTHORPE_WALL,\
-    SNARKY_SUBMISSION_CNT_THRESHHOLD
+    SNARKY_SUBMISSION_SCORE_THRESHHOLD
 from results import Result, TestResult
 from test_parsing import read_tests
 from attributes import Attributes
@@ -412,7 +412,7 @@ def report_submission_count(current_result: Any) -> None:
     submission_cnt, total_points = get_number_of_submissions_and_total_points()
     current_result["output"] += (
         f"This is your {submission_cnt}{ordinal_suffix(submission_cnt)} submission.\n")
-    if current_result['score'] < total_points * SNARKY_SUBMISSION_CNT_THRESHHOLD:
+    if current_result['score'] < total_points * SNARKY_SUBMISSION_SCORE_THRESHHOLD:
         current_result["output"] += snarky_comment_about_number_of_submissions(submission_cnt)
 
 def running_on_gradescope() -> bool:
