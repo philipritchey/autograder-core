@@ -138,14 +138,14 @@ def read_annotations(file_pos: FilePosition) -> Dict[str, Any]:
     # go to next line
     line = goto_next_line(file_pos).rstrip()
 
-    attr_dict: Dict[str, Any] = dict()
+    attr_dict: Dict[str, Any] = {}
     while line.startswith('@'):
         try:
             tag, value = line.split(sep=':', maxsplit=1)
-        except ValueError:
+        except ValueError as exc:
             raise SyntaxError(
                 'missing attribute value? (attributes look like "@name: value")',
-                (file_pos.filename, file_pos.index+1, 1, line))
+                (file_pos.filename, file_pos.index+1, 1, line)) from exc
         tag = tag.strip()[1:]
         value = value.strip()
         if tag in attr_dict:
@@ -430,7 +430,7 @@ def read_script_test(file_pos: FilePosition) -> Tuple[str, str]:
     expect_start_of_test_block(file_pos)
 
     # go to next line
-    line = goto_next_line(file_pos)
+    line = goto_next_line(file_pos).strip()
     values = line.split(None, 1)
     script_args = str()
     script_content = str()
@@ -452,7 +452,7 @@ def read_script_test(file_pos: FilePosition) -> Tuple[str, str]:
     expect_end_of_test_block(file_pos)
 
     try:
-        with open(script_filename_string, 'r') as file:
+        with open(script_filename_string, 'rt', encoding='utf-8') as file:
             script_content = file.read()
     except FileNotFoundError:
         print(f'No such file or directory: \'{script_filename_string}\'')
