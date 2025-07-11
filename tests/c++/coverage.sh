@@ -50,7 +50,7 @@ target_extension="${filename##*.}"
 if [ $target_extension == "h" ]; then
   filename=$(basename -- "$main")
 fi
-filename="${filename%.*}"
+filename="a-${filename%.*}"
 if [ ! -f "$filename.gcda" ]; then
 	echo -e "Unknown FATAL error (a required coverage file was not generated)." >> DEBUG
 	fail
@@ -69,9 +69,9 @@ gcov -mnr "$filename" | \
   cat OUTPUT
 } >> DEBUG
 
-typeset -i coverage=$(cat OUTPUT)
+coverage=$(head -n 1 OUTPUT)
 
-if [ $coverage -lt 90 ]; then
+if [ "$coverage" -lt 90 ]; then
   echo "< 90% coverage" >> DEBUG
   fail
 else
