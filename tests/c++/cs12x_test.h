@@ -3,6 +3,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <cmath>
+#include <string>
 
 /*
 #include <iostream>
@@ -84,9 +85,9 @@ try {\
 #define EXPECT_EQ(X, Y) CHECK_EQ(X, Y, pass = false)
 #define ASSERT_EQ(X, Y) CHECK_EQ(X, Y, RESULT(false); return 1)
 
-#define CHECK_STREQ(X, Y, Z) TRY(std::string(X),std::string(Y),Z,!(X == Y),explain_eq)
-#define EXPECT_STREQ(X, Y) CHECK_EQ(std::string(X), std::string(Y), pass = false)
-#define ASSERT_STREQ(X, Y) CHECK_EQ(std::string(X), std::string(Y), RESULT(false); return 1)
+#define CHECK_STREQ(X, Y, Z) TRY(std::string(X),std::string(Y),Z,!(X == Y),explain_streq)
+#define EXPECT_STREQ(X, Y) CHECK_STREQ(std::string(X), std::string(Y), pass = false)
+#define ASSERT_STREQ(X, Y) CHECK_STREQ(std::string(X), std::string(Y), RESULT(false); return 1)
 
 #define CHECK_NE(X, Y, Z) TRY(X,Y,Z,!(X != Y),explain_ne)
 #define EXPECT_NE(X, Y) CHECK_NE(X, Y, pass = false)
@@ -363,4 +364,61 @@ void explain_near(
   std::cout << "to be near" << std::endl;
   std::cout << " " << n2 << std::endl;
   std::cout << "  Which is: " << o2 << std::endl;
+}
+
+// construct a representation of a string that is intended to be unambiguous
+std::string repr(const std::string& str) {
+    std::string rstr;
+    rstr.push_back('"');
+    for (char c : str) {
+        switch(c) {
+        case '"':
+            rstr.append("\\\"");
+            break;
+        case '\t':
+            rstr.append("\\t");
+            break;
+        case '\r':
+            rstr.append("\\r");
+            break;
+        case '\n':
+            rstr.append("\\n");
+            break;
+        case '\f':
+            rstr.append("\\f");
+            break;
+        case '\v':
+            rstr.append("\\v");
+            break;
+        case '\\':
+            rstr.append("\\\\");
+            break;
+        default:
+            if (c < 32 or c == 127) {
+                // non-printable -> use hex
+                char HEX[]{'0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'};
+                rstr.append("\\x");
+                rstr.push_back(HEX[c / 16]);
+                rstr.push_back(HEX[c % 16]);
+            } else {
+                // printable
+                rstr.push_back(c);
+            }
+        }
+    }
+    rstr.push_back('"');
+    return rstr;
+}
+
+void explain_streq(
+    const char n1[],
+    const std::string& s1,
+    const char n2[],
+    const std::string& s2,
+    const char func[],
+    const size_t line) {
+  std::cout << func << ":" << line << ": Failure" << std::endl;
+  std::cout << "Expected equality of these values:" << std::endl;
+  std::cout << " " << repr(s1) << std::endl;
+  std::cout << " " << repr(s2) << std::endl;
 }
