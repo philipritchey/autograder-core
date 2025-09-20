@@ -72,10 +72,10 @@ try {\
     Z;\
   }\
 } catch (const std::exception& err) {\
-  std::cout << err.what() << std::endl;\
+  std::cout << "expected " << #X << " to throw no exception, but got " << err.what() << std::endl;\
   Z;\
 } catch (...) {\
-  std::cout << "non-std::exception thrown" << std::endl;\
+  std::cout << "expected " << #X << " to throw no exception, but got non-std::exception" << std::endl;\
   Z;\
 }
 
@@ -136,6 +136,11 @@ try {\
 #define CHECK_FALSE(X, Y, Z) TRY_TF(X,Y,Z,X)
 #define EXPECT_FALSE(X) CHECK_FALSE(X, false, pass = false)
 #define ASSERT_FALSE(X) CHECK_FALSE(X, false, RESULT(false); return 1)
+
+#define EXPECT(X) EXPECT_TRUE(X)
+#define ASSERT(X) ASSERT_TRUE(X)
+#define EXPECT_NOT(X) EXPECT_FALSE(X)
+#define ASSERT_NOT(X) ASSERT_FALSE(X)
 
 #define TRY_NULL(X,Z,COND) \
 try {\
@@ -264,9 +269,7 @@ void explain_tf(
     const char func[],
     const size_t line) {
   std::cout << func << ":" << line << ": Failure" << std::endl;
-  std::cout << "Value of " << name << std::endl;
-  std::cout << "  Actual: " << (actual?"true":"false") << std::endl;
-  std::cout << " Expected: " << (expected?"true":"false") << std::endl;
+  std::cout << "Expected " << name << " to be " << std::boolalpha << expected << ", got " << actual << std::endl;
 }
 
 template <typename T>
@@ -276,9 +279,7 @@ void explain_null(
     const char func[],
     const size_t line) {
   std::cout << func << ":" << line << ": Failure" << std::endl;
-  std::cout << "Value of " << name << std::endl;
-  std::cout << "  Actual: " << actual << std::endl;
-  std::cout << " Expected: NULL (e.g. 0, nullptr)" << std::endl;
+  std::cout << "Expected " << name << " to be null, got " << actual << std::endl;
 }
 
 template <typename T1, typename T2>
