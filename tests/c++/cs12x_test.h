@@ -419,7 +419,9 @@ void explain_streq(
     const char func[],
     const size_t line) {
   std::cout << func << ":" << line << ": Failure" << std::endl;
-  std::cout << "Expected equality of these strings:" << std::endl;
-  std::cout << " " << n1 << " = " << repr(s1) << std::endl;
-  std::cout << " " << n2 << " = " << repr(s2) << std::endl;
+  std::cout << "Expected equality of these values:" << std::endl;
+  std::cout << " " << n1 << std::endl;
+  std::cout << "  Which is: " << repr(s1) << std::endl;
+  std::cout << " " << n2 << std::endl;
+  std::cout << "  Which is: " << repr(s2) << std::endl;
 }
