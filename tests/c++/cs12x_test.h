@@ -85,9 +85,9 @@ try {\
 #define EXPECT_EQ(X, Y) CHECK_EQ(X, Y, pass = false)
 #define ASSERT_EQ(X, Y) CHECK_EQ(X, Y, RESULT(false); return 1)
 
-#define CHECK_STREQ(X, Y, Z) TRY(std::string(X),std::string(Y),Z,!(X == Y),explain_streq)
-#define EXPECT_STREQ(X, Y) CHECK_STREQ(std::string(X), std::string(Y), pass = false)
-#define ASSERT_STREQ(X, Y) CHECK_STREQ(std::string(X), std::string(Y), RESULT(false); return 1)
+#define CHECK_STREQ(X, Y, Z) TRY(X,Y,Z,!(X == Y),explain_streq)
+#define EXPECT_STREQ(X, Y) CHECK_STREQ(X, Y, pass = false)
+#define ASSERT_STREQ(X, Y) CHECK_STREQ(X, Y, RESULT(false); return 1)
 
 #define CHECK_NE(X, Y, Z) TRY(X,Y,Z,!(X != Y),explain_ne)
 #define EXPECT_NE(X, Y) CHECK_NE(X, Y, pass = false)
@@ -420,6 +420,6 @@ void explain_streq(
     const size_t line) {
   std::cout << func << ":" << line << ": Failure" << std::endl;
   std::cout << "Expected equality of these strings:" << std::endl;
-  std::cout << " " << repr(s1) << std::endl;
-  std::cout << " " << repr(s2) << std::endl;
+  std::cout << " " << n1 << " = " << repr(s1) << std::endl;
+  std::cout << " " << n2 << " = " << repr(s2) << std::endl;
 }
