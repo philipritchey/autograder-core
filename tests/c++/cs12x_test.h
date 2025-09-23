@@ -125,7 +125,10 @@ try {\
     Z;\
   }\
 } catch (const std::exception& err) {\
-  std::cout << err.what() << std::endl;\
+  std::cout << "expected " << #X << " to throw no exception, but got " << err.what() << std::endl;\
+  Z;\
+} catch (...) {\
+  std::cout << "expected " << #X << " to throw no exception, but got non-std::exception" << std::endl;\
   Z;\
 }
 
