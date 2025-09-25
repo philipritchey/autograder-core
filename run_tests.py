@@ -109,8 +109,8 @@ def main(args: Namespace) -> Result:
     debugmode: bool = args.debugmode
     if debugmode:
         print('===DEBUGMODE===')
-        print(f'filename: {filename}')
-        print(f'test_number: {test_number}')
+        print(f'[DEBUG] filename: {filename}')
+        print(f'[DEBUG] test_number: {test_number}')
 
     result_score: float = 0.0
     test_results: List[TestResult] = list()
