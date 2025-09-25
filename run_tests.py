@@ -74,16 +74,15 @@ def apply_test_filter(test_number: str, tests: List[Attributes]) -> None:
     '''
     run only those tests with number that matches test_number
       '*' means run all tests
-      '5' means run all tests numbered 5: 5[.1, 5.2, ...]
-      '5.2' means run all tests numbered 5.2: 5.2[.1, 5.2.2, ...]
+      '5' means run all tests numbered 5: 5[.1, 5.2, ...], 5[a, b, ...]
+      '5.2' means run all tests numbered 5.2: 5.2[.1, 5.2.2, ...], 5.2[a, b, ...]
     '''
     if test_number != '*':
         for test in tests:
             if (test['number'] == test_number or
                 (test['number'].startswith(test_number) and
-                 (len(test['number']) == len(test_number) or
-                  test['number'][len(test_number)] == '.'
-                 )
+                 len(test['number']) >= len(test_number) and
+                 test['number'][len(test_number)] not in '0123456789'
                 )
                ):
                 test['skip'] = False
@@ -134,12 +133,12 @@ def main(args: Namespace) -> Result:
         return fail_result
 
     if debugmode:
-        print(f'read {len(tests)} tests')
+        print(f'[DEBUG] read {len(tests)} tests')
 
     apply_test_filter(test_number, tests)
 
     if debugmode:
-        print(f'{len([test for test in tests if not test["skip"]])} tests will be run')
+        print(f'[DEBUG] {len([test for test in tests if not test["skip"]])} tests will be run')
 
     unapproved_includes = False
     sufficient_coverage = True
