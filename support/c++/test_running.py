@@ -21,6 +21,8 @@ def run_unit_test(timeout: float) -> Tuple[bool,str]:
     except Exception as e:
         output = str(e)
     ret = p.returncode
+    if ret == -8:
+        output = "Floating point exception (core dumped)"
     return ret == 0, output
 
 def run_performance_test(timeout: float) -> Tuple[bool,str]:
@@ -30,10 +32,12 @@ def run_performance_test(timeout: float) -> Tuple[bool,str]:
         output_en, err_en = p.communicate(timeout=timeout) #p.stdout.decode('utf-8')
         output = output_en.decode('utf-8')
     except subprocess.TimeoutExpired as e:
-        output = "Timeout during test execution, check for an infinite loop\n"
+        output = TIMEOUT_MSSG
     except Exception as e:
         output = str(e)
     ret = p.returncode
+    if ret == -8:
+        output = "Floating point exception (core dumped)"
     return ret == 0, output
 
 def remove_end_of_line_whitespace(s: str) -> str:

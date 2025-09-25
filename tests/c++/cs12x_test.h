@@ -72,10 +72,10 @@ try {\
     Z;\
   }\
 } catch (const std::exception& err) {\
-  std::cout << "expected " << #X << " to throw no exception, but got " << err.what() << std::endl;\
+  std::cout << "did not expect " << #X << " to throw an exception, but got " << err.what() << std::endl;\
   Z;\
 } catch (...) {\
-  std::cout << "expected " << #X << " to throw no exception, but got non-std::exception" << std::endl;\
+  std::cout << "did not expect " << #X << " to throw an exception, but got non-std::exception" << std::endl;\
   Z;\
 }
 
@@ -125,7 +125,10 @@ try {\
     Z;\
   }\
 } catch (const std::exception& err) {\
-  std::cout << err.what() << std::endl;\
+  std::cout << "did not expect " << #X << " to throw an exception, but got " << err.what() << std::endl;\
+  Z;\
+} catch (...) {\
+  std::cout << "did not expect " << #X << " to throw an exception, but got non-std::exception" << std::endl;\
   Z;\
 }
 
@@ -149,7 +152,10 @@ try {\
     Z;\
   }\
 } catch (const std::exception& err) {\
-  std::cout << err.what() << std::endl;\
+  std::cout << "did not expect " << #X << " to throw an exception, but got " << err.what() << std::endl;\
+  Z;\
+} catch (...) {\
+  std::cout << "did not expect " << #X << " to throw an exception, but got non-std::exception" << std::endl;\
   Z;\
 }
 

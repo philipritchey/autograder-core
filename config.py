@@ -32,7 +32,7 @@ DEFAULT_VISIBILITY = VISIBLE
 DEFAULT_STDOUT_VISIBILITY = VISIBLE
 
 # output
-TIMEOUT_MSSG = 'Timeout during test execution, check for an infinite loop\n'
+TIMEOUT_MSSG = 'Timeout during test execution\n'
 OCTOTHORPE_LINE = '#'*27
 OCTOTHORPE_WALL = '#'+' '*25+'#'
 INFO_UNSUPPORTED_TEST = '[INFO] Unsupported Test'
