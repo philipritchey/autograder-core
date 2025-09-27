@@ -38,7 +38,7 @@ OCTOTHORPE_WALL = '#'+' '*25+'#'
 INFO_UNSUPPORTED_TEST = '[INFO] Unsupported Test'
 
 # snarky comment control
-SNARKY_SUBMISSION_CNT_THRESHHOLD = 0.9  # be snarky when score < 90%
+SNARKY_SUBMISSION_CNT_THRESHHOLD = 0.0  # be snarky when score < 90%
 
 # cpp compilation config
 CXX = 'g++'
