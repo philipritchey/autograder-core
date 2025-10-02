@@ -63,12 +63,12 @@ struct cout_redirect {
 }\
 std::cout << " in " << __FUNCTION__ << std::endl;
 
-#define FUNC_ARGS(X, Y) #X, X, #Y, Y, __FUNCTION__, __LINE__
-
 #define TRY(X,Y,Z,COND,FUNC) \
 try {\
+  auto x = X;\
+  auto y = Y;\
   if (COND) {\
-    FUNC(FUNC_ARGS(X, Y));\
+    FUNC(#X, x, #Y, y, __FUNCTION__, __LINE__);\
     Z;\
   }\
 } catch (const std::exception& err) {\
@@ -81,47 +81,51 @@ try {\
 
 #define FAIL() RESULT(false); return 1; std::cout
 
-#define CHECK_EQ(X, Y, Z) TRY(X,Y,Z,!(X == Y),explain_eq)
+#define CHECK_EQ(X, Y, Z) TRY(X,Y,Z,!(x == y),explain_eq)
 #define EXPECT_EQ(X, Y) CHECK_EQ(X, Y, pass = false)
 #define ASSERT_EQ(X, Y) CHECK_EQ(X, Y, RESULT(false); return 1)
 
-#define CHECK_STREQ(X, Y, Z) TRY(X,Y,Z,!(X == Y),explain_streq)
+#define CHECK_STREQ(X, Y, Z) TRY(X,Y,Z,!(x == y),explain_streq)
 #define EXPECT_STREQ(X, Y) CHECK_STREQ(X, Y, pass = false)
 #define ASSERT_STREQ(X, Y) CHECK_STREQ(X, Y, RESULT(false); return 1)
 
-#define CHECK_NE(X, Y, Z) TRY(X,Y,Z,!(X != Y),explain_ne)
+#define CHECK_NE(X, Y, Z) TRY(X,Y,Z,!(x != y),explain_ne)
 #define EXPECT_NE(X, Y) CHECK_NE(X, Y, pass = false)
 #define ASSERT_NE(X, Y) CHECK_NE(X, Y, RESULT(false); return 1)
 
-#define CHECK_LT(X, Y, Z) TRY(X,Y,Z,!(X < Y),explain_lt)
+#define CHECK_LT(X, Y, Z) TRY(X,Y,Z,!(x < y),explain_lt)
 #define EXPECT_LT(X, Y) CHECK_LT(X, Y, pass = false)
 #define ASSERT_LT(X, Y) CHECK_LT(X, Y, RESULT(false); return 1)
 
-#define CHECK_LE(X, Y, Z) TRY(X,Y,Z,!(X <= Y),explain_le)
+#define CHECK_LE(X, Y, Z) TRY(X,Y,Z,!(x <= y),explain_le)
 #define EXPECT_LE(X, Y) CHECK_LE(X, Y, pass = false)
 #define ASSERT_LE(X, Y) CHECK_LE(X, Y, RESULT(false); return 1)
 
-#define CHECK_GT(X, Y, Z) TRY(X,Y,Z,!(X > Y),explain_gt)
+#define CHECK_GT(X, Y, Z) TRY(X,Y,Z,!(x > y),explain_gt)
 #define EXPECT_GT(X, Y) CHECK_GT(X, Y, pass = false)
 #define ASSERT_GT(X, Y) CHECK_GT(X, Y, RESULT(false); return 1)
 
-#define CHECK_GE(X, Y, Z) TRY(X,Y,Z,!(X >= Y), explain_ge)
+#define CHECK_GE(X, Y, Z) TRY(X,Y,Z,!(x >= y), explain_ge)
 #define EXPECT_GE(X, Y) CHECK_GE(X, Y, pass = false)
 #define ASSERT_GE(X, Y) CHECK_GE(X, Y, RESULT(false); return 1)
 
-#define CHECK_NEAR(X, Y, Z, W) TRY(X,Y,W,!(std::fabs(X-Y) <= Z), explain_near)
+#define CHECK_NEAR(X, Y, Z, W) TRY(X,Y,W,!(std::abs(x-y) <= Z), explain_near)
 #define EXPECT_NEAR3(X, Y, Z) CHECK_NEAR(X, Y, Z, pass = false)
 #define ASSERT_NEAR3(X, Y, Z) CHECK_NEAR(X, Y, Z, RESULT(false); return 1)
 #define EXPECT_NEAR2(X, Y) EXPECT_NEAR3(X, Y, 0.00005)
 #define ASSERT_NEAR2(X, Y) ASSERT_NEAR3(X, Y, 0.00005)
 
-#define GET_EXPECT_NEAR(_1,_2,_3,NAME) NAME
-#define EXPECT_NEAR(...) GET_EXPECT_NEAR(__VA_ARGS__, EXPECT_NEAR3, EXPECT_NEAR2)(__VA_ARGS__)
+#define EXPAND(X) X
+#define GET_EXPECT_NEAR(_1,_2,_3,NAME, ...) NAME
+#define EXPECT_NEAR(...) EXPAND( GET_EXPECT_NEAR(__VA_ARGS__, EXPECT_NEAR3, EXPECT_NEAR2)(__VA_ARGS__) )
+#define GET_ASSERT_NEAR(_1,_2,_3,NAME, ...) NAME
+#define ASSERT_NEAR(...) EXPAND( GET_ASSERT_NEAR(__VA_ARGS__, ASSERT_NEAR3, ASSERT_NEAR2)(__VA_ARGS__) )
 
 #define TRY_TF(X,Y,Z,COND) \
 try {\
+  bool x = X;\
   if (COND) {\
-    explain_tf(#X, X, Y, __FUNCTION__, __LINE__);\
+    explain_tf(#X, x, Y, __FUNCTION__, __LINE__);\
     Z;\
   }\
 } catch (const std::exception& err) {\
@@ -132,11 +136,11 @@ try {\
   Z;\
 }
 
-#define CHECK_TRUE(X, Y, Z) TRY_TF(X,Y,Z,!(X))
+#define CHECK_TRUE(X, Y, Z) TRY_TF(X,Y,Z,!(x))
 #define EXPECT_TRUE(X) CHECK_TRUE(X, true, pass = false)
 #define ASSERT_TRUE(X) CHECK_TRUE(X, true, RESULT(false); return 1)
 
-#define CHECK_FALSE(X, Y, Z) TRY_TF(X,Y,Z,X)
+#define CHECK_FALSE(X, Y, Z) TRY_TF(X,Y,Z,x)
 #define EXPECT_FALSE(X) CHECK_FALSE(X, false, pass = false)
 #define ASSERT_FALSE(X) CHECK_FALSE(X, false, RESULT(false); return 1)
 
@@ -147,6 +151,7 @@ try {\
 
 #define TRY_NULL(X,Z,COND) \
 try {\
+  auto x = X;\
   if (COND) {\
     explain_null(#X, X, __FUNCTION__, __LINE__);\
     Z;\
@@ -159,7 +164,7 @@ try {\
   Z;\
 }
 
-#define CHECK_NULL(X, Z) TRY_NULL(X, Z, X)
+#define CHECK_NULL(X, Z) TRY_NULL(X, Z, x)
 #define EXPECT_NULL(X) CHECK_NULL(X, pass = false)
 #define ASSERT_NULL(X) CHECK_NULL(X, RESULT(false); return 1)
 
