@@ -85,7 +85,7 @@ try {\
 #define EXPECT_EQ(X, Y) CHECK_EQ(X, Y, pass = false)
 #define ASSERT_EQ(X, Y) CHECK_EQ(X, Y, RESULT(false); return 1)
 
-#define CHECK_STREQ(X, Y, Z) TRY(X,Y,Z,!(x == y),explain_streq)
+#define CHECK_STREQ(X, Y, Z) TRY(X,Y,Z,!(std::string(x) == std::string(y)),explain_streq)
 #define EXPECT_STREQ(X, Y) CHECK_STREQ(X, Y, pass = false)
 #define ASSERT_STREQ(X, Y) CHECK_STREQ(X, Y, RESULT(false); return 1)
 
@@ -187,6 +187,21 @@ catch (...) {\
   pass = false;\
 }
 
+#define EXPECT_THROW_MSSG(X,Y,Z) \
+try {\
+  X;\
+  std::cout << "expected " << #X << " to throw " << #Y <<", but nothing thrown" << std::endl;\
+  pass = false;\
+} catch (const Y& err) { EXPECT_STREQ(err.what(), Z); }\
+catch (const std::exception& err) {\
+  std::cout << "expected " << #X << " to throw " << #Y <<", but got " << err.what() << std::endl;\
+  pass = false;\
+}\
+catch (...) {\
+  std::cout << "expected " << #X << " to throw " << #Y <<", but got a non-std::exception" << std::endl;\
+  pass = false;\
+}
+
 #define ASSERT_THROW(X,Y) \
 try {\
   X;\
@@ -194,6 +209,24 @@ try {\
   RESULT(false);\
   return 1;\
 } catch (const Y& err) {}\
+catch (const std::exception& err) {\
+  std::cout << "expected " << #X << " to throw " << #Y <<", but got " << err.what() << std::endl;\
+  RESULT(false);\
+  return 1;\
+}\
+catch (...) {\
+  std::cout << "expected " << #X << " to throw " << #Y <<", but got a non-std::exception" << std::endl;\
+  RESULT(false);\
+  return 1;\
+}
+
+#define ASSERT_THROW_MSSG(X,Y,Z) \
+try {\
+  X;\
+  std::cout << "expected " << #X << " to throw " << #Y <<", but nothing thrown" << std::endl;\
+  RESULT(false);\
+  return 1;\
+} catch (const Y& err) { ASSERT_STREQ(err.what(), Z); }\
 catch (const std::exception& err) {\
   std::cout << "expected " << #X << " to throw " << #Y <<", but got " << err.what() << std::endl;\
   RESULT(false);\
