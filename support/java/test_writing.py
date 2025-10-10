@@ -6,6 +6,7 @@ def write_unit_test(test: Attributes) -> None:
         f.write('import static org.hamcrest.MatcherAssert.assertThat;\n')
         f.write('import static org.hamcrest.Matchers.*;\n')
         f.write('import static org.junit.Assert.assertThrows;\n\n')
+        f.write('import java.util.ArrayList;\n\n')
 
         f.write('import junit.framework.TestCase;\n')
         f.write('import org.junit.Test;\n\n')
