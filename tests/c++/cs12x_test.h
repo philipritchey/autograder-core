@@ -206,36 +206,30 @@ catch (...) {\
 try {\
   X;\
   std::cout << "expected " << #X << " to throw " << #Y <<", but nothing thrown" << std::endl;\
-  RESULT(false);\
-  return 1;\
+  FAIL;\
 } catch (const Y& err) {}\
 catch (const std::exception& err) {\
   std::cout << "expected " << #X << " to throw " << #Y <<", but got " << err.what() << std::endl;\
-  RESULT(false);\
-  return 1;\
+  FAIL;\
 }\
 catch (...) {\
   std::cout << "expected " << #X << " to throw " << #Y <<", but got a non-std::exception" << std::endl;\
-  RESULT(false);\
-  return 1;\
+  FAIL;\
 }
 
 #define ASSERT_THROW_MSSG(X,Y,Z) \
 try {\
   X;\
   std::cout << "expected " << #X << " to throw " << #Y <<", but nothing thrown" << std::endl;\
-  RESULT(false);\
-  return 1;\
+  FAIL;\
 } catch (const Y& err) { ASSERT_STREQ(err.what(), Z); }\
 catch (const std::exception& err) {\
   std::cout << "expected " << #X << " to throw " << #Y <<", but got " << err.what() << std::endl;\
-  RESULT(false);\
-  return 1;\
+  FAIL;\
 }\
 catch (...) {\
   std::cout << "expected " << #X << " to throw " << #Y <<", but got a non-std::exception" << std::endl;\
-  RESULT(false);\
-  return 1;\
+  FAIL;\
 }
 
 #define EXPECT_NO_THROW(X) \
@@ -255,13 +249,11 @@ try {\
   X;\
 } catch (const std::exception& err) {\
   std::cout << "expected " << #X << " to throw no exception, but got " << err.what() << std::endl;\
-  RESULT(false);\
-  return 1;\
+  FAIL;\
 }\
 catch (...) {\
   std::cout << "expected " << #X << " to throw no exception, but got a non-std::exception" << std::endl;\
-  RESULT(false);\
-  return 1;\
+  FAIL;\
 }
 
 #define STARTING(X) std::cout << "Starting test_" << #X << "..." << std::endl;
