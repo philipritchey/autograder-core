@@ -112,8 +112,8 @@ try {\
 #define CHECK_NEAR(X, Y, Z, W) TRY(X,Y,W,!(std::abs(x-y) <= Z), explain_near)
 #define EXPECT_NEAR3(X, Y, Z) CHECK_NEAR(X, Y, Z, pass = false)
 #define ASSERT_NEAR3(X, Y, Z) CHECK_NEAR(X, Y, Z, RESULT(false); return 1)
-#define EXPECT_NEAR2(X, Y) EXPECT_NEAR3(X, Y, 0.00005)
-#define ASSERT_NEAR2(X, Y) ASSERT_NEAR3(X, Y, 0.00005)
+#define EXPECT_NEAR2(X, Y) EXPECT_NEAR3(X, Y, 5e-7)
+#define ASSERT_NEAR2(X, Y) ASSERT_NEAR3(X, Y, 5e-7)
 
 #define EXPAND(X) X
 #define GET_EXPECT_NEAR(_1,_2,_3,NAME, ...) NAME
