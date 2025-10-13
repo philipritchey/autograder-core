@@ -265,6 +265,50 @@ std::ostream& operator<<(std::ostream& os, std::nullptr_t) {
   return os;
 }
 
+// construct a representation of a string that is intended to be unambiguous
+std::string repr(const std::string& str) {
+    std::string rstr;
+    rstr.push_back('"');
+    for (unsigned char c : str) {
+        switch(c) {
+        case '"':
+            rstr.append("\\\"");
+            break;
+        case '\t':
+            rstr.append("\\t");
+            break;
+        case '\r':
+            rstr.append("\\r");
+            break;
+        case '\n':
+            rstr.append("\\n");
+            break;
+        case '\f':
+            rstr.append("\\f");
+            break;
+        case '\v':
+            rstr.append("\\v");
+            break;
+        case '\\':
+            rstr.append("\\\\");
+            break;
+        default:
+            if (c < 32 or c >= 127) {
+                // non-printable -> use hex
+                char HEX[]{'0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'};
+                rstr.append("\\x");
+                rstr.push_back(HEX[c / 16]);
+                rstr.push_back(HEX[c % 16]);
+            } else {
+                // printable
+                rstr.push_back(c);
+            }
+        }
+    }
+    rstr.push_back('"');
+    return rstr;
+}
+
 template <typename T1, typename T2>
 void explain_eq(
     const char actual_expression[],
@@ -276,6 +320,18 @@ void explain_eq(
   std::cout << func << ":" << line << ": Failure" << std::endl;
   std::cout << "Expected " << actual_expression << " to equal " << expected_expression << std::endl;
   std::cout << "     Got " << actual_value << " != " << expected_value << std::endl;
+}
+
+void explain_streq(
+    const char actual_expression[],
+    const std::string& actual_value,
+    const char expected_expression[],
+    const std::string& expected_value,
+    const char func[],
+    const size_t line) {
+  std::cout << func << ":" << line << ": Failure" << std::endl;
+  std::cout << "Expected " << actual_expression << " to equal " << expected_expression << std::endl;
+  std::cout << "     Got " << repr(actual_value) << " != " << repr(expected_value) << std::endl;
 }
 
 template <typename T1, typename T2>
@@ -375,63 +431,4 @@ void explain_near(
   std::cout << func << ":" << line << ": Failure" << std::endl;
   std::cout << "Expected " << actual_expression << " to be near " << expected_expression << std::endl;
   std::cout << "     Got " << actual_value << " which is not near " << expected_value << std::endl;
-}
-
-// construct a representation of a string that is intended to be unambiguous
-std::string repr(const std::string& str) {
-    std::string rstr;
-    rstr.push_back('"');
-    for (char c : str) {
-        switch(c) {
-        case '"':
-            rstr.append("\\\"");
-            break;
-        case '\t':
-            rstr.append("\\t");
-            break;
-        case '\r':
-            rstr.append("\\r");
-            break;
-        case '\n':
-            rstr.append("\\n");
-            break;
-        case '\f':
-            rstr.append("\\f");
-            break;
-        case '\v':
-            rstr.append("\\v");
-            break;
-        case '\\':
-            rstr.append("\\\\");
-            break;
-        default:
-            if (c < 32 or c == 127) {
-                // non-printable -> use hex
-                char HEX[]{'0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'};
-                rstr.append("\\x");
-                rstr.push_back(HEX[c / 16]);
-                rstr.push_back(HEX[c % 16]);
-            } else {
-                // printable
-                rstr.push_back(c);
-            }
-        }
-    }
-    rstr.push_back('"');
-    return rstr;
-}
-
-void explain_streq(
-    const char actual_expression[],
-    const std::string& s1,
-    const char expected_expression[],
-    const std::string& s2,
-    const char func[],
-    const size_t line) {
-  std::cout << func << ":" << line << ": Failure" << std::endl;
-  std::cout << "Expected equality of these values:" << std::endl;
-  std::cout << " " << actual_expression << std::endl;
-  std::cout << "  Which is: " << repr(s1) << std::endl;
-  std::cout << " " << expected_expression << std::endl;
-  std::cout << "  Which is: " << repr(s2) << std::endl;
 }
