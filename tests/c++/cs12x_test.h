@@ -267,34 +267,28 @@ std::ostream& operator<<(std::ostream& os, std::nullptr_t) {
 
 template <typename T1, typename T2>
 void explain_eq(
-    const char n1[],
-    const T1& o1,
-    const char n2[],
-    const T2& o2,
+    const char actual_expression[],
+    const T1& actual_value,
+    const char expected_expression[],
+    const T2& expected_value,
     const char func[],
     const size_t line) {
   std::cout << func << ":" << line << ": Failure" << std::endl;
-  std::cout << "Expected equality of these values:" << std::endl;
-  std::cout << " " << n1 << std::endl;
-  std::cout << "  Which is: " << o1 << std::endl;
-  std::cout << " " << n2 << std::endl;
-  std::cout << "  Which is: " << o2 << std::endl;
+  std::cout << "Expected " << actual_expression << " to equal " << expected_expression << std::endl;
+  std::cout << "     Got " << actual_value << " != " << expected_value << std::endl;
 }
 
 template <typename T1, typename T2>
 void explain_ne(
-    const char n1[],
-    const T1& o1,
-    const char n2[],
-    const T2& o2,
+    const char actual_expression[],
+    const T1& actual_value,
+    const char expected_expression[],
+    const T2& expected_value,
     const char func[],
     const size_t line) {
   std::cout << func << ":" << line << ": Failure" << std::endl;
-  std::cout << "Expected inequality of these values:" << std::endl;
-  std::cout << " " << n1 << std::endl;
-  std::cout << "  Which is: " << o1 << std::endl;
-  std::cout << " " << n2 << std::endl;
-  std::cout << "  Which is: " << o2 << std::endl;
+  std::cout << "Expected " << actual_expression << " to not equal " << expected_expression << std::endl;
+  std::cout << "     Got " << actual_value << " == " << expected_value << std::endl;
 }
 
 template <typename B=bool>
@@ -320,87 +314,67 @@ void explain_null(
 
 template <typename T1, typename T2>
 void explain_lt(
-    const char n1[],
-    const T1& o1,
-    const char n2[],
-    const T2& o2,
+    const char actual_expression[],
+    const T1& actual_value,
+    const char expected_expression[],
+    const T2& expected_value,
     const char func[],
     const size_t line) {
   std::cout << func << ":" << line << ": Failure" << std::endl;
-  std::cout << "Expected" << std::endl;
-  std::cout << " " << n1 << std::endl;
-  std::cout << "  Which is: " << o1 << std::endl;
-  std::cout << "to be <" << std::endl;
-  std::cout << " " << n2 << std::endl;
-  std::cout << "  Which is: " << o2 << std::endl;
+  std::cout << "Expected " << actual_expression << " to be less than " << expected_expression << std::endl;
+  std::cout << "     Got " << actual_value << " >= " << expected_value << std::endl;
 }
 
 template <typename T1, typename T2>
 void explain_le(
-    const char n1[],
-    const T1& o1,
-    const char n2[],
-    const T2& o2,
+    const char actual_expression[],
+    const T1& actual_value,
+    const char expected_expression[],
+    const T2& expected_value,
     const char func[],
     const size_t line) {
   std::cout << func << ":" << line << ": Failure" << std::endl;
-  std::cout << "Expected" << std::endl;
-  std::cout << " " << n1 << std::endl;
-  std::cout << "  Which is: " << o1 << std::endl;
-  std::cout << "to be <=" << std::endl;
-  std::cout << " " << n2 << std::endl;
-  std::cout << "  Which is: " << o2 << std::endl;
+  std::cout << "Expected " << actual_expression << " to be less than or equal to " << expected_expression << std::endl;
+  std::cout << "     Got " << actual_value << " > " << expected_value << std::endl;
 }
 
 template <typename T1, typename T2>
 void explain_gt(
-    const char n1[],
-    const T1& o1,
-    const char n2[],
-    const T2& o2,
+    const char actual_expression[],
+    const T1& actual_value,
+    const char expected_expression[],
+    const T2& expected_value,
     const char func[],
     const size_t line) {
   std::cout << func << ":" << line << ": Failure" << std::endl;
-  std::cout << "Expected" << std::endl;
-  std::cout << " " << n1 << std::endl;
-  std::cout << "  Which is: " << o1 << std::endl;
-  std::cout << "to be >" << std::endl;
-  std::cout << " " << n2 << std::endl;
-  std::cout << "  Which is: " << o2 << std::endl;
+  std::cout << "Expected " << actual_expression << " to be greater than " << expected_expression << std::endl;
+  std::cout << "     Got " << actual_value << " <= " << expected_value << std::endl;
 }
 
 template <typename T1, typename T2>
 void explain_ge(
-    const char n1[],
-    const T1& o1,
-    const char n2[],
-    const T2& o2,
+    const char actual_expression[],
+    const T1& actual_value,
+    const char expected_expression[],
+    const T2& expected_value,
     const char func[],
     const size_t line) {
   std::cout << func << ":" << line << ": Failure" << std::endl;
-  std::cout << "Expected" << std::endl;
-  std::cout << " " << n1 << std::endl;
-  std::cout << "  Which is: " << o1 << std::endl;
-  std::cout << "to be >=" << std::endl;
-  std::cout << " " << n2 << std::endl;
-  std::cout << "  Which is: " << o2 << std::endl;
+  std::cout << "Expected " << actual_expression << " to be greater than or equal to " << expected_expression << std::endl;
+  std::cout << "     Got " << actual_value << " < " << expected_value << std::endl;
 }
 
 template <typename T1, typename T2>
 void explain_near(
-    const char n1[],
-    const T1& o1,
-    const char n2[],
-    const T2& o2,
+    const char actual_expression[],
+    const T1& actual_value,
+    const char expected_expression[],
+    const T2& expected_value,
     const char func[],
     const size_t line) {
   std::cout << func << ":" << line << ": Failure" << std::endl;
-  std::cout << "Expected" << std::endl;
-  std::cout << " " << n1 << std::endl;
-  std::cout << "  Which is: " << o1 << std::endl;
-  std::cout << "to be near" << std::endl;
-  std::cout << " " << n2 << std::endl;
-  std::cout << "  Which is: " << o2 << std::endl;
+  std::cout << "Expected " << actual_expression << " to be near " << expected_expression << std::endl;
+  std::cout << "     Got " << actual_value << " which is not near " << expected_value << std::endl;
 }
 
 // construct a representation of a string that is intended to be unambiguous
@@ -448,16 +422,16 @@ std::string repr(const std::string& str) {
 }
 
 void explain_streq(
-    const char n1[],
+    const char actual_expression[],
     const std::string& s1,
-    const char n2[],
+    const char expected_expression[],
     const std::string& s2,
     const char func[],
     const size_t line) {
   std::cout << func << ":" << line << ": Failure" << std::endl;
   std::cout << "Expected equality of these values:" << std::endl;
-  std::cout << " " << n1 << std::endl;
+  std::cout << " " << actual_expression << std::endl;
   std::cout << "  Which is: " << repr(s1) << std::endl;
-  std::cout << " " << n2 << std::endl;
+  std::cout << " " << expected_expression << std::endl;
   std::cout << "  Which is: " << repr(s2) << std::endl;
 }
