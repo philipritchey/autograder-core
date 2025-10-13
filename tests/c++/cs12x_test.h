@@ -83,35 +83,35 @@ try {\
 
 #define CHECK_EQ(X, Y, Z) TRY(X,Y,Z,!(x == y),explain_eq)
 #define EXPECT_EQ(X, Y) CHECK_EQ(X, Y, pass = false)
-#define ASSERT_EQ(X, Y) CHECK_EQ(X, Y, RESULT(false); return 1)
+#define ASSERT_EQ(X, Y) CHECK_EQ(X, Y, FAIL())
 
 #define CHECK_STREQ(X, Y, Z) TRY(X,Y,Z,!(std::string(x) == std::string(y)),explain_streq)
 #define EXPECT_STREQ(X, Y) CHECK_STREQ(X, Y, pass = false)
-#define ASSERT_STREQ(X, Y) CHECK_STREQ(X, Y, RESULT(false); return 1)
+#define ASSERT_STREQ(X, Y) CHECK_STREQ(X, Y, FAIL())
 
 #define CHECK_NE(X, Y, Z) TRY(X,Y,Z,!(x != y),explain_ne)
 #define EXPECT_NE(X, Y) CHECK_NE(X, Y, pass = false)
-#define ASSERT_NE(X, Y) CHECK_NE(X, Y, RESULT(false); return 1)
+#define ASSERT_NE(X, Y) CHECK_NE(X, Y, FAIL())
 
 #define CHECK_LT(X, Y, Z) TRY(X,Y,Z,!(x < y),explain_lt)
 #define EXPECT_LT(X, Y) CHECK_LT(X, Y, pass = false)
-#define ASSERT_LT(X, Y) CHECK_LT(X, Y, RESULT(false); return 1)
+#define ASSERT_LT(X, Y) CHECK_LT(X, Y, FAIL())
 
 #define CHECK_LE(X, Y, Z) TRY(X,Y,Z,!(x <= y),explain_le)
 #define EXPECT_LE(X, Y) CHECK_LE(X, Y, pass = false)
-#define ASSERT_LE(X, Y) CHECK_LE(X, Y, RESULT(false); return 1)
+#define ASSERT_LE(X, Y) CHECK_LE(X, Y, FAIL())
 
 #define CHECK_GT(X, Y, Z) TRY(X,Y,Z,!(x > y),explain_gt)
 #define EXPECT_GT(X, Y) CHECK_GT(X, Y, pass = false)
-#define ASSERT_GT(X, Y) CHECK_GT(X, Y, RESULT(false); return 1)
+#define ASSERT_GT(X, Y) CHECK_GT(X, Y, FAIL())
 
 #define CHECK_GE(X, Y, Z) TRY(X,Y,Z,!(x >= y), explain_ge)
 #define EXPECT_GE(X, Y) CHECK_GE(X, Y, pass = false)
-#define ASSERT_GE(X, Y) CHECK_GE(X, Y, RESULT(false); return 1)
+#define ASSERT_GE(X, Y) CHECK_GE(X, Y, FAIL())
 
 #define CHECK_NEAR(X, Y, Z, W) TRY(X,Y,W,!(std::abs(x-y) <= Z), explain_near)
 #define EXPECT_NEAR3(X, Y, Z) CHECK_NEAR(X, Y, Z, pass = false)
-#define ASSERT_NEAR3(X, Y, Z) CHECK_NEAR(X, Y, Z, RESULT(false); return 1)
+#define ASSERT_NEAR3(X, Y, Z) CHECK_NEAR(X, Y, Z, FAIL())
 #define EXPECT_NEAR2(X, Y) EXPECT_NEAR3(X, Y, 5e-7)
 #define ASSERT_NEAR2(X, Y) ASSERT_NEAR3(X, Y, 5e-7)
 
@@ -138,11 +138,11 @@ try {\
 
 #define CHECK_TRUE(X, Y, Z) TRY_TF(X,Y,Z,!(x))
 #define EXPECT_TRUE(X) CHECK_TRUE(X, true, pass = false)
-#define ASSERT_TRUE(X) CHECK_TRUE(X, true, RESULT(false); return 1)
+#define ASSERT_TRUE(X) CHECK_TRUE(X, true, FAIL())
 
 #define CHECK_FALSE(X, Y, Z) TRY_TF(X,Y,Z,x)
 #define EXPECT_FALSE(X) CHECK_FALSE(X, false, pass = false)
-#define ASSERT_FALSE(X) CHECK_FALSE(X, false, RESULT(false); return 1)
+#define ASSERT_FALSE(X) CHECK_FALSE(X, false, FAIL())
 
 #define EXPECT(X) EXPECT_TRUE(X)
 #define ASSERT(X) ASSERT_TRUE(X)
@@ -166,11 +166,11 @@ try {\
 
 #define CHECK_NULL(X, Z) TRY_NULL(X, Z, x)
 #define EXPECT_NULL(X) CHECK_NULL(X, pass = false)
-#define ASSERT_NULL(X) CHECK_NULL(X, RESULT(false); return 1)
+#define ASSERT_NULL(X) CHECK_NULL(X, FAIL())
 
 #define CHECK_NOT_NULL(X, Z) TRY_NULL(X, Z, !X)
 #define EXPECT_NOT_NULL(X) CHECK_NOT_NULL(X, pass = false)
-#define ASSERT_NOT_NULL(X) CHECK_NOT_NULL(X, RESULT(false); return 1)
+#define ASSERT_NOT_NULL(X) CHECK_NOT_NULL(X, FAIL())
 
 #define EXPECT_THROW(X,Y) \
 try {\
@@ -206,30 +206,30 @@ catch (...) {\
 try {\
   X;\
   std::cout << "expected " << #X << " to throw " << #Y <<", but nothing thrown" << std::endl;\
-  FAIL;\
+  FAIL();\
 } catch (const Y& err) {}\
 catch (const std::exception& err) {\
   std::cout << "expected " << #X << " to throw " << #Y <<", but got " << err.what() << std::endl;\
-  FAIL;\
+  FAIL();\
 }\
 catch (...) {\
   std::cout << "expected " << #X << " to throw " << #Y <<", but got a non-std::exception" << std::endl;\
-  FAIL;\
+  FAIL();\
 }
 
 #define ASSERT_THROW_MSSG(X,Y,Z) \
 try {\
   X;\
   std::cout << "expected " << #X << " to throw " << #Y <<", but nothing thrown" << std::endl;\
-  FAIL;\
+  FAIL();\
 } catch (const Y& err) { ASSERT_STREQ(err.what(), Z); }\
 catch (const std::exception& err) {\
   std::cout << "expected " << #X << " to throw " << #Y <<", but got " << err.what() << std::endl;\
-  FAIL;\
+  FAIL();\
 }\
 catch (...) {\
   std::cout << "expected " << #X << " to throw " << #Y <<", but got a non-std::exception" << std::endl;\
-  FAIL;\
+  FAIL();\
 }
 
 #define EXPECT_NO_THROW(X) \
@@ -249,11 +249,11 @@ try {\
   X;\
 } catch (const std::exception& err) {\
   std::cout << "expected " << #X << " to throw no exception, but got " << err.what() << std::endl;\
-  FAIL;\
+  FAIL();\
 }\
 catch (...) {\
   std::cout << "expected " << #X << " to throw no exception, but got a non-std::exception" << std::endl;\
-  FAIL;\
+  FAIL();\
 }
 
 #define STARTING(X) std::cout << "Starting test_" << #X << "..." << std::endl;
