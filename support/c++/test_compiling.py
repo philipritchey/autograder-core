@@ -6,19 +6,19 @@ from config import CXX_FLAGS, CXX
 from test_types import UnsupportedTestException
 
 
-def compile_x_test(name: str, src: List[str] = None) -> Tuple[bool,str]:
+def compile_x_test(name: str, src: List[str] | None = None) -> Tuple[bool,str]:
     if src:
-        SRC = ' '.join(src)
+        source = ' '.join(src)
     else:
-        SRC = f'{name}.cpp'
-    compile_cmd = f'{CXX} {CXX_FLAGS} -o {name} {SRC} 2>&1'
+        source = f'{name}.cpp'
+    compile_cmd = f'{CXX} {CXX_FLAGS} -o {name} {source} 2>&1'
     p = popen(compile_cmd)
     try:
         output = p.read()
     except Exception as e:
         output = str(e)
     ret = p.close()
-    return ret == None, output
+    return ret is None, output
 
 def compile_unit_test() -> Tuple[bool,str]:
     return compile_x_test('unit_test')
