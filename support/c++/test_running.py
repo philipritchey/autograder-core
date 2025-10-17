@@ -47,7 +47,7 @@ def remove_end_of_line_whitespace(s: str) -> str:
 
 
 def run_io_test(timeout: float) -> Tuple[bool,str]:
-    run_cmd = ["./io_test", "2>&1"]
+    run_cmd = ["./io_test"]
     with open('input.txt', 'r') as file:
         input_data = file.read()
     p = subprocess.Popen(run_cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
