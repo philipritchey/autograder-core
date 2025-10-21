@@ -172,7 +172,7 @@ try {\
 try {\
   auto x_value_ = X;\
   if (x_value_) {} else {\
-    explain_not_null(#X, x_value_, __FUNCTION__, __LINE__);\
+    explain_not_null(#X, __FUNCTION__, __LINE__);\
     Z;\
   }\
 } catch (const std::exception& err) {\
@@ -386,7 +386,6 @@ void explain_null(
 template <typename T>
 void explain_not_null(
     const char name[],
-    const T& actual,
     const char func[],
     const size_t line) {
   std::cout << func << ":" << line << ": Failure" << std::endl;
