@@ -168,7 +168,22 @@ try {\
 #define EXPECT_NULL(X) CHECK_NULL(X, pass = false)
 #define ASSERT_NULL(X) CHECK_NULL(X, FAIL())
 
-#define CHECK_NOT_NULL(X, Z) TRY_NULL(X, Z, !X)
+#define TRY_NOT_NULL(X,Z,COND) \
+try {\
+  auto x = X;\
+  if (!(COND)) {\
+    explain_not_null(#X, X, __FUNCTION__, __LINE__);\
+    Z;\
+  }\
+} catch (const std::exception& err) {\
+  std::cout << "did not expect " << #X << " to throw an exception, but got " << err.what() << std::endl;\
+  Z;\
+} catch (...) {\
+  std::cout << "did not expect " << #X << " to throw an exception, but got non-std::exception" << std::endl;\
+  Z;\
+}
+
+#define CHECK_NOT_NULL(X, Z) TRY_NOT_NULL(X, Z, x)
 #define EXPECT_NOT_NULL(X) CHECK_NOT_NULL(X, pass = false)
 #define ASSERT_NOT_NULL(X) CHECK_NOT_NULL(X, FAIL())
 
@@ -366,6 +381,16 @@ void explain_null(
     const size_t line) {
   std::cout << func << ":" << line << ": Failure" << std::endl;
   std::cout << "Expected " << name << " to be null, got " << actual << std::endl;
+}
+
+template <typename T>
+void explain_not_null(
+    const char name[],
+    const T& actual,
+    const char func[],
+    const size_t line) {
+  std::cout << func << ":" << line << ": Failure" << std::endl;
+  std::cout << "Expected " << name << " to be not null, got " << actual << std::endl;
 }
 
 template <typename T1, typename T2>
