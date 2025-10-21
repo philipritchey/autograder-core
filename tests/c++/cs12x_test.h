@@ -65,10 +65,10 @@ std::cout << " in " << __FUNCTION__ << std::endl;
 
 #define TRY(X,Y,Z,COND,FUNC) \
 try {\
-  auto x = X;\
-  auto y = Y;\
+  auto x_value_ = X;\
+  auto y_value_ = Y;\
   if (COND) {\
-    FUNC(#X, x, #Y, y, __FUNCTION__, __LINE__);\
+    FUNC(#X, x_value_, #Y, y_value_, __FUNCTION__, __LINE__);\
     Z;\
   }\
 } catch (const std::exception& err) {\
@@ -81,35 +81,35 @@ try {\
 
 #define FAIL() RESULT(false); return 1; std::cout
 
-#define CHECK_EQ(X, Y, Z) TRY(X,Y,Z,!(x == y),explain_eq)
+#define CHECK_EQ(X, Y, Z) TRY(X,Y,Z,!(x_value_ == y_value_),explain_eq)
 #define EXPECT_EQ(X, Y) CHECK_EQ(X, Y, pass = false)
 #define ASSERT_EQ(X, Y) CHECK_EQ(X, Y, FAIL())
 
-#define CHECK_STREQ(X, Y, Z) TRY(X,Y,Z,!(std::string(x) == std::string(y)),explain_streq)
+#define CHECK_STREQ(X, Y, Z) TRY(X,Y,Z,!(std::string(x_value_) == std::string(y_value_)),explain_streq)
 #define EXPECT_STREQ(X, Y) CHECK_STREQ(X, Y, pass = false)
 #define ASSERT_STREQ(X, Y) CHECK_STREQ(X, Y, FAIL())
 
-#define CHECK_NE(X, Y, Z) TRY(X,Y,Z,!(x != y),explain_ne)
+#define CHECK_NE(X, Y, Z) TRY(X,Y,Z,!(x_value_ != y_value_),explain_ne)
 #define EXPECT_NE(X, Y) CHECK_NE(X, Y, pass = false)
 #define ASSERT_NE(X, Y) CHECK_NE(X, Y, FAIL())
 
-#define CHECK_LT(X, Y, Z) TRY(X,Y,Z,!(x < y),explain_lt)
+#define CHECK_LT(X, Y, Z) TRY(X,Y,Z,!(x_value_ < y_value_),explain_lt)
 #define EXPECT_LT(X, Y) CHECK_LT(X, Y, pass = false)
 #define ASSERT_LT(X, Y) CHECK_LT(X, Y, FAIL())
 
-#define CHECK_LE(X, Y, Z) TRY(X,Y,Z,!(x <= y),explain_le)
+#define CHECK_LE(X, Y, Z) TRY(X,Y,Z,!(x_value_ <= y_value_),explain_le)
 #define EXPECT_LE(X, Y) CHECK_LE(X, Y, pass = false)
 #define ASSERT_LE(X, Y) CHECK_LE(X, Y, FAIL())
 
-#define CHECK_GT(X, Y, Z) TRY(X,Y,Z,!(x > y),explain_gt)
+#define CHECK_GT(X, Y, Z) TRY(X,Y,Z,!(x_value_ > y_value_),explain_gt)
 #define EXPECT_GT(X, Y) CHECK_GT(X, Y, pass = false)
 #define ASSERT_GT(X, Y) CHECK_GT(X, Y, FAIL())
 
-#define CHECK_GE(X, Y, Z) TRY(X,Y,Z,!(x >= y), explain_ge)
+#define CHECK_GE(X, Y, Z) TRY(X,Y,Z,!(x_value_ >= y_value_), explain_ge)
 #define EXPECT_GE(X, Y) CHECK_GE(X, Y, pass = false)
 #define ASSERT_GE(X, Y) CHECK_GE(X, Y, FAIL())
 
-#define CHECK_NEAR(X, Y, Z, W) TRY(X,Y,W,!(std::abs(x-y) <= Z), explain_near)
+#define CHECK_NEAR(X, Y, Z, W) TRY(X,Y,W,!(std::abs(x_value_-y_value_) <= Z), explain_near)
 #define EXPECT_NEAR3(X, Y, Z) CHECK_NEAR(X, Y, Z, pass = false)
 #define ASSERT_NEAR3(X, Y, Z) CHECK_NEAR(X, Y, Z, FAIL())
 #define EXPECT_NEAR2(X, Y) EXPECT_NEAR3(X, Y, 5e-7)
@@ -123,9 +123,9 @@ try {\
 
 #define TRY_TF(X,Y,Z,COND) \
 try {\
-  bool x = X;\
+  bool x_value_ = X;\
   if (COND) {\
-    explain_tf(#X, x, Y, __FUNCTION__, __LINE__);\
+    explain_tf(#X, x_value_, Y, __FUNCTION__, __LINE__);\
     Z;\
   }\
 } catch (const std::exception& err) {\
@@ -149,11 +149,11 @@ try {\
 #define EXPECT_NOT(X) EXPECT_FALSE(X)
 #define ASSERT_NOT(X) ASSERT_FALSE(X)
 
-#define TRY_NULL(X,Z,COND) \
+#define TRY_NULL(X,Z) \
 try {\
-  auto x = X;\
-  if (COND) {\
-    explain_null(#X, X, __FUNCTION__, __LINE__);\
+  auto x_value_ = X;\
+  if (x_value_) {\
+    explain_null(#X, x_value_, __FUNCTION__, __LINE__);\
     Z;\
   }\
 } catch (const std::exception& err) {\
@@ -164,15 +164,15 @@ try {\
   Z;\
 }
 
-#define CHECK_NULL(X, Z) TRY_NULL(X, Z, x)
+#define CHECK_NULL(X, Z) TRY_NULL(X, Z)
 #define EXPECT_NULL(X) CHECK_NULL(X, pass = false)
 #define ASSERT_NULL(X) CHECK_NULL(X, FAIL())
 
-#define TRY_NOT_NULL(X,Z,COND) \
+#define TRY_NOT_NULL(X,Z) \
 try {\
-  auto x = X;\
-  if (!(COND)) {\
-    explain_not_null(#X, X, __FUNCTION__, __LINE__);\
+  auto x_value_ = X;\
+  if (x_value_) {} else {\
+    explain_not_null(#X, x_value_, __FUNCTION__, __LINE__);\
     Z;\
   }\
 } catch (const std::exception& err) {\
@@ -183,7 +183,7 @@ try {\
   Z;\
 }
 
-#define CHECK_NOT_NULL(X, Z) TRY_NOT_NULL(X, Z, x)
+#define CHECK_NOT_NULL(X, Z) TRY_NOT_NULL(X, Z)
 #define EXPECT_NOT_NULL(X) CHECK_NOT_NULL(X, pass = false)
 #define ASSERT_NOT_NULL(X) CHECK_NOT_NULL(X, FAIL())
 
@@ -390,7 +390,7 @@ void explain_not_null(
     const char func[],
     const size_t line) {
   std::cout << func << ":" << line << ": Failure" << std::endl;
-  std::cout << "Expected " << name << " to be not null, got " << actual << std::endl;
+  std::cout << "Expected " << name << " to be not null" << std::endl;
 }
 
 template <typename T1, typename T2>
