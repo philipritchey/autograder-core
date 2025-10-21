@@ -383,7 +383,6 @@ void explain_null(
   std::cout << "Expected " << name << " to be null, got " << actual << std::endl;
 }
 
-template <typename T>
 void explain_not_null(
     const char name[],
     const char func[],
