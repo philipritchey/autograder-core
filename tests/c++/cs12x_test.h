@@ -136,11 +136,11 @@ try {\
   Z;\
 }
 
-#define CHECK_TRUE(X, Y, Z) TRY_TF(X,Y,Z,!(x))
+#define CHECK_TRUE(X, Y, Z) TRY_TF(X,Y,Z,!(x_value_))
 #define EXPECT_TRUE(X) CHECK_TRUE(X, true, pass = false)
 #define ASSERT_TRUE(X) CHECK_TRUE(X, true, FAIL())
 
-#define CHECK_FALSE(X, Y, Z) TRY_TF(X,Y,Z,x)
+#define CHECK_FALSE(X, Y, Z) TRY_TF(X,Y,Z,x_value_)
 #define EXPECT_FALSE(X) CHECK_FALSE(X, false, pass = false)
 #define ASSERT_FALSE(X) CHECK_FALSE(X, false, FAIL())
 
