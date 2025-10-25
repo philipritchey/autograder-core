@@ -79,7 +79,7 @@ try {\
   Z;\
 }
 
-#define FAIL() RESULT(false); return 1; std::cout
+#define FAIL() RESULT(false); return 1;
 
 #define CHECK_EQ(X, Y, Z) TRY(X,Y,Z,!(x_value_ == y_value_),explain_eq)
 #define EXPECT_EQ(X, Y) CHECK_EQ(X, Y, pass = false)
