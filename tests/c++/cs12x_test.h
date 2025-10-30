@@ -54,6 +54,22 @@ struct cout_redirect {
     }
 };
 
+struct cin_redirect {
+ private:
+    std::streambuf* old;
+ public:
+    cin_redirect(std::streambuf* new_buffer) : old(std::cin.rdbuf(new_buffer)) {}
+
+    cin_redirect(const cin_redirect& other) : old(other.old) {}
+    ~cin_redirect() { std::cin.rdbuf(old); }
+    cin_redirect& operator=(const cin_redirect& rhs) {
+        if (this != &rhs) {
+            old = rhs.old;
+        }
+        return *this;
+    }
+};
+
 #define INIT_TEST bool pass = true;
 
 #define RESULT(X) if (X) {\
@@ -274,11 +290,6 @@ catch (...) {\
 #define STARTING(X) std::cout << "Starting test_" << #X << "..." << std::endl;
 #define TEST(X) STARTING(X); test_##X() ? pass_cnt++ : fail_cnt++;
 #define SKIP(X) std::cout << "Skipping test_" << #X << "..." << std::endl; skip_cnt++;
-
-std::ostream& operator<<(std::ostream& os, std::nullptr_t) {
-  os << "nullptr";
-  return os;
-}
 
 // construct a representation of a string that is intended to be unambiguous
 std::string repr(const std::string& str) {
