@@ -166,8 +166,13 @@ def run_test(test: Attributes) -> PartialTestResult:
             print('[PASS] ran correctly\n')
         points = max_points * (point_multiplier / 100.0)
     else:
-        print('[FAIL] incorrect behavior\n')
-        points = 0
+        if point_multiplier < 0:
+            # this is a penalty -> deduct points
+            print('[FAIL] penalty applied\n')
+            points = point_multiplier
+        else:
+            print('[FAIL] incorrect behavior\n')
+            points = 0
 
     result: PartialTestResult = {
         'run_output': run_output,
