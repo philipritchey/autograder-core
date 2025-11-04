@@ -14,8 +14,8 @@ def run_unit_test(timeout: float) -> Tuple[bool,str]:
     run_cmd = ["./unit_test", "2>&1"]
     p = subprocess.Popen(run_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     try:
-        output_en, err_en = p.communicate(timeout=timeout) #p.stdout.decode('utf-8')
-        output = output_en.decode('utf-8', errors='backslashreplace')
+        output_en, err_en = p.communicate(timeout=timeout)
+        output = output_en.decode(encoding = 'utf-8', errors = 'backslashreplace')
     except subprocess.TimeoutExpired as e:
         output = TIMEOUT_MSSG
     except Exception as e:
@@ -29,8 +29,8 @@ def run_performance_test(timeout: float) -> Tuple[bool,str]:
     run_cmd = ["./performance_test", "2>&1"]
     p = subprocess.Popen(run_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     try:
-        output_en, err_en = p.communicate(timeout=timeout) #p.stdout.decode('utf-8')
-        output = output_en.decode('utf-8')
+        output_en, err_en = p.communicate(timeout=timeout)
+        output = output_en.decode(encoding = 'utf-8', errors = 'backslashreplace')
     except subprocess.TimeoutExpired as e:
         output = TIMEOUT_MSSG
     except Exception as e:
@@ -58,7 +58,7 @@ def run_io_test(timeout: float) -> Tuple[bool,str]:
 
     try:
         output, _ = p.communicate(input_data.encode('utf-8'), timeout=timeout)
-        output_str = output.decode('utf-8').rstrip()
+        output_str = output.decode(encoding = 'utf-8', errors = 'backslashreplace').rstrip()
 
         with open('output.txt', 'r') as file:
             gt_string = file.read().replace('\r', '').rstrip()
