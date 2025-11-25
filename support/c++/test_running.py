@@ -25,7 +25,7 @@ def run_unit_test(timeout: float) -> Tuple[bool,str]:
         output += '\nFloating point exception (core dumped)'
     elif ret == -11:
         output += '\nSegmentation fault (core dumped)'
-    elif ret != 0:
+    elif ret < 0 or ret > 1:
         output += f"\nProgram exited with status {ret} (crashed?)"
     return ret == 0, output
 
@@ -44,7 +44,7 @@ def run_performance_test(timeout: float) -> Tuple[bool,str]:
         output += '\nFloating point exception (core dumped)'
     elif ret == -11:
         output += '\nSegmentation fault (core dumped)'
-    elif ret != 0:
+    elif ret < 0 or ret > 1:
         output += f"\nProgram exited with status {ret} (crashed?)"
     return ret == 0, output
 
