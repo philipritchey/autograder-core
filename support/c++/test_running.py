@@ -23,10 +23,10 @@ def run_unit_test(timeout: float) -> Tuple[bool,str]:
     ret = p.returncode
     if ret == -8:
         output = 'Floating point exception (core dumped)'
-    elif ret == 139:
+    elif ret == -11:
         output = 'Segmentation fault (core dumped)'
     elif ret != 0:
-        output = 'Program exited with non-zero status (crashed?)'
+        output = f"Program exited with status {ret} (crashed?)"
     return ret == 0, output
 
 def run_performance_test(timeout: float) -> Tuple[bool,str]:
@@ -42,10 +42,10 @@ def run_performance_test(timeout: float) -> Tuple[bool,str]:
     ret = p.returncode
     if ret == -8:
         output = "Floating point exception (core dumped)"
-    elif ret == 139:
+    elif ret == -11:
         output = "Segmentation fault (core dumped)"
     elif ret != 0:
-        output = 'Program exited with non-zero status (crashed?)'
+        output = f"Program exited with status {ret} (crashed?)"
     return ret == 0, output
 
 def remove_end_of_line_whitespace(s: str) -> str:
