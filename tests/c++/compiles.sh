@@ -21,7 +21,7 @@ for file in "${source[@]}"; do
 done
 
 printf "compiles without errors? " >> DEBUG
-if g++ -std=c++17 -Wall -Wextra -Weffc++ -pedantic-errors "${source[@]}" 1>OUT 2>ERR; then
+if g++ -std=c++23 -Wall -Wextra -Weffc++ -pedantic-errors "${source[@]}" 1>OUT 2>ERR; then
   printf "OK\n" >> DEBUG
 else
   printf "NO\n" >> DEBUG

@@ -19,7 +19,7 @@ while getopts "dht:" flag; do
   esac
 done
 
-if g++ -std=c++17 -pedantic-errors -g code.cpp code_interactive.cpp > DEBUG 2>&1; then
+if g++ -std=c++23 -pedantic-errors -g code.cpp code_interactive.cpp > DEBUG 2>&1; then
     echo "X" | ./a.out > OUT
     if grep -qi "invalid input" OUT; then
         echo 100 > OUTPUT

@@ -42,7 +42,7 @@ SNARKY_SUBMISSION_SCORE_THRESHHOLD = 0.9  # be snarky when score < 90%
 
 # cpp compilation config
 CXX = 'g++'
-CXX_FLAGS = '-std=c++17 -g'
+CXX_FLAGS = '-std=c++23 -g'
 
 # java compilation config
 JAVA_CLASSPATH = ".:./lib/hamcrest-2.2.jar:./lib/junit-4.13.2.jar"

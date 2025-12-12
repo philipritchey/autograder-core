@@ -31,7 +31,7 @@ done
 rm -f *.gcda *.gcno *.gcov
 
 # compile code with coverage and execute
-if g++ -std=c++17 --coverage "${source[@]}" "$main" >>DEBUG 2>&1; then
+if g++ -std=c++23 --coverage "${source[@]}" "$main" >>DEBUG 2>&1; then
   echo -e "\nCompiles without error\n" >> DEBUG
 else
   echo -e "\nCompile-time errors" >> DEBUG
