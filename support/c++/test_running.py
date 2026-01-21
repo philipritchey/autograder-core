@@ -18,8 +18,10 @@ def run_unit_test(timeout: float) -> Tuple[bool,str]:
         output = output_en.decode(encoding = 'utf-8', errors = 'backslashreplace')
     except subprocess.TimeoutExpired:
         output = TIMEOUT_MSSG
+        return False, output
     except Exception as e:
         output = str(e)
+        return False, output
     ret = p.returncode
     if ret == -8:
         output += '\nFloating point exception (core dumped)'
@@ -37,8 +39,10 @@ def run_performance_test(timeout: float) -> Tuple[bool,str]:
         output = output_en.decode(encoding = 'utf-8', errors = 'backslashreplace')
     except subprocess.TimeoutExpired:
         output = TIMEOUT_MSSG
+        return False, output
     except Exception as e:
         output = str(e)
+        return False, output
     ret = p.returncode
     if ret == -8:
         output += '\nFloating point exception (core dumped)'
