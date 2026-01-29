@@ -291,6 +291,11 @@ catch (...) {\
 #define TEST(X) STARTING(X); test_##X() ? pass_cnt++ : fail_cnt++;
 #define SKIP(X) std::cout << "Skipping test_" << #X << "..." << std::endl; skip_cnt++;
 
+template <typename T>
+const T& repr(const T& t) {
+    return t;
+}
+
 // construct a representation of a string that is intended to be unambiguous
 std::string repr(const std::string& str) {
     std::string rstr;
@@ -335,6 +340,46 @@ std::string repr(const std::string& str) {
     return rstr;
 }
 
+// construct a representation of a c-string that is intended to be unambiguous
+std::string repr(const char* str) {
+    return repr(std::string(str));
+}
+
+// construct a representation of a character that is intended to be unambiguous
+std::string repr(char c) {
+  switch(c) {
+    case '"':
+      return "\\\"";
+    case '\t':
+      return "\\t";
+    case '\r':
+      return "\\r";
+    case '\n':
+      return "\\n";
+    case '\f':
+      return "\\f";
+    case '\v':
+      return "\\v";
+    case '\\':
+      return "\\\\";
+    default:
+      if (c < 32 or c >= 127) {
+        // non-printable -> use hex
+        char HEX[]{'0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'};
+        std::string rstr = "\\x";
+        rstr.push_back(HEX[c / 16]);
+        rstr.push_back(HEX[c % 16]);
+        return rstr;
+      } else {
+        // printable
+        std::string rstr = "' '";
+        rstr.at(1) = c;
+        return rstr;
+      }
+  }
+}
+
+// TODO(pcr): put repr into here?
 template <typename T1, typename T2>
 void explain_eq(
     const char actual_expression[],
@@ -343,9 +388,10 @@ void explain_eq(
     const T2& expected_value,
     const char func[],
     const size_t line) {
-  std::cout << func << ":" << line << ": Failure" << std::endl;
-  std::cout << "Expected " << actual_expression << " to equal " << expected_expression << std::endl;
-  std::cout << "     Got " << actual_value << " != " << expected_value << std::endl;
+  std::cout << func << ":" << line << ": Failure\n";
+  std::cout << "Expected " << actual_expression << " to equal " << expected_expression << '\n';
+  std::cout << "     Got " << actual_value << '\n'
+            << "      != " << expected_value << std::endl;
 }
 
 void explain_streq(
@@ -355,9 +401,10 @@ void explain_streq(
     const std::string& expected_value,
     const char func[],
     const size_t line) {
-  std::cout << func << ":" << line << ": Failure" << std::endl;
-  std::cout << "Expected " << actual_expression << " to equal " << expected_expression << std::endl;
-  std::cout << "     Got " << repr(actual_value) << " != " << repr(expected_value) << std::endl;
+  std::cout << func << ":" << line << ": Failure\n";
+  std::cout << "Expected " << actual_expression << " to equal " << expected_expression << '\n';
+  std::cout << "     Got " << repr(actual_value) << '\n'
+            << "      != " << repr(expected_value) << std::endl;
 }
 
 template <typename T1, typename T2>
