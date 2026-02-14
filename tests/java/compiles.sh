@@ -25,7 +25,6 @@ rm -f *.class
 
 printf "compiles without errors? " >> DEBUG
 classpath=.:./lib/hamcrest-2.2.jar:./lib/junit-4.13.2.jar
-
 if javac -Xlint -g -cp $classpath "${source[@]}" 1>OUT 2>ERR; then
   printf "OK\n" >> DEBUG
 else
