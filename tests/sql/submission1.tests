@@ -1,0 +1,36 @@
+/*
+@number: 2.1
+@name: Test 1
+@points: 0
+@type: sql
+@target: submission1.sql
+@show_output: true
+@timeout: 30
+*/
+<test>
+  type : sql
+  database : CH07_CONSTRUCTCO
+  setup : dbs/Ch07_ConstructCo_MySQL.sql
+  statement : 1
+  solution : sol/submission1.sql
+
+</test>
+
+/*
+@number: 2.2
+@name: Test 2
+@points: 0
+@type: sql
+@target: submission1.sql
+@show_output: true
+@timeout: 30
+*/
+<test>
+  type : sql
+  database : CH07_CONSTRUCTCO
+  setup : dbs/Ch07_ConstructCo_MySQL.sql
+  statement : 3
+  solution : sol/submission1.sql
+  ordered : true
+
+</test>
