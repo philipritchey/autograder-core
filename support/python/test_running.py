@@ -24,7 +24,7 @@ def run_code(class_name: str, timeout: float) -> Tuple[bool,str]:
     p = subprocess.Popen(run_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     try:
         _, output_err = p.communicate(timeout=timeout)
-        output = output_err.decode('utf-8')
+        output = output_err.decode(encoding = 'utf-8', errors = 'backslashreplace')
     except subprocess.TimeoutExpired as e:
         output = TIMEOUT_MSSG
     except Exception as e:
@@ -48,7 +48,7 @@ def run_io_test(timeout: float, main: str) -> Tuple[bool,str]:
 
     try:
         output, _ = p.communicate(input_data.encode('utf-8'), timeout=timeout)
-        output_str = output.decode('utf-8').rstrip()
+        output_str = output.decode(encoding = 'utf-8', errors = 'backslashreplace').rstrip()
 
         with open('output.txt', 'r') as file:
             gt_string = file.read().replace('\r', '').rstrip()

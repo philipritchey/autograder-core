@@ -1,28 +1,36 @@
+'''write tests for c++'''
 from attributes import Attributes
 from test_types import UnsupportedTestException
 
-
 def write_unit_test(test: Attributes) -> None:
-    with open('unit_test.cpp', 'wt') as f:
+    with open('unit_test.cpp', 'wt', encoding='utf-8') as f:
         f.write(f"#include \"{test['target']}\"\n\n")
-        if len(test['include']) > 0:
+        if test['include']:
             for include in test['include'].split():
                 f.write(f'#include {include}\n')
         f.write('#include "cs12x_test.h"\n\n')
 
         f.write('int main() {\n')
         f.write('    INIT_TEST;\n')
-        f.write('    {}\n'.format('\n    '.join(test['code'].splitlines())))
+        f.write('    try {\n')
+        f.write('        {}\n'.format('\n        '.join(test['code'].splitlines())))
+        f.write('    } catch (const std::exception& err) {\n')
+        f.write('        std::cout << "Caught unexpected std::exception, what: " << err.what() << std::endl;')
+        f.write('        FAIL();\n')
+        f.write('    } catch (...) {\n')
+        f.write('        std::cout << "Caught unexpected non-std::exception" << std::endl;\n')
+        f.write('        FAIL();\n')
+        f.write('    }\n')
         f.write('    RESULT(pass);\n')
         f.write('    return pass ? 0 : 1;\n')
         f.write('}\n')
 
 def write_performance_test(test: Attributes) -> None:
-    with open('performance_test.cpp', 'wt') as f:
+    with open('performance_test.cpp', 'wt', encoding='utf-8') as f:
         f.write(f"#include \"{test['target']}\"\n\n")
         f.write('#include <iostream>\n')
         f.write('#include <chrono>\n')
-        if len(test['include']) > 0:
+        if test['include']:
             for include in test['include'].split():
                 f.write(f'#include {include}\n')
         f.write('#include "cs12x_test.h"\n\n')
@@ -30,7 +38,15 @@ def write_performance_test(test: Attributes) -> None:
         f.write('int main() {\n')
         f.write('    INIT_TEST;\n')
         f.write('    auto start = std::chrono::steady_clock::now();\n')
-        f.write('    {}\n'.format('\n    '.join(test['code'].splitlines())))
+        f.write('    try {\n')
+        f.write('        {}\n'.format('\n        '.join(test['code'].splitlines())))
+        f.write('    } catch (const std::exception& err) {\n')
+        f.write('        std::cout << "Caught unexpected std::exception, what: " << err.what() << std::endl;')
+        f.write('        FAIL();\n')
+        f.write('    } catch (...) {\n')
+        f.write('        std::cout << "Caught unexpected non-std::exception" << std::endl;\n')
+        f.write('        FAIL();\n')
+        f.write('    }\n')
         f.write('    auto end = std::chrono::steady_clock::now();\n')
         f.write('    auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();\n')
         f.write('    std::cout << "operation took " << microseconds << " µs." << std::endl;\n')
@@ -40,14 +56,14 @@ def write_performance_test(test: Attributes) -> None:
 
 # Writes out the input and output strings
 def write_io_test(test: Attributes) -> None:
-    with open('input.txt', 'wt') as f:
+    with open('input.txt', 'wt', encoding='utf-8') as f:
         f.write(test['expected_input'])
         f.write("\n")
-    with open('output.txt', 'wt') as f:
+    with open('output.txt', 'wt', encoding='utf-8') as f:
         f.write(test['expected_output'])
 
 def write_script_test(test: Attributes) -> None:
-    with open('script.sh', 'wt') as f:
+    with open('script.sh', 'wt', encoding='utf-8') as f:
         f.write(test['script_content'])
 
 def write_approved_includes_test(test: Attributes) -> None:

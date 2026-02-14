@@ -13,7 +13,7 @@ from os.path import exists as path_exists
 import json
 from argparse import ArgumentParser, Namespace
 from config import DEFAULT_STDOUT_VISIBILITY, DEFAULT_VISIBILITY, OCTOTHORPE_LINE, OCTOTHORPE_WALL,\
-    SNARKY_SUBMISSION_CNT_THRESHHOLD
+    SNARKY_SUBMISSION_SCORE_THRESHHOLD
 from results import Result, TestResult
 from test_parsing import read_tests
 from attributes import Attributes
@@ -74,16 +74,15 @@ def apply_test_filter(test_number: str, tests: List[Attributes]) -> None:
     '''
     run only those tests with number that matches test_number
       '*' means run all tests
-      '5' means run all tests numbered 5: 5[.1, 5.2, ...]
-      '5.2' means run all tests numbered 5.2: 5.2[.1, 5.2.2, ...]
+      '5' means run all tests numbered 5: 5[.1, 5.2, ...], 5[a, b, ...]
+      '5.2' means run all tests numbered 5.2: 5.2[.1, 5.2.2, ...], 5.2[a, b, ...]
     '''
     if test_number != '*':
         for test in tests:
             if (test['number'] == test_number or
                 (test['number'].startswith(test_number) and
-                 (len(test['number']) == len(test_number) or
-                  test['number'][len(test_number)] == '.'
-                 )
+                 len(test['number']) >= len(test_number) and
+                 test['number'][len(test_number)] not in '0123456789'
                 )
                ):
                 test['skip'] = False
@@ -110,8 +109,8 @@ def main(args: Namespace) -> Result:
     debugmode: bool = args.debugmode
     if debugmode:
         print('===DEBUGMODE===')
-        print(f'filename: {filename}')
-        print(f'test_number: {test_number}')
+        print(f'[DEBUG] filename: {filename}')
+        print(f'[DEBUG] test_number: {test_number}')
 
     result_score: float = 0.0
     test_results: List[TestResult] = list()
@@ -134,12 +133,12 @@ def main(args: Namespace) -> Result:
         return fail_result
 
     if debugmode:
-        print(f'read {len(tests)} tests')
+        print(f'[DEBUG] read {len(tests)} tests')
 
     apply_test_filter(test_number, tests)
 
     if debugmode:
-        print(f'{len([test for test in tests if not test["skip"]])} tests will be run')
+        print(f'[DEBUG] {len([test for test in tests if not test["skip"]])} tests will be run')
 
     unapproved_includes = False
     sufficient_coverage = True
@@ -412,7 +411,7 @@ def report_submission_count(current_result: Any) -> None:
     submission_cnt, total_points = get_number_of_submissions_and_total_points()
     current_result["output"] += (
         f"This is your {submission_cnt}{ordinal_suffix(submission_cnt)} submission.\n")
-    if current_result['score'] < total_points * SNARKY_SUBMISSION_CNT_THRESHHOLD:
+    if current_result['score'] < total_points * SNARKY_SUBMISSION_SCORE_THRESHHOLD:
         current_result["output"] += snarky_comment_about_number_of_submissions(submission_cnt)
 
 def running_on_gradescope() -> bool:
