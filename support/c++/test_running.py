@@ -14,7 +14,7 @@ def run_unit_test(timeout: float) -> Tuple[bool,str]:
     run_cmd = ["./unit_test", "2>&1"]
     p = subprocess.Popen(run_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     try:
-        output_en, err_en = p.communicate(timeout=timeout)
+        output_en, _ = p.communicate(timeout=timeout)
         output = output_en.decode(encoding = 'utf-8', errors = 'backslashreplace')
     except subprocess.TimeoutExpired:
         output = TIMEOUT_MSSG
@@ -35,7 +35,7 @@ def run_performance_test(timeout: float) -> Tuple[bool,str]:
     run_cmd = ["./performance_test", "2>&1"]
     p = subprocess.Popen(run_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     try:
-        output_en, err_en = p.communicate(timeout=timeout)
+        output_en, _ = p.communicate(timeout=timeout)
         output = output_en.decode(encoding = 'utf-8', errors = 'backslashreplace')
     except subprocess.TimeoutExpired:
         output = TIMEOUT_MSSG
@@ -107,21 +107,19 @@ def run_script_test(timeout: float, args: str = '') -> Tuple[bool,str,float]:
         _, _ = p.communicate(timeout=timeout)
 
         if path_exists('./OUTPUT'):
-            with open('./OUTPUT', 'r', encoding='utf-8') as file:
+            with open('./OUTPUT', 'r', encoding='utf-8', errors = 'backslashreplace') as file:
                 output_string = file.read()
         else:
             print('[FATAL]: OUTPUT does not exist.')
             return False, "test failed to run", 0
 
         if path_exists('./DEBUG'):
-            with open('./DEBUG', 'r', encoding='utf-8') as file:
+            with open('./DEBUG', 'r', encoding='utf-8', errors = 'backslashreplace') as file:
                 debug_string = "Debug:\n" + file.read()
 
         score = float(output_string)
     except subprocess.TimeoutExpired:
         debug_string = TIMEOUT_MSSG
-    except UnicodeDecodeError as e:
-        debug_string = "Malformed output is unreadable, check for non-utf-8 characters\n"
 
     return (score > 0.0), debug_string, score
 
