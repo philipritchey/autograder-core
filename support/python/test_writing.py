@@ -2,7 +2,7 @@ from attributes import Attributes
 from test_types import UnsupportedTestException
 
 def write_unit_test(test: Attributes) -> None:
-    with open('UnitTest.py', 'wt') as f:
+    with open('UnitTest.py', 'wt', encoding='utf-8') as f:
         f.write('import unittest\n')
         f.write('from ' + test['target'][:-3] + ' import *\n')
 
@@ -22,14 +22,14 @@ def write_unit_test(test: Attributes) -> None:
 
 # Writes out the input and output strings
 def write_io_test(test: Attributes) -> None:
-    with open('input.txt', 'wt') as f:
+    with open('input.txt', 'wt', encoding='utf-8') as f:
         f.write(test['expected_input'])
         f.write("\n")
-    with open('output.txt', 'wt') as f:
+    with open('output.txt', 'wt', encoding='utf-8') as f:
         f.write(test['expected_output'])
 
 def write_script_test(test: Attributes) -> None:
-    with open('script.sh', 'wt') as f:
+    with open('script.sh', 'wt', encoding='utf-8') as f:
         f.write(test['script_content'])
 
 def write_test(test: Attributes) -> None:
