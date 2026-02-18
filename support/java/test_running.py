@@ -25,7 +25,7 @@ def run_code(class_name: str, timeout: float) -> Tuple[bool,str]:
     try:
         output_en, _ = p.communicate(timeout=timeout)
         output = output_en.decode(encoding = 'utf-8', errors = 'backslashreplace')
-    except subprocess.TimeoutExpired as e:
+    except subprocess.TimeoutExpired:
         output = TIMEOUT_MSSG
     except Exception as e:
         output = str(e)
@@ -40,7 +40,7 @@ def run_performance_test(timeout: float) -> Tuple[bool,str]:
 
 def run_io_test(timeout: float, main: str) -> Tuple[bool,str]:
     run_cmd = ["java", "-classpath", ".", class_name(main), "2>&1"]
-    with open('input.txt', 'r') as file:
+    with open('input.txt', 'r', encoding = 'utf-8', errors = 'backslashreplace') as file:
         input_data = file.read()
     p = subprocess.Popen(run_cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
@@ -52,7 +52,7 @@ def run_io_test(timeout: float, main: str) -> Tuple[bool,str]:
         output, _ = p.communicate(input_data.encode('utf-8'), timeout=timeout)
         output_str = output.decode(encoding = 'utf-8', errors = 'backslashreplace').rstrip()
 
-        with open('output.txt', 'r') as file:
+        with open('output.txt', 'r', encoding = 'utf-8', errors = 'backslashreplace') as file:
             gt_string = file.read().replace('\r', '').rstrip()
 
         gt_string = remove_end_of_line_whitespace(gt_string)
@@ -62,7 +62,7 @@ def run_io_test(timeout: float, main: str) -> Tuple[bool,str]:
         message_to_student += f"Your output:\n{output_str}\n\n"
         message_to_student += f"Expected output:\n{gt_string}\n\n"
 
-    except subprocess.TimeoutExpired as e:
+    except subprocess.TimeoutExpired:
         output_str = TIMEOUT_MSSG
         message_to_student += output_str
     except Exception as e:
