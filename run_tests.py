@@ -360,7 +360,7 @@ def get_command_line_args() -> Namespace:
         '--language',
         type=str,
         default='c++',
-        help='supported languages: c++, java')
+        help='supported languages: c++, java, python, sql')
 
     return parser.parse_args()
 
@@ -466,7 +466,7 @@ def run_autograder() -> None:
         write_results_to_file(results, '/autograder/results/results.json')
 
     original_language = language
-    if language.lower() in ('c++', 'cpp', 'java', 'python'):
+    if language.lower() in ('c++', 'cpp', 'java', 'python', 'sql'):
         # read, write, compile, and run tests
         results = main(args)
 

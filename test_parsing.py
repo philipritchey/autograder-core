@@ -544,7 +544,7 @@ def read_tests(filename: str) -> List[Attributes]:
             break
 
         test_type = attributes['type']
-        if test_type in ('unit', 'performance'):
+        if test_type in ('unit', 'performance', 'sql', 'ddl'):
             attributes['code'] = read_unit_test(file_pos)
             tests.append(attributes)
 

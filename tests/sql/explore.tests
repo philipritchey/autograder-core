@@ -1,0 +1,16 @@
+/*
+@number: 1
+@name: data exploration : submit explore.sql
+@points: 0
+@type: sql
+@target: explore.sql
+@show_output: true
+@timeout: 30
+*/
+<test>
+  type : sql
+  database : CH07_CONSTRUCTCO
+  setup : dbs/Ch07_ConstructCo_MySQL.sql
+
+</test>
+
