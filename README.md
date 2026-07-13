@@ -13,27 +13,6 @@ git checkout main
 git pull upstream main
 ```
 
-## running autograder on gradescope (or locally)
-this is how you can use the `run_autograder` script when debugging on gradescope (or locally).
-
-```
-./run_autograder  # run exactly as gradescope would
-```
-
-```
-./run_autograder -h  # print the usage message and exit
-```
-
-```
-./run_autograder -d  # run in debugmode (all test output is forced visible)
-```
-
-```
-./run_autograder -t <number>  # run test(s) with specified number; "5" includes "5.1, 5.2, ..."
-```
-
-the `-d` and `-t` options can be combined to run a specific test (or group of tests) in debugmode.
-
-## get started integrating with your assignment-specific repo
+## integrate with your assignment-specific repo
 [Use the autograded-assignment-template repo](https://github.com/philipritchey/autograded-assignment-template)
 
