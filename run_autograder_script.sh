@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 usage() {
-  echo "Usage: $0 [-d] [-h] [-t <number>]"
+  echo "Usage: $0 [-d] [-h] [-t <number>] <filenames>"
   echo "  -d            run tests in debug mode"
   echo "  -h            show this help message and exit"
   echo "  -l <language> expected programming language"
@@ -72,7 +72,7 @@ else
 fi
 
 case "$language" in
-  c++ | java | python | sql)
+  c++ | go | java | python | sql)
     ;;
   *)
     echo "Unsupported Language: $language"
@@ -113,12 +113,21 @@ cp $AUTOGRADER_CORE_REPO/results.py $TESTBOX/
 cp $AUTOGRADER_CORE_REPO/test_parsing.py $TESTBOX/
 cp $AUTOGRADER_CORE_REPO/test_types.py $TESTBOX/
 cp -r $AUTOGRADER_CORE_REPO/tests/$language/* $TESTBOX/
+# TODO(pcr): can't this be refactored to extract common code?
 if [ "${language}" == "c++" ]; then
   cp $AUTOGRADER_CORE_REPO/support/c++/test_writing.py $TESTBOX/
   cp $AUTOGRADER_CORE_REPO/support/c++/test_compiling.py $TESTBOX/
   cp $AUTOGRADER_CORE_REPO/support/c++/test_running.py $TESTBOX/
 
   testFile=tests.cpp
+  testPattern="*.tests"
+
+elif [ "${language}" == "go" ]; then
+  cp $AUTOGRADER_CORE_REPO/support/go/test_writing.py $TESTBOX/
+  cp $AUTOGRADER_CORE_REPO/support/go/test_compiling.py $TESTBOX/
+  cp $AUTOGRADER_CORE_REPO/support/go/test_running.py $TESTBOX/
+
+  testFile=tests.go
   testPattern="*.tests"
 
 elif [ "${language}" == "java" ]; then
