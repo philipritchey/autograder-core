@@ -1,0 +1,151 @@
+/*
+@number: 00
+@name: approved includes for code.go
+@points: 1
+@type: approved_includes
+@show_output: True
+@target: code.go
+*/
+<test>
+fmt
+</test>
+
+/*
+@number: 0
+@name: approved includes for code_interactive.go
+@points: 1
+@type: approved_includes
+@show_output: True
+@target: code_test.go
+*/
+<test>
+fmt
+testing
+</test>
+
+/*
+@number: 0
+@name: approved includes for code_test.go
+@points: 1
+@type: approved_includes
+@show_output: True
+@target: code_test.go
+*/
+<test>
+fmt
+testing
+</test>
+
+/*
+@number: 1
+@name: code compiles without errors or warnings
+@points: 1
+@show_output: True
+@type: compile
+*/
+<test>
+code.go
+code_interactive.go
+</test>
+
+/*
+@number: 3
+@name: test coverage
+@points: 1
+@show_output: True
+@type: coverage
+@target: code.go
+@timeout: 30
+*/
+<test>
+main: code_test.go
+</test>
+
+/*
+@number: 4.1
+@name: unit example
+@points: 1
+@show_output: True
+@type: unit
+@target: code.go
+@include: testing
+*/
+<test>
+func TestIsPrime(t *testing.T) {
+	n := 13
+	got := IsPrime(n)
+	want := true
+	if got != want {
+		t.Errorf("IsPrime(%d): got %v want %v", n, got, want)
+	}
+}
+</test>
+
+/*
+@number: 5.1
+@name: i/o example with output shown
+@points: 1
+@show_output: True
+@type: i/o
+@target: code_interactive.go code.go
+*/
+<test>
+  input: io_tests/example/input.txt
+  output: io_tests/example/output.txt
+</test>
+
+/*
+@number: 5.2
+@name: i/o example with output NOT shown
+@points: 1
+@show_output: False
+@type: i/o
+@target: code_interactive.go code.go
+*/
+<test>
+  input: io_tests/example/input.txt
+  output: io_tests/example/output.txt
+</test>
+
+/*
+@number: 7
+@name: script example
+@points: 1
+@show_output: True
+@type: script
+*/
+<test>
+  script_tests/example.sh
+</test>
+
+/*
+@skip: True
+@number: 8
+@name: skipped example
+@points: 1
+@show_output: True
+@type: script
+*/
+<test>
+  script_tests/example.sh
+</test>
+
+/*
+@number: 9
+@name: example with args
+@points: 1
+@show_output: True
+@type: script
+*/
+<test>
+  script_tests/example.sh -h
+</test>
+
+/*
+@number: ten
+@name: semantically invalid test
+@points: -F
+@type: scantron
+@target: target
+*/
+<test/>
